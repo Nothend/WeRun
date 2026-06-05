@@ -2,6 +2,7 @@
 #   - 本文件 docker-compose.yml
 #   - 真实配置 .env（含 APPSECRET / 千问 Key / WERUN_IMAGE 等，不入库）
 #   - ./data 目录（持久化 SQLite 与头像）
+# HTTPS 由宿主机 Caddy 处理（your.domain.com → 127.0.0.1:9056），无需 nginx。
 services:
   werun:
     image: ${WERUN_IMAGE}
@@ -10,6 +11,6 @@ services:
     env_file:
       - .env
     ports:
-      - "127.0.0.1:3000:3000"   # 仅本机可访问，由 nginx 反代到 443
+      - "127.0.0.1:9056:3000"   # 仅本机可访问，由 Caddy 反代（your.domain.com → :9056）
     volumes:
       - ./data:/app/data
