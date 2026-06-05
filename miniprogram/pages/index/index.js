@@ -7,6 +7,7 @@ Page({
     loggingIn: false,
     // 资料编辑
     avatarUrl: '',
+    avatarChanged: false, // 用户本次是否重新选了头像（需上传）
     nickname: '',
     saving: false,
     // 本周状态
@@ -39,7 +40,7 @@ Page({
 
   // 头像选择（开放能力）
   onChooseAvatar(e) {
-    this.setData({ avatarUrl: e.detail.avatarUrl });
+    this.setData({ avatarUrl: e.detail.avatarUrl, avatarChanged: true });
   },
   onNicknameInput(e) {
     this.setData({ nickname: e.detail.value });
@@ -54,26 +55,21 @@ Page({
     this.setData({ saving: true });
     try {
       let data;
-      // 若头像是本地临时文件则上传，否则只更新昵称
-      if (this.data.avatarUrl && /^(http|wxfile|cloud|wx):/.test(this.data.avatarUrl) === false) {
+      if (this.data.avatarChanged && this.data.avatarUrl) {
+        // 用户本次重新选了头像 → 上传文件 + 昵称
         data = await api.upload('/api/profile', this.data.avatarUrl, {
           name: 'avatar',
           formData: { nickname: this.data.nickname },
         });
-      } else if (this.data.avatarUrl && this.data.avatarUrl.startsWith('http')) {
-        // 头像未变（已是服务器 URL），仅提交昵称
+      } else {
+        // 头像未变 → 仅提交昵称
         data = await api.request('/api/profile', {
           method: 'POST',
           data: { nickname: this.data.nickname },
         });
-      } else {
-        data = await api.upload('/api/profile', this.data.avatarUrl, {
-          name: 'avatar',
-          formData: { nickname: this.data.nickname },
-        });
       }
       app.setUser(data.user);
-      this.setData({ user: data.user, avatarUrl: data.user.avatarUrl });
+      this.setData({ user: data.user, avatarUrl: data.user.avatarUrl, avatarChanged: false });
       wx.showToast({ title: '已保存', icon: 'success' });
     } catch (e) {
       wx.showToast({ title: e.message, icon: 'none' });
