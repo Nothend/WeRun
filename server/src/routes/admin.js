@@ -1,8 +1,13 @@
 const express = require('express');
+const multer = require('multer');
+const XLSX = require('xlsx');
 const db = require('../db');
+const config = require('../config');
 const { authRequired, adminRequired } = require('../auth');
+const { weekKeyForDate } = require('../week');
 
 const router = express.Router();
+const xlsUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 // 所有 /api/admin/* 都需要登录 + 管理员
 router.use(authRequired, adminRequired);
@@ -64,6 +69,90 @@ router.post('/admin/users/:openid/admin', (req, res) => {
 
   db.prepare('UPDATE users SET is_admin = ? WHERE openid = ?').run(isAdmin, target);
   res.json({ ok: true, isAdmin: !!isAdmin });
+});
+
+// POST /api/admin/users/:openid/nickname  { nickname: "..." } 修改用户昵称
+router.post('/admin/users/:openid/nickname', (req, res) => {
+  const { openid } = req.params;
+  const nickname = ((req.body && req.body.nickname) || '').trim();
+  if (!nickname) return res.status(400).json({ error: '昵称不能为空' });
+  if (nickname.length > 20) return res.status(400).json({ error: '昵称不能超过 20 字' });
+
+  const info = db.prepare('UPDATE users SET nickname = ? WHERE openid = ?').run(nickname, openid);
+  if (!info.changes) return res.status(404).json({ error: '用户不存在' });
+  res.json({ ok: true, nickname });
+});
+
+// POST /api/admin/import  导入 Excel 打卡数据
+// Excel 格式：列名"用户昵称"/"昵称"  + "打卡时间"/"日期"（YYYY-MM-DD 或 YYYY/MM/DD）
+router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: '请上传 Excel 文件' });
+
+  let rows;
+  try {
+    const wb = XLSX.read(req.file.buffer, { type: 'buffer', cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    rows = XLSX.utils.sheet_to_json(sheet, { raw: false, defval: '' });
+  } catch (e) {
+    return res.status(400).json({ error: `Excel 解析失败: ${e.message}` });
+  }
+
+  // 构建 昵称 → openid 映射（精确匹配）
+  const users = db
+    .prepare("SELECT openid, nickname FROM users WHERE nickname IS NOT NULL AND nickname != ''")
+    .all();
+  const nicknameMap = {};
+  users.forEach((u) => { nicknameMap[u.nickname.trim()] = u.openid; });
+
+  const insert = db.prepare(
+    `INSERT OR IGNORE INTO checkins (openid, week_key, checkin_date, duration_minutes, created_at)
+     VALUES (?, ?, ?, ?, ?)`
+  );
+
+  const result = { total: rows.length, matched: 0, inserted: 0, skipped: 0, errors: [] };
+
+  const tx = db.transaction(() => {
+    for (const row of rows) {
+      const nickname = (row['用户昵称'] || row['昵称'] || row['nickname'] || '').toString().trim();
+      const rawDate = row['打卡时间'] || row['日期'] || row['date'] || row['checkin_date'] || '';
+
+      if (!nickname || !rawDate) { result.skipped++; continue; }
+
+      const openid = nicknameMap[nickname];
+      if (!openid) {
+        if (result.errors.length < 20) result.errors.push(`未找到用户：${nickname}`);
+        result.skipped++;
+        continue;
+      }
+
+      // 解析日期：支持 Date 对象 / "YYYY-MM-DD" / "YYYY/MM/DD"
+      let dateStr;
+      if (typeof rawDate === 'object' && rawDate instanceof Date) {
+        dateStr = rawDate.toISOString().slice(0, 10);
+      } else {
+        dateStr = String(rawDate).replace(/\//g, '-').slice(0, 10);
+      }
+
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        if (result.errors.length < 20) result.errors.push(`日期格式错误 (${nickname}): ${rawDate}`);
+        result.skipped++;
+        continue;
+      }
+
+      result.matched++;
+      const weekKey = weekKeyForDate(dateStr);
+      const info = insert.run(openid, weekKey, dateStr, config.minDurationMinutes, Date.now());
+      if (info.changes) result.inserted++;
+      else result.skipped++; // 当天已有打卡，跳过
+    }
+  });
+
+  try {
+    tx();
+    res.json({ ok: true, ...result });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 module.exports = router;

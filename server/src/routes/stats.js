@@ -12,9 +12,13 @@ router.get('/stats/me', authRequired, (req, res) => {
   const weekCount = db
     .prepare('SELECT COUNT(*) AS n FROM checkins WHERE openid = ? AND week_key = ?')
     .get(req.user.openid, weekKey).n;
+  const totalCount = db
+    .prepare('SELECT COUNT(*) AS n FROM checkins WHERE openid = ?')
+    .get(req.user.openid).n;
   res.json({
     weekKey,
     weekCount,
+    totalCount,
     target: config.weeklyTarget,
     achieved: weekCount >= config.weeklyTarget,
   });

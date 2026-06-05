@@ -25,4 +25,11 @@ function localDateStr(now = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
-module.exports = { currentWeekKey, localDateStr };
+// 给定 "YYYY-MM-DD" 字符串，返回对应的 week_key
+function weekKeyForDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const { year, week } = getISOWeek(d);
+  return `${year}-W${String(week).padStart(2, '0')}`;
+}
+
+module.exports = { currentWeekKey, localDateStr, weekKeyForDate };

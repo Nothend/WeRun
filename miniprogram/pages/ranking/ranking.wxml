@@ -18,6 +18,11 @@
         <text class="summary-sub">达标次数</text>
       </view>
     </view>
+    <!-- 管理员：分享群总览 -->
+    <view wx:if="{{isAdmin}}" class="share-group-btn {{shareGroupLoading ? 'btn-loading' : ''}}"
+          bindtap="openGroupShareModal">
+      {{shareGroupLoading ? '生成中…' : '📤 分享群总览'}}
+    </view>
   </view>
 
   <!-- 排行榜 -->
@@ -44,4 +49,19 @@
   </view>
 
   <view wx:if="{{loading}}" class="loading muted">加载中...</view>
+</view>
+
+<!-- 群总览分享弹窗 -->
+<view wx:if="{{showShareGroupModal}}" class="share-overlay" bindtap="closeGroupShareModal">
+  <view class="share-modal" catchtap="">
+    <view class="share-title">分享群总览 📤</view>
+    <view class="share-text-box">
+      <text class="share-text">{{shareGroupText}}</text>
+    </view>
+    <view class="share-actions">
+      <view class="share-copy-btn" bindtap="copyGroupShareText">复制文案</view>
+      <button class="share-forward-btn" open-type="share">分享给好友</button>
+    </view>
+    <view class="share-close" bindtap="closeGroupShareModal">关闭</view>
+  </view>
 </view>

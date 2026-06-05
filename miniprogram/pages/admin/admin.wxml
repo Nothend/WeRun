@@ -1,8 +1,11 @@
 <view class="container">
   <!-- 标题栏 -->
   <view class="card header-card">
-    <view class="header-title">成员管理</view>
-    <view class="header-count">{{list.length}} 位成员</view>
+    <view class="header-left">
+      <view class="header-title">成员管理</view>
+      <view class="header-count">{{list.length}} 位成员</view>
+    </view>
+    <button class="import-btn" loading="{{importLoading}}" bindtap="importExcel">导入数据</button>
   </view>
 
   <!-- 成员列表 -->
@@ -18,6 +21,9 @@
         <view class="checkins muted">累计 {{item.totalCheckins}} 次打卡</view>
       </view>
       <view class="ops">
+        <button size="mini" class="op-btn rename-btn"
+                data-openid="{{item.openid}}" data-nickname="{{item.nickname}}"
+                bindtap="openRenameModal">改名</button>
         <button size="mini" class="op-btn"
                 data-openid="{{item.openid}}" data-nickname="{{item.nickname}}"
                 data-isadmin="{{item.isAdmin}}" bindtap="toggleAdmin">
@@ -30,5 +36,53 @@
       </view>
     </view>
     <view wx:if="{{!loading && list.length === 0}}" class="empty muted">暂无成员</view>
+  </view>
+
+  <!-- 导入说明 -->
+  <view class="card hint-card">
+    <view class="hint-title">Excel 导入格式说明</view>
+    <view class="hint-row">列名：<text class="hint-code">用户昵称</text> 和 <text class="hint-code">打卡时间</text></view>
+    <view class="hint-row">日期格式：<text class="hint-code">2026-06-05</text> 或 <text class="hint-code">2026/06/05</text></view>
+    <view class="hint-row muted">需先将 Excel 文件发到微信聊天，再点「导入数据」从文件中选取</view>
+  </view>
+</view>
+
+<!-- 改名弹窗 -->
+<view wx:if="{{renameModal}}" class="modal-overlay" catchtap="closeRenameModal">
+  <view class="modal-box" catchtap="">
+    <view class="modal-title">修改昵称</view>
+    <view class="modal-cur muted">当前：{{renameTarget.nickname || '未设昵称'}}</view>
+    <input class="modal-input" value="{{newNickname}}" bindinput="onNewNicknameInput"
+           placeholder="输入新昵称" maxlength="20" focus="{{renameModal}}"/>
+    <view class="modal-btns">
+      <view class="modal-btn-cancel" bindtap="closeRenameModal">取消</view>
+      <view class="modal-btn-confirm {{renaming ? 'btn-disabled' : ''}}" bindtap="confirmRename">
+        {{renaming ? '保存中…' : '确定'}}
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 导入结果弹窗 -->
+<view wx:if="{{showImportResult && importResult}}" class="modal-overlay" catchtap="closeImportResult">
+  <view class="modal-box" catchtap="">
+    <view class="modal-title">导入结果</view>
+    <view class="result-row">
+      <text class="result-lbl">共处理</text>
+      <text class="result-val">{{importResult.total}} 行</text>
+    </view>
+    <view class="result-row">
+      <text class="result-lbl">成功插入</text>
+      <text class="result-val green">{{importResult.inserted}} 条</text>
+    </view>
+    <view class="result-row">
+      <text class="result-lbl">已跳过</text>
+      <text class="result-val">{{importResult.skipped}} 条</text>
+    </view>
+    <view wx:if="{{importResult.errors.length > 0}}" class="result-errors">
+      <view class="result-err-title muted">未匹配用户：</view>
+      <view wx:for="{{importResult.errors}}" wx:key="index" class="result-err-item">{{item}}</view>
+    </view>
+    <view class="modal-btn-confirm" style="margin-top:28rpx;text-align:center" bindtap="closeImportResult">关闭</view>
   </view>
 </view>

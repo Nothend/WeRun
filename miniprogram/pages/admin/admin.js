@@ -6,6 +6,15 @@ Page({
     list: [],
     loading: true,
     myOpenid: '',
+    // 改名弹窗
+    renameModal: false,
+    renameTarget: null,
+    newNickname: '',
+    renaming: false,
+    // Excel 导入
+    importLoading: false,
+    showImportResult: false,
+    importResult: null,
   },
 
   onShow() {
@@ -70,5 +79,90 @@ Page({
         }
       },
     });
+  },
+
+  // ── 改名 ──────────────────────────────────────────────
+  openRenameModal(e) {
+    const { openid, nickname } = e.currentTarget.dataset;
+    this.setData({
+      renameModal: true,
+      renameTarget: { openid, nickname },
+      newNickname: nickname || '',
+    });
+  },
+
+  closeRenameModal() {
+    this.setData({ renameModal: false, renameTarget: null, newNickname: '' });
+  },
+
+  onNewNicknameInput(e) {
+    this.setData({ newNickname: e.detail.value });
+  },
+
+  async confirmRename() {
+    if (this.data.renaming) return;
+    const name = this.data.newNickname.trim();
+    if (!name) {
+      wx.showToast({ title: '昵称不能为空', icon: 'none' });
+      return;
+    }
+    this.setData({ renaming: true });
+    try {
+      await api.request(`/api/admin/users/${this.data.renameTarget.openid}/nickname`, {
+        method: 'POST',
+        data: { nickname: name },
+      });
+      wx.showToast({ title: '已修改', icon: 'success' });
+      this.closeRenameModal();
+      this.load();
+    } catch (err) {
+      wx.showToast({ title: err.message, icon: 'none' });
+    } finally {
+      this.setData({ renaming: false });
+    }
+  },
+
+  // ── Excel 导入 ────────────────────────────────────────
+  importExcel() {
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      extension: ['xlsx', 'xls'],
+      success: (res) => {
+        const file = res.tempFiles[0];
+        this.setData({ importLoading: true });
+        wx.uploadFile({
+          url: require('../../config').baseUrl + '/api/admin/import',
+          filePath: file.path,
+          name: 'excel',
+          header: {
+            Authorization: app.globalData.token ? `Bearer ${app.globalData.token}` : '',
+          },
+          success: (uploadRes) => {
+            let result;
+            try { result = JSON.parse(uploadRes.data); } catch (e) {
+              wx.showToast({ title: '返回数据解析失败', icon: 'none' });
+              return;
+            }
+            if (uploadRes.statusCode >= 200 && uploadRes.statusCode < 300) {
+              this.setData({ importResult: result, showImportResult: true });
+              this.load();
+            } else {
+              wx.showToast({ title: result.error || '导入失败', icon: 'none' });
+            }
+          },
+          fail: () => wx.showToast({ title: '上传失败', icon: 'none' }),
+          complete: () => this.setData({ importLoading: false }),
+        });
+      },
+      fail: (err) => {
+        if (err.errMsg && err.errMsg.includes('cancel')) return;
+        wx.showToast({ title: '请先将 Excel 发送到微信聊天，再从文件中选择', icon: 'none', duration: 3000 });
+      },
+    });
+  },
+
+  closeImportResult() {
+    this.setData({ showImportResult: false, importResult: null });
   },
 });

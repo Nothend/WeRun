@@ -14,51 +14,50 @@
   <!-- 个人资料 -->
   <view class="card profile-card">
     <view class="profile-row">
-      <view class="avatar-wrap">
-        <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-          <image class="avatar" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
-        </button>
-        <text class="avatar-hint">换头像</text>
+      <image class="avatar" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+      <view class="profile-info">
+        <text class="profile-name">{{nickname || '未设置昵称'}}</text>
+        <text class="profile-sub">跑团成员</text>
       </view>
-      <view class="profile-fields">
-        <input type="nickname" class="nickname-input" placeholder="输入昵称"
-               placeholder-class="input-ph"
-               value="{{nickname}}" bindinput="onNicknameInput"/>
-        <view class="profile-footer">
-          <text class="muted">WeChat 昵称或自定义</text>
-          <button class="btn-save" loading="{{saving}}" bindtap="saveProfile">保存</button>
-        </view>
+    </view>
+    <view class="profile-stats">
+      <view class="pstat-item">
+        <text class="pstat-num">{{stats ? stats.weekCount : '-'}}</text>
+        <text class="pstat-label">本周打开</text>
+      </view>
+      <view class="pstat-divider"></view>
+      <view class="pstat-item">
+        <text class="pstat-num">{{stats ? stats.totalCount : '-'}}</text>
+        <text class="pstat-label">总打卡次数</text>
       </view>
     </view>
   </view>
 
-  <!-- 本周状态 -->
-  <view class="card stats-card {{stats && stats.achieved ? 'achieved' : ''}}">
-    <view class="stats-header">本周打卡</view>
-    <view class="stats-nums">
-      <text class="stats-num">{{stats ? stats.weekCount : '-'}}</text>
-      <text class="stats-denom"> / {{stats ? stats.target : 3}}</text>
+  <!-- 上传截图打卡 -->
+  <view class="card checkin-card" hover-class="card-hover" hover-stay-time="150" bindtap="goCheckin">
+    <view class="checkin-icon-wrap">📷</view>
+    <view class="checkin-content">
+      <text class="checkin-title">上传截图打卡</text>
+      <text class="checkin-sub">上传运动截图，AI 识别时长</text>
     </view>
-    <view class="progress-track">
-      <view class="progress-fill" style="width: {{stats && stats.target > 0 ? (stats.weekCount >= stats.target ? 100 : stats.weekCount / stats.target * 100) : 0}}%"></view>
-    </view>
-    <view class="stats-status">
-      <text wx:if="{{stats && stats.achieved}}">🎯 本周已达标</text>
-      <text wx:elif="{{stats}}">还差 {{stats.target - stats.weekCount}} 次达标</text>
-      <text wx:else class="muted">—</text>
-    </view>
+    <text class="action-chevron">›</text>
   </view>
 
   <!-- 快速入口 -->
   <view class="card actions-card">
-    <view class="action-item primary" hover-class="action-hover" hover-stay-time="150" bindtap="goCheckin">
-      <view class="action-icon-wrap">📷</view>
-      <text class="action-text">上传截图打卡</text>
+    <view class="action-item sponsor-item" hover-class="action-hover" hover-stay-time="150" bindtap="openSponsor">
+      <view class="action-icon-wrap">☕</view>
+      <text class="action-text sponsor-text">支持作者</text>
       <text class="action-chevron">›</text>
     </view>
     <view class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goRanking">
       <view class="action-icon-wrap">🏆</view>
       <text class="action-text">查看群周榜</text>
+      <text class="action-chevron">›</text>
+    </view>
+    <view class="action-item" hover-class="action-hover" hover-stay-time="150" loading="{{shareLoading}}" bindtap="openShareModal">
+      <view class="action-icon-wrap">📤</view>
+      <text class="action-text">分享运动数据</text>
       <text class="action-chevron">›</text>
     </view>
     <view wx:if="{{user.isAdmin}}" class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goAdmin">
@@ -68,4 +67,29 @@
     </view>
   </view>
 
+</view>
+
+<!-- 赞助二维码蒙层 -->
+<view wx:if="{{showSponsor}}" class="sponsor-overlay" bindtap="closeSponsor">
+  <view class="sponsor-modal" catchtap="">
+    <view class="sponsor-title">请作者喝杯咖啡 ☕</view>
+    <image class="sponsor-qr" src="/assets/wechat.png" mode="aspectFit"/>
+    <view class="sponsor-hint">微信扫码</view>
+    <view class="sponsor-close" bindtap="closeSponsor">关闭</view>
+  </view>
+</view>
+
+<!-- 分享运动数据蒙层 -->
+<view wx:if="{{showShareModal}}" class="share-overlay" bindtap="closeShareModal">
+  <view class="share-modal" catchtap="">
+    <view class="share-title">分享运动数据 📤</view>
+    <view class="share-text-box">
+      <text class="share-text">{{shareText}}</text>
+    </view>
+    <view class="share-actions">
+      <view class="share-copy-btn" bindtap="copyShareText">复制文案</view>
+      <button class="share-forward-btn" open-type="share">分享给好友</button>
+    </view>
+    <view class="share-close" bindtap="closeShareModal">关闭</view>
+  </view>
 </view>

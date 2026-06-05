@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>WeRun · 交互预览</title>
+<style>
+/* ── RESET ── */
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;
+  background:
+    radial-gradient(ellipse 700px 500px at 15% 20%,rgba(34,211,238,.05) 0%,transparent 70%),
+    radial-gradient(ellipse 500px 400px at 85% 75%,rgba(99,102,241,.05) 0%,transparent 70%),
+    #050a14;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:52px 32px 80px;
+  color:#e2e8f0;
+}
+
+/* ── HEADER ── */
+header{text-align:center;margin-bottom:48px}
+.brand{font-size:48px;font-weight:900;letter-spacing:10px;color:#e2e8f0}
+.brand em{color:#22d3ee;font-style:normal}
+.tagline{font-size:13px;color:#334155;letter-spacing:4px;margin-top:10px}
+.badges{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.badge{padding:5px 16px;border-radius:20px;font-size:11px;letter-spacing:1.5px}
+.b-cyan{color:#22d3ee;border:1px solid rgba(34,211,238,.3);background:rgba(34,211,238,.07)}
+.b-green{color:#4ade80;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.07)}
+.b-purple{color:#a78bfa;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.07)}
+
+/* ── LAYOUT ── */
+.demo-wrap{display:flex;gap:56px;align-items:flex-start;justify-content:center}
+
+/* ── PHONE FRAME ── */
+.phone{
+  width:300px;height:648px;
+  background:#070d1b;
+  border-radius:46px;
+  border:6px solid #111e30;
+  overflow:hidden;
+  position:relative;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.04),
+    0 0 0 1px rgba(34,211,238,.07),
+    0 40px 100px rgba(0,0,0,.75),
+    0 0 80px rgba(34,211,238,.03);
+  flex-shrink:0;
+}
+.island{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  width:90px;height:24px;background:#000;border-radius:20px;z-index:50;
+  pointer-events:none;
+}
+/* status bar */
+.sb{
+  height:46px;display:flex;align-items:flex-end;
+  justify-content:space-between;padding:0 20px 8px;
+  flex-shrink:0;
+}
+.sb-time{font-size:14px;font-weight:700;color:#e2e8f0}
+.sb-r{font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:5px}
+.bat{
+  width:22px;height:11px;border:1.5px solid #94a3b8;border-radius:2px;
+  position:relative;display:inline-flex;align-items:center;padding:1.5px;
+}
+.bat::after{
+  content:'';position:absolute;right:-5px;top:50%;transform:translateY(-50%);
+  width:3px;height:5px;background:#94a3b8;border-radius:0 1px 1px 0;
+}
+.bat-fill{width:75%;height:100%;background:#94a3b8;border-radius:1px}
+/* nav bar */
+.nav{
+  height:42px;display:flex;align-items:center;justify-content:center;position:relative;
+  border-bottom:1px solid rgba(255,255,255,.04);flex-shrink:0;
+}
+.nav-t{font-size:15px;font-weight:600;color:#e2e8f0}
+.nav-back{
+  position:absolute;left:16px;font-size:14px;color:#22d3ee;
+  cursor:pointer;user-select:none;
+}
+.nav-back:active{opacity:.6}
+
+/* screen wrapper */
+.screens{
+  height:calc(648px - 46px - 42px);
+  position:relative;overflow:hidden;
+}
+.screen{
+  position:absolute;inset:0;
+  overflow-y:auto;overflow-x:hidden;
+  padding:10px;
+  scrollbar-width:none;
+}
+.screen::-webkit-scrollbar{display:none}
+.screen{display:none}
+.screen.active{display:block}
+
+/* ── APP CARDS ── */
+.c{
+  background:#0c1526;border-radius:14px;
+  border:1px solid rgba(34,211,238,.07);
+  padding:14px;margin-bottom:10px;
+}
+
+/* Profile */
+.p-row{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.ava{
+  width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:#fff;flex-shrink:0;
+  border:1.5px solid rgba(34,211,238,.25);
+}
+.p-info{flex:1}
+.p-name{font-size:15px;font-weight:600;color:#e2e8f0;margin-bottom:3px}
+.p-sub{font-size:11px;color:#1e3a56}
+.p-stats{
+  display:flex;align-items:center;
+  background:rgba(34,211,238,.04);
+  border:1px solid rgba(34,211,238,.1);
+  border-radius:10px;padding:12px 0;
+}
+.ps-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.ps-num{font-size:26px;font-weight:800;color:#22d3ee;line-height:1;letter-spacing:-1px}
+.ps-lbl{font-size:9px;color:#475569;letter-spacing:1.5px}
+.ps-div{width:1px;height:28px;background:rgba(34,211,238,.12)}
+
+/* Checkin card */
+.ck-card{
+  display:flex;align-items:center;padding:14px;
+  cursor:pointer;user-select:none;transition:background .15s;
+  border-radius:14px;
+}
+.ck-card:active,.ck-card:hover{background:rgba(34,211,238,.06)}
+.ck-ico{
+  width:42px;height:42px;border-radius:12px;
+  background:rgba(34,211,238,.12);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-right:14px;flex-shrink:0;
+}
+.ck-info{flex:1}
+.ck-ttl{font-size:15px;font-weight:600;color:#e2e8f0}
+.ck-sub{font-size:10px;color:#475569;margin-top:3px}
+
+/* Stats (used on result screen) */
+.st-c{text-align:center;padding:18px 14px}
+.st-lbl{font-size:9px;font-weight:700;letter-spacing:3px;color:#192840;text-transform:uppercase;margin-bottom:10px}
+.st-nums{display:flex;align-items:flex-end;justify-content:center;gap:2px;margin-bottom:12px;line-height:1}
+.big{font-size:72px;font-weight:900;line-height:1;letter-spacing:-4px}
+.den{font-size:22px;color:#1e3050;margin-bottom:8px}
+.bar-t{height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin-bottom:9px}
+.bar-f{height:100%;border-radius:2px}
+.bar-cyan{background:linear-gradient(90deg,#0ea5e9,#22d3ee);box-shadow:0 0 8px rgba(34,211,238,.6)}
+.bar-green{background:linear-gradient(90deg,#22c55e,#4ade80);box-shadow:0 0 8px rgba(74,222,128,.6)}
+.st-s{font-size:11px}
+.st-s.cyan{color:#22d3ee}.st-s.green{color:#4ade80}.st-s.muted{color:#334155}
+
+/* Action list */
+.act-c{padding:0;overflow:hidden}
+.ai{
+  display:flex;align-items:center;padding:13px 14px;
+  cursor:pointer;user-select:none;transition:background .15s;
+}
+.ai:active,.ai:hover{background:rgba(34,211,238,.04)}
+.ai+.ai{border-top:1px solid rgba(255,255,255,.04)}
+.ai-ico{
+  width:34px;height:34px;border-radius:9px;
+  background:rgba(255,255,255,.04);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;margin-right:11px;flex-shrink:0;
+}
+.ai-ico.pri{background:rgba(34,211,238,.1)}
+.ai-t{flex:1;font-size:13px;color:#94a3b8}
+.ai.pri .ai-t{color:#e2e8f0}
+.ai-arr{font-size:18px;color:#152030}
+.ai-t.dim{color:#475569}
+
+/* Upload zone */
+.uz{
+  width:100%;height:154px;border-radius:10px;
+  border:1.5px dashed rgba(34,211,238,.18);
+  background:rgba(34,211,238,.02);
+  overflow:hidden;margin-bottom:9px;position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.uz-preview{
+  width:100%;height:100%;
+  background:linear-gradient(135deg,#0a1828 0%,#0f2440 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+.uz-fig{font-size:60px;opacity:.5}
+.run-info{
+  position:absolute;bottom:8px;right:10px;
+  background:rgba(0,0,0,.55);border-radius:6px;
+  padding:5px 9px;font-size:10px;color:#94a3b8;text-align:right;
+}
+.run-v{font-size:15px;font-weight:700;color:#22d3ee;display:block}
+.uz-meta{font-size:10px;color:#1e3050;text-align:center;margin-bottom:10px}
+.sub-btn{
+  background:linear-gradient(135deg,#0ea5e9,#22d3ee);color:#fff;
+  border-radius:10px;height:42px;line-height:42px;text-align:center;
+  font-size:14px;font-weight:600;letter-spacing:2px;
+  box-shadow:0 4px 14px rgba(34,211,238,.25);
+  cursor:pointer;user-select:none;transition:opacity .15s;
+}
+.sub-btn:hover{opacity:.85}
+
+/* Result card */
+.res{border-left:3px solid transparent}
+.res.ok{border-left-color:#4ade80;background:rgba(74,222,128,.04)}
+.r-ico{font-size:26px;text-align:center;margin-bottom:6px}
+.r-ttl{font-size:16px;font-weight:700;text-align:center;margin-bottom:12px;letter-spacing:1px}
+.r-ttl.ok{color:#4ade80}
+.r-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.r-row:last-of-type{border:none}
+.r-lbl{font-size:11px;color:#334155}
+.r-val{font-size:12px;color:#e2e8f0;font-weight:600}
+.r-val.cyan{color:#22d3ee}
+.r-ach{text-align:center;color:#4ade80;font-size:12px;font-weight:700;margin-top:10px}
+.qw-tag{
+  display:flex;align-items:center;gap:5px;justify-content:center;
+  margin-top:9px;font-size:10px;color:#1e3a56;
+}
+.qw-dot{width:5px;height:5px;border-radius:50%;background:#22d3ee}
+
+/* Ranking summary */
+.sum-c{text-align:center;padding:14px}
+.wk-lbl{font-size:11px;color:#22d3ee;letter-spacing:2px;font-weight:700;margin-bottom:12px}
+.sum-row{display:flex;align-items:center;justify-content:center}
+.sum-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.sum-n{font-size:22px;font-weight:700;color:#e2e8f0}
+.sum-s{font-size:9px;color:#1e3050;letter-spacing:1px}
+.sum-sep{width:1px;height:28px;background:rgba(255,255,255,.06);margin:0 4px}
+.share-grp-btn{
+  margin-top:12px;
+  font-size:11px;color:#22d3ee;
+  border:1px solid rgba(34,211,238,.2);border-radius:8px;
+  padding:5px 16px;background:rgba(34,211,238,.06);
+  cursor:pointer;user-select:none;display:inline-block;
+  transition:background .15s;
+}
+.share-grp-btn:hover{background:rgba(34,211,238,.12)}
+
+/* Ranking list */
+.lst-c{padding:0;overflow:hidden}
+.rr{display:flex;align-items:center;padding:10px 12px}
+.rr+.rr{border-top:1px solid rgba(255,255,255,.04)}
+.rr.top{background:rgba(34,211,238,.025)}
+.rk{width:30px;text-align:center;font-size:16px;margin-right:6px;flex-shrink:0}
+.rk-n{font-size:11px;color:#172534;font-weight:700}
+.r-ava{
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;
+  margin-right:9px;flex-shrink:0;
+}
+.r-nm{flex:1;font-size:12px;color:#94a3b8}
+.cnt-cell{display:flex;align-items:center;gap:2px}
+.cnt{font-size:15px;font-weight:700}
+.cnt.ok{color:#4ade80}.cnt.no{color:#172534}
+.cnt-u{font-size:10px;color:#1e3050;margin-top:2px}
+.rbd{
+  margin-left:5px;font-size:9px;color:#4ade80;
+  background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);
+  border-radius:4px;padding:1px 6px;
+}
+
+/* Admin page */
+.adm-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.adm-ttl{font-size:14px;font-weight:700;color:#e2e8f0;letter-spacing:1px}
+.adm-cnt{font-size:10px;color:#334155;margin-top:2px}
+.adm-import{
+  font-size:10px;color:#22d3ee;
+  border:1px solid rgba(34,211,238,.25);border-radius:7px;
+  padding:4px 12px;background:rgba(34,211,238,.07);
+  cursor:pointer;user-select:none;flex-shrink:0;
+  transition:background .15s;
+}
+.adm-import:hover{background:rgba(34,211,238,.14)}
+.adm-row{display:flex;align-items:center;padding:9px 12px}
+.adm-row+.adm-row{border-top:1px solid rgba(255,255,255,.04)}
+.adm-ava{
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;flex-shrink:0;
+  margin-right:8px;
+}
+.adm-info{flex:1}
+.adm-name{font-size:12px;color:#e2e8f0}
+.adm-sub{font-size:10px;color:#1e3050;margin-top:2px}
+.adm-ops{display:flex;gap:4px;flex-shrink:0}
+.op{
+  font-size:9px;padding:3px 7px;border-radius:5px;
+  cursor:pointer;user-select:none;
+  border:1px solid rgba(255,255,255,.07);color:#475569;background:rgba(255,255,255,.04);
+  transition:all .15s;
+}
+.op:hover{background:rgba(255,255,255,.08)}
+.op.ren{color:#22d3ee;border-color:rgba(34,211,238,.2);background:rgba(34,211,238,.06)}
+.op.ren:hover{background:rgba(34,211,238,.12)}
+.op.kick{color:#f87171;border-color:rgba(248,113,113,.2);background:rgba(248,113,113,.06)}
+.adm-tag{
+  font-size:9px;color:#22d3ee;
+  background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);
+  border-radius:4px;padding:1px 6px;display:inline-block;margin-left:4px;
+}
+.hint-card{padding:10px 12px}
+.hint-ttl{font-size:10px;font-weight:600;color:#334155;margin-bottom:6px}
+.hint-line{font-size:9px;color:#1e3a56;line-height:1.7}
+.hint-code{font-family:monospace;color:#22d3ee;background:rgba(34,211,238,.06);border-radius:2px;padding:1px 4px}
+
+/* ── MODAL overlay (inside phone) ── */
+.modal-ov{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.75);
+  display:flex;align-items:center;justify-content:center;
+  z-index:100;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s;
+}
+.modal-ov.open{opacity:1;pointer-events:all}
+.modal-box{
+  background:#0f1e33;
+  border:1px solid rgba(34,211,238,.2);
+  border-radius:18px;
+  padding:22px 20px 18px;
+  width:240px;
+  transform:scale(.9);
+  transition:transform .2s;
+}
+.modal-ov.open .modal-box{transform:scale(1)}
+.modal-ttl{font-size:13px;font-weight:700;color:#e2e8f0;text-align:center;margin-bottom:6px}
+.modal-sub{font-size:10px;color:#334155;text-align:center;margin-bottom:12px}
+.modal-inp{
+  width:100%;height:34px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(34,211,238,.15);border-radius:7px;
+  padding:0 10px;font-size:12px;color:#e2e8f0;
+  display:flex;align-items:center;margin-bottom:14px;
+}
+.fake-cursor{color:#22d3ee;animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.modal-btns{display:flex;gap:8px}
+.m-cancel{flex:1;height:32px;line-height:32px;text-align:center;font-size:11px;color:#475569;border:1px solid rgba(255,255,255,.07);border-radius:8px;cursor:pointer}
+.m-confirm{flex:1;height:32px;line-height:32px;text-align:center;font-size:11px;font-weight:600;color:#fff;background:linear-gradient(135deg,#0ea5e9,#22d3ee);border-radius:8px;cursor:pointer}
+
+/* share text box */
+.share-txt-box{
+  background:rgba(34,211,238,.04);
+  border:1px solid rgba(34,211,238,.12);
+  border-radius:8px;padding:10px;margin-bottom:12px;
+}
+.share-txt{font-size:11px;color:#94a3b8;line-height:1.6}
+.share-actions{display:flex;gap:6px;margin-bottom:12px}
+.s-copy{flex:1;height:30px;line-height:30px;text-align:center;font-size:10px;color:#22d3ee;border:1px solid rgba(34,211,238,.25);border-radius:7px;cursor:pointer}
+.s-fwd{flex:1;height:30px;line-height:30px;text-align:center;font-size:10px;font-weight:600;color:#fff;background:linear-gradient(135deg,#0ea5e9,#22d3ee);border-radius:7px;cursor:pointer}
+.modal-close{font-size:11px;color:#475569;text-align:center;padding:6px;cursor:pointer}
+
+/* Import result */
+.imp-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.imp-lbl{font-size:10px;color:#334155}
+.imp-val{font-size:10px;font-weight:600;color:#e2e8f0}
+.imp-val.ok{color:#4ade80}
+
+/* ── SPONSOR MODAL (inside phone) ── */
+.sponsor-overlay{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.78);
+  display:flex;align-items:center;justify-content:center;
+  z-index:100;
+  opacity:0;pointer-events:none;
+  transition:opacity .22s;
+}
+.sponsor-overlay.open{opacity:1;pointer-events:all}
+.sponsor-modal{
+  background:#0f1e33;
+  border:1px solid rgba(34,211,238,.22);
+  border-radius:20px;
+  padding:28px 24px 22px;
+  display:flex;flex-direction:column;align-items:center;
+  width:240px;
+  transform:scale(.88);
+  transition:transform .22s;
+}
+.sponsor-overlay.open .sponsor-modal{transform:scale(1)}
+.sponsor-title{font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:18px;letter-spacing:.5px}
+.qr-box{
+  width:160px;height:160px;border-radius:10px;
+  background:#fff;padding:10px;
+  display:grid;
+  grid-template-columns:repeat(11,1fr);
+  grid-template-rows:repeat(11,1fr);
+  gap:1.5px;
+}
+.qr-box .px{border-radius:1px;background:#1a1a1a}
+.qr-box .blank{background:transparent}
+.sponsor-hint{font-size:11px;color:#475569;margin-top:12px;letter-spacing:1.5px}
+.sponsor-close{
+  margin-top:16px;font-size:12px;color:#22d3ee;
+  padding:8px 28px;border:1px solid rgba(34,211,238,.25);
+  border-radius:8px;cursor:pointer;user-select:none;
+  transition:background .15s;
+}
+.sponsor-close:hover{background:rgba(34,211,238,.08)}
+
+/* ── SIDEBAR: screen nav ── */
+.sidebar{
+  display:flex;flex-direction:column;gap:12px;padding-top:12px;
+}
+.snav-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;border-radius:14px;
+  background:#0c1526;
+  border:1px solid rgba(34,211,238,.07);
+  cursor:pointer;user-select:none;
+  transition:border-color .18s,background .18s;
+  min-width:180px;
+}
+.snav-item:hover{border-color:rgba(34,211,238,.18);background:#0f1e33}
+.snav-item.active{border-color:rgba(34,211,238,.35);background:#0f1e33}
+.snav-ico{font-size:22px;flex-shrink:0}
+.snav-info{flex:1}
+.snav-name{font-size:13px;font-weight:600;color:#94a3b8}
+.snav-item.active .snav-name{color:#e2e8f0}
+.snav-desc{font-size:11px;color:#1e3050;margin-top:2px}
+.snav-item.active .snav-desc{color:#334155}
+.snav-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:rgba(34,211,238,.15);flex-shrink:0;
+  transition:background .18s;
+}
+.snav-item.active .snav-dot{background:#22d3ee;box-shadow:0 0 6px rgba(34,211,238,.6)}
+
+/* ── HINT ── */
+.hint-bar{
+  margin-top:8px;
+  font-size:11px;color:#1e3050;letter-spacing:1px;
+  text-align:center;
+}
+
+/* ── FEATURES ── */
+.features{
+  margin-top:64px;
+  display:flex;gap:28px;justify-content:center;
+  width:100%;max-width:1000px;flex-wrap:wrap;
+}
+.feat{
+  flex:1;min-width:200px;background:#0c1526;border-radius:16px;
+  border:1px solid rgba(34,211,238,.07);
+  padding:24px 20px;text-align:center;
+}
+.feat-icon{font-size:32px;margin-bottom:10px}
+.feat-title{font-size:13px;font-weight:700;color:#e2e8f0;letter-spacing:2px;margin-bottom:8px}
+.feat-desc{font-size:11px;color:#334155;line-height:1.9;letter-spacing:.5px}
+.feat-tag{
+  display:inline-block;margin-top:12px;
+  font-size:10px;color:#22d3ee;
+  border:1px solid rgba(34,211,238,.25);
+  border-radius:12px;padding:3px 12px;
+  background:rgba(34,211,238,.06);
+}
+
+footer{margin-top:60px;font-size:11px;color:#0f1f35;letter-spacing:3px;text-align:center}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">We<em>Run</em></div>
+  <div class="tagline">微信跑步群 · 智能打卡统计小程序</div>
+  <div class="badges">
+    <div class="badge b-cyan">⚡ 千问 Qwen-VL 驱动</div>
+    <div class="badge b-green">✓ 微信小程序</div>
+    <div class="badge b-purple">◎ 截图秒识别</div>
+  </div>
+</header>
+
+<div class="demo-wrap">
+
+  <!-- ── PHONE ── -->
+  <div>
+    <div class="phone">
+      <div class="island"></div>
+
+      <!-- Status bar (shared) -->
+      <div class="sb">
+        <span class="sb-time">9:41</span>
+        <span class="sb-r">
+          <span style="font-size:11px;letter-spacing:-1px;color:#94a3b8">▄▄▄▄</span>
+          <span style="font-size:10px;color:#94a3b8">WiFi</span>
+          <span class="bat"><span class="bat-fill"></span></span>
+        </span>
+      </div>
+
+      <!-- Nav bar -->
+      <div class="nav" id="nav-bar">
+        <span class="nav-back" id="nav-back" onclick="goBack()" style="display:none">‹ 返回</span>
+        <span class="nav-t" id="nav-title">WeRun</span>
+      </div>
+
+      <!-- Screens -->
+      <div class="screens">
+
+        <!-- ① 首页 -->
+        <div class="screen active" id="screen-index">
+          <!-- 个人资料 -->
+          <div class="c">
+            <div class="p-row">
+              <div class="ava" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)">张</div>
+              <div class="p-info">
+                <div class="p-name">张磊</div>
+                <div class="p-sub">跑团成员</div>
+              </div>
+            </div>
+            <div class="p-stats">
+              <div class="ps-item">
+                <span class="ps-num">2</span>
+                <span class="ps-lbl">本周打开</span>
+              </div>
+              <div class="ps-div"></div>
+              <div class="ps-item">
+                <span class="ps-num">14</span>
+                <span class="ps-lbl">总打卡次数</span>
+              </div>
+            </div>
+          </div>
+          <!-- 上传截图打卡 -->
+          <div class="c ck-card" onclick="goTo('screen-checkin','打卡','back')">
+            <div class="ck-ico">📷</div>
+            <div class="ck-info">
+              <div class="ck-ttl">上传截图打卡</div>
+              <div class="ck-sub">上传运动截图，AI 识别时长</div>
+            </div>
+            <span class="ai-arr">›</span>
+          </div>
+          <!-- 快速入口 -->
+          <div class="c act-c">
+            <div class="ai" onclick="openSponsor()">
+              <div class="ai-ico">☕</div>
+              <span class="ai-t dim">支持作者</span>
+              <span class="ai-arr">›</span>
+            </div>
+            <div class="ai" onclick="goTo('screen-ranking','群周榜','back')">
+              <div class="ai-ico">🏆</div>
+              <span class="ai-t">查看群周榜</span>
+              <span class="ai-arr">›</span>
+            </div>
+            <div class="ai" onclick="openShareModal()">
+              <div class="ai-ico">📤</div>
+              <span class="ai-t">分享运动数据</span>
+              <span class="ai-arr">›</span>
+            </div>
+            <div class="ai" onclick="goTo('screen-admin','后台管理','back')">
+              <div class="ai-ico">⚙️</div>
+              <span class="ai-t">后台管理</span>
+              <span class="ai-arr">›</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ② 打卡识别 -->
+        <div class="screen" id="screen-checkin">
+          <div class="c">
+            <div class="uz">
+              <div class="uz-preview">
+                <span class="uz-fig">🏃</span>
+                <div class="run-info">
+                  <span style="color:#475569;font-size:9px">运动时长</span>
+                  <span class="run-v">38:24</span>
+                  <span style="color:#334155;font-size:9px;display:block">Keep · 2026-06-05</span>
+                </div>
+              </div>
+            </div>
+            <div class="uz-meta">AI 识别运动时长，≥ 30 分钟计为一次打卡</div>
+            <div class="sub-btn" onclick="goTo('screen-result','打卡','back')">提交打卡</div>
+          </div>
+        </div>
+
+        <!-- ③ 打卡结果 -->
+        <div class="screen" id="screen-result">
+          <div class="c res ok">
+            <div class="r-ico">✅</div>
+            <div class="r-ttl ok">打卡成功</div>
+            <div class="r-row">
+              <span class="r-lbl">识别时长</span>
+              <span class="r-val">约 38 分钟</span>
+            </div>
+            <div class="r-row">
+              <span class="r-lbl">本周已打卡</span>
+              <span class="r-val cyan">3 / 3 次</span>
+            </div>
+            <div class="r-ach">🎉 本周已达标！</div>
+            <div class="qw-tag">
+              <div class="qw-dot"></div>千问 Qwen-VL 视觉识别
+            </div>
+          </div>
+          <div class="c st-c" style="margin-top:0">
+            <div class="st-lbl">本周打卡</div>
+            <div class="st-nums">
+              <span class="big" style="color:#4ade80">3</span>
+              <span class="den">&nbsp;/ 3</span>
+            </div>
+            <div class="bar-t"><div class="bar-f bar-green" style="width:100%"></div></div>
+            <div class="st-s green">🎯 本周已达标</div>
+          </div>
+        </div>
+
+        <!-- ④ 群周榜 -->
+        <div class="screen" id="screen-ranking">
+          <div class="c sum-c">
+            <div class="wk-lbl">2026-W23</div>
+            <div class="sum-row">
+              <div class="sum-item">
+                <span class="sum-n">5</span><span class="sum-s">已达标</span>
+              </div>
+              <div class="sum-sep"></div>
+              <div class="sum-item">
+                <span class="sum-n">8</span><span class="sum-s">总人数</span>
+              </div>
+              <div class="sum-sep"></div>
+              <div class="sum-item">
+                <span class="sum-n">≥ 3</span><span class="sum-s">达标次数</span>
+              </div>
+            </div>
+            <div class="share-grp-btn" onclick="openGroupShareModal()">📤 分享群总览</div>
+          </div>
+          <div class="c lst-c">
+            <div class="rr top">
+              <div class="rk">🥇</div>
+              <div class="r-ava" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">王</div>
+              <div class="r-nm">王芳</div>
+              <div class="cnt-cell"><span class="cnt ok">5</span><span class="cnt-u">次</span><div class="rbd">达标</div></div>
+            </div>
+            <div class="rr top">
+              <div class="rk">🥈</div>
+              <div class="r-ava" style="background:linear-gradient(135deg,#0f766e,#14b8a6)">李</div>
+              <div class="r-nm">李明</div>
+              <div class="cnt-cell"><span class="cnt ok">4</span><span class="cnt-u">次</span><div class="rbd">达标</div></div>
+            </div>
+            <div class="rr top">
+              <div class="rk">🥉</div>
+              <div class="r-ava" style="background:linear-gradient(135deg,#b45309,#d97706)">陈</div>
+              <div class="r-nm">陈晓</div>
+              <div class="cnt-cell"><span class="cnt ok">3</span><span class="cnt-u">次</span><div class="rbd">达标</div></div>
+            </div>
+            <div class="rr">
+              <div class="rk"><span class="rk-n">4</span></div>
+              <div class="r-ava" style="background:linear-gradient(135deg,#1e40af,#3b82f6)">张</div>
+              <div class="r-nm">张磊</div>
+              <div class="cnt-cell"><span class="cnt no">2</span><span class="cnt-u">次</span></div>
+            </div>
+            <div class="rr">
+              <div class="rk"><span class="rk-n">5</span></div>
+              <div class="r-ava" style="background:linear-gradient(135deg,#155e75,#0891b2)">刘</div>
+              <div class="r-nm">刘洋</div>
+              <div class="cnt-cell"><span class="cnt no">1</span><span class="cnt-u">次</span></div>
+            </div>
+            <div class="rr">
+              <div class="rk"><span class="rk-n">6</span></div>
+              <div class="r-ava" style="background:linear-gradient(135deg,#4a044e,#86198f)">赵</div>
+              <div class="r-nm">赵琳</div>
+              <div class="cnt-cell"><span class="cnt no">1</span><span class="cnt-u">次</span></div>
+            </div>
+          </div>
+          <!-- 群总览分享弹窗 -->
+          <div class="modal-ov" id="group-share-overlay" onclick="closeGroupShareModal(event)">
+            <div class="modal-box" onclick="event.stopPropagation()">
+              <div class="modal-ttl">分享群总览 📤</div>
+              <div class="share-txt-box" style="margin-top:10px">
+                <div class="share-txt">🏃 WeRun 跑步群 2026-W23：8 人参与，5 人达标（≥3次）！本周前三：王芳、李明、陈晓。一起奔跑，一起进步！</div>
+              </div>
+              <div class="share-actions">
+                <div class="s-copy" onclick="doCopy()">复制文案</div>
+                <div class="s-fwd">分享给好友</div>
+              </div>
+              <div class="modal-close" onclick="closeGroupShareModal()">关闭</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ⑤ 后台管理 -->
+        <div class="screen" id="screen-admin">
+          <div class="c">
+            <div class="adm-hdr">
+              <div>
+                <div class="adm-ttl">成员管理</div>
+                <div class="adm-cnt">3 位成员</div>
+              </div>
+              <div class="adm-import" onclick="openImportResult()">导入数据</div>
+            </div>
+          </div>
+          <div class="c" style="padding:0;overflow:hidden">
+            <div class="adm-row">
+              <div class="adm-ava" style="background:linear-gradient(135deg,#1e40af,#3b82f6)">张</div>
+              <div class="adm-info">
+                <div class="adm-name">张磊 <span class="adm-tag">管理员</span> <span style="font-size:9px;color:#475569">我</span></div>
+                <div class="adm-sub">累计 12 次打卡</div>
+              </div>
+              <div class="adm-ops">
+                <div class="op ren" onclick="openRenameModal()">改名</div>
+                <div class="op">设管理</div>
+              </div>
+            </div>
+            <div class="adm-row">
+              <div class="adm-ava" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">王</div>
+              <div class="adm-info">
+                <div class="adm-name">王芳</div>
+                <div class="adm-sub">累计 20 次打卡</div>
+              </div>
+              <div class="adm-ops">
+                <div class="op ren" onclick="openRenameModal()">改名</div>
+                <div class="op">设管理</div>
+                <div class="op kick">踢出</div>
+              </div>
+            </div>
+            <div class="adm-row">
+              <div class="adm-ava" style="background:linear-gradient(135deg,#0f766e,#14b8a6)">李</div>
+              <div class="adm-info">
+                <div class="adm-name">李明</div>
+                <div class="adm-sub">累计 16 次打卡</div>
+              </div>
+              <div class="adm-ops">
+                <div class="op ren" onclick="openRenameModal()">改名</div>
+                <div class="op">设管理</div>
+                <div class="op kick">踢出</div>
+              </div>
+            </div>
+          </div>
+          <div class="c hint-card">
+            <div class="hint-ttl">Excel 导入格式说明</div>
+            <div class="hint-line">列名：<span class="hint-code">用户昵称</span> 和 <span class="hint-code">打卡时间</span></div>
+            <div class="hint-line">日期：<span class="hint-code">2026-06-05</span> 或 <span class="hint-code">2026/06/05</span></div>
+            <div class="hint-line" style="color:#1e2d40;margin-top:4px">先将 Excel 发到微信聊天，再点「导入数据」</div>
+          </div>
+
+          <!-- 改名弹窗 -->
+          <div class="modal-ov" id="rename-overlay" onclick="closeRenameModal(event)">
+            <div class="modal-box" onclick="event.stopPropagation()">
+              <div class="modal-ttl">修改昵称</div>
+              <div class="modal-sub">当前：王芳</div>
+              <div class="modal-inp">
+                <span style="color:#e2e8f0;flex:1">王芳加油</span>
+                <span class="fake-cursor">|</span>
+              </div>
+              <div class="modal-btns">
+                <div class="m-cancel" onclick="closeRenameModal()">取消</div>
+                <div class="m-confirm" onclick="closeRenameModal()">确定</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 导入结果弹窗 -->
+          <div class="modal-ov" id="import-result-overlay" onclick="closeImportResult(event)">
+            <div class="modal-box" onclick="event.stopPropagation()">
+              <div class="modal-ttl">导入结果</div>
+              <div style="margin-top:10px">
+                <div class="imp-row"><span class="imp-lbl">共处理</span><span class="imp-val">12 行</span></div>
+                <div class="imp-row"><span class="imp-lbl">成功插入</span><span class="imp-val ok">10 条</span></div>
+                <div class="imp-row" style="border:none"><span class="imp-lbl">已跳过</span><span class="imp-val">2 条</span></div>
+              </div>
+              <div class="m-confirm" style="margin-top:12px;border-radius:8px" onclick="closeImportResult()">关闭</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分享运动数据弹窗 (absolute, over index) -->
+        <div class="modal-ov" id="share-overlay" onclick="closeShareModal(event)">
+          <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-ttl">分享运动数据 📤</div>
+            <div class="share-txt-box" style="margin-top:10px">
+              <div class="share-txt">💪 张磊本周跑步打卡 2/3 次，历史累计 8 次，继续冲！来 WeRun 一起打卡吧！</div>
+            </div>
+            <div class="share-actions">
+              <div class="s-copy" onclick="doCopy()">复制文案</div>
+              <div class="s-fwd">分享给好友</div>
+            </div>
+            <div class="modal-close" onclick="closeShareModal()">关闭</div>
+          </div>
+        </div>
+
+        <!-- 赞助蒙层 (absolute over all screens) -->
+        <div class="sponsor-overlay" id="sponsor-overlay" onclick="closeSponsor(event)">
+          <div class="sponsor-modal">
+            <div class="sponsor-title">请作者喝杯咖啡 ☕</div>
+            <div class="qr-box" id="qr-box"></div>
+            <div class="sponsor-hint">微信扫码支持</div>
+            <div class="sponsor-close" onclick="closeSponsor(event)">关闭</div>
+          </div>
+        </div>
+
+      </div><!-- /screens -->
+    </div><!-- /phone -->
+    <div class="hint-bar" id="hint-bar">← 点击手机内容可交互</div>
+  </div>
+
+  <!-- ── SIDEBAR NAV ── -->
+  <div class="sidebar">
+    <div class="snav-item active" id="snav-index" onclick="navTo('index')">
+      <span class="snav-ico">🏠</span>
+      <div class="snav-info">
+        <div class="snav-name">首页</div>
+        <div class="snav-desc">个人统计 · 快速打卡入口</div>
+      </div>
+      <div class="snav-dot"></div>
+    </div>
+    <div class="snav-item" id="snav-checkin" onclick="navTo('checkin')">
+      <span class="snav-ico">📷</span>
+      <div class="snav-info">
+        <div class="snav-name">打卡上传</div>
+        <div class="snav-desc">截图识别运动时长</div>
+      </div>
+      <div class="snav-dot"></div>
+    </div>
+    <div class="snav-item" id="snav-result" onclick="navTo('result')">
+      <span class="snav-ico">✅</span>
+      <div class="snav-info">
+        <div class="snav-name">打卡结果</div>
+        <div class="snav-desc">AI 识别 · 达标判断</div>
+      </div>
+      <div class="snav-dot"></div>
+    </div>
+    <div class="snav-item" id="snav-ranking" onclick="navTo('ranking')">
+      <span class="snav-ico">🏆</span>
+      <div class="snav-info">
+        <div class="snav-name">群周榜</div>
+        <div class="snav-desc">本周成员排名 · 分享群总览</div>
+      </div>
+      <div class="snav-dot"></div>
+    </div>
+    <div class="snav-item" id="snav-admin" onclick="navTo('admin')">
+      <span class="snav-ico">⚙️</span>
+      <div class="snav-info">
+        <div class="snav-name">后台管理</div>
+        <div class="snav-desc">改名 · 导入 Excel · 踢人</div>
+      </div>
+      <div class="snav-dot"></div>
+    </div>
+    <div class="snav-item" id="snav-sponsor" onclick="navTo('index');setTimeout(openSponsor,80)">
+      <span class="snav-ico">☕</span>
+      <div class="snav-info">
+        <div class="snav-name">支持作者</div>
+        <div class="snav-desc">微信赞赏码</div>
+      </div>
+      <div class="snav-dot"></div>
+    </div>
+  </div>
+
+</div><!-- /demo-wrap -->
+
+<!-- ── FEATURES ── -->
+<div class="features">
+  <div class="feat">
+    <div class="feat-icon">🤖</div>
+    <div class="feat-title">智能视觉识别</div>
+    <div class="feat-desc">
+      上传 Keep、微信运动、悦跑圈<br>等平台运动截图，自动识别<br>运动时长，无需手动填写
+    </div>
+    <div class="feat-tag">Qwen-VL 多模态大模型</div>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">📤</div>
+    <div class="feat-title">AI 生成分享文案</div>
+    <div class="feat-desc">
+      一键生成个性化运动分享文案<br>管理员可分享群周报总览<br>复制或直接转发给微信好友
+    </div>
+    <div class="feat-tag">Qwen 文字模型 · 积极励志风格</div>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">📊</div>
+    <div class="feat-title">实时群内竞技</div>
+    <div class="feat-desc">
+      群内周榜自动排名<br>🥇🥈🥉 每周争名次<br>每周 ≥ 3 次算达标
+    </div>
+    <div class="feat-tag">每周自动重置 · 激励持续运动</div>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">⚙️</div>
+    <div class="feat-title">管理员后台</div>
+    <div class="feat-desc">
+      修改成员显示昵称<br>导入 Excel 批量补录打卡<br>设置/取消管理员 · 踢出成员
+    </div>
+    <div class="feat-tag">Excel 导入 · 昵称精确匹配</div>
+  </div>
+</div>
+
+<footer>WERUN · WECHAT MINI PROGRAM · POWERED BY QWEN-VL</footer>
+
+<script>
+/* ── State ── */
+let currentScreen = 'index';
+let history = [];
+const TITLES = {
+  index: 'WeRun',
+  checkin: '打卡',
+  result: '打卡',
+  ranking: '群周榜',
+  admin: '后台管理',
+};
+
+/* ── Navigation ── */
+function showScreen(id, pushHistory) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  if (el) el.classList.add('active');
+
+  const back = document.getElementById('nav-back');
+  document.getElementById('nav-title').textContent = TITLES[id] || 'WeRun';
+
+  if (id === 'index') {
+    back.style.display = 'none';
+    history = [];
+  } else {
+    back.style.display = '';
+  }
+
+  document.querySelectorAll('.snav-item').forEach(s => s.classList.remove('active'));
+  const sideItem = document.getElementById('snav-' + id);
+  if (sideItem) sideItem.classList.add('active');
+
+  currentScreen = id;
+}
+
+function goTo(screenId, title, mode) {
+  const id = screenId.replace('screen-', '');
+  history.push(currentScreen);
+  showScreen(id);
+  document.getElementById('hint-bar').textContent = '← 点击「返回」回到上一页';
+}
+
+function goBack() {
+  const prev = history.pop();
+  if (prev) showScreen(prev);
+  else showScreen('index');
+}
+
+function navTo(id) {
+  history = [];
+  showScreen(id);
+}
+
+/* ── Sponsor modal ── */
+function openSponsor() {
+  document.getElementById('sponsor-overlay').classList.add('open');
+  document.getElementById('snav-sponsor').classList.add('active');
+  document.getElementById('hint-bar').textContent = '点击蒙层或「关闭」可退出';
+}
+
+function closeSponsor(e) {
+  if (e && e.target !== document.getElementById('sponsor-overlay') &&
+      !e.currentTarget.classList.contains('sponsor-close')) {
+    if (!e.currentTarget.classList.contains('sponsor-overlay')) return;
+  }
+  document.getElementById('sponsor-overlay').classList.remove('open');
+  document.querySelectorAll('.snav-item').forEach(s => s.classList.remove('active'));
+  const sideItem = document.getElementById('snav-' + currentScreen);
+  if (sideItem) sideItem.classList.add('active');
+  document.getElementById('hint-bar').textContent = '← 点击手机内容可交互';
+}
+
+/* ── Share modal (personal) ── */
+function openShareModal() {
+  document.getElementById('share-overlay').classList.add('open');
+  document.getElementById('hint-bar').textContent = '点击蒙层或「关闭」退出';
+}
+function closeShareModal(e) {
+  if (e && e.target !== document.getElementById('share-overlay')) return;
+  document.getElementById('share-overlay').classList.remove('open');
+  document.getElementById('hint-bar').textContent = '← 点击手机内容可交互';
+}
+
+/* ── Group share modal (ranking) ── */
+function openGroupShareModal() {
+  document.getElementById('group-share-overlay').classList.add('open');
+  document.getElementById('hint-bar').textContent = '点击蒙层或「关闭」退出';
+}
+function closeGroupShareModal(e) {
+  if (e && e.target !== document.getElementById('group-share-overlay')) return;
+  document.getElementById('group-share-overlay').classList.remove('open');
+  document.getElementById('hint-bar').textContent = '← 点击手机内容可交互';
+}
+
+/* ── Rename modal (admin) ── */
+function openRenameModal() {
+  document.getElementById('rename-overlay').classList.add('open');
+  document.getElementById('hint-bar').textContent = '模拟改名弹窗';
+}
+function closeRenameModal(e) {
+  if (e && e.target !== document.getElementById('rename-overlay')) return;
+  document.getElementById('rename-overlay').classList.remove('open');
+  document.getElementById('hint-bar').textContent = '← 点击手机内容可交互';
+}
+
+/* ── Import result modal (admin) ── */
+function openImportResult() {
+  document.getElementById('import-result-overlay').classList.add('open');
+  document.getElementById('hint-bar').textContent = '模拟 Excel 导入结果';
+}
+function closeImportResult(e) {
+  if (e && e.target !== document.getElementById('import-result-overlay')) return;
+  document.getElementById('import-result-overlay').classList.remove('open');
+  document.getElementById('hint-bar').textContent = '← 点击手机内容可交互';
+}
+
+/* ── Copy demo ── */
+function doCopy() {
+  document.getElementById('hint-bar').textContent = '✓ 文案已复制到剪贴板';
+  setTimeout(() => {
+    document.getElementById('hint-bar').textContent = '← 点击手机内容可交互';
+  }, 1500);
+}
+
+/* ── Build fake QR code (CSS pixel grid 11×11) ── */
+(function buildQR() {
+  const pattern = [
+    [1,1,1,1,1,1,1,0,1,0,1],
+    [1,0,0,0,0,0,1,0,0,1,1],
+    [1,0,1,1,1,0,1,0,1,0,0],
+    [1,0,1,1,1,0,1,0,0,1,0],
+    [1,0,1,1,1,0,1,0,1,0,1],
+    [1,0,0,0,0,0,1,0,0,0,1],
+    [1,1,1,1,1,1,1,0,1,0,1],
+    [0,0,0,0,0,0,0,0,0,1,0],
+    [1,0,1,1,0,1,0,1,1,0,1],
+    [0,1,0,0,1,0,0,0,1,1,0],
+    [1,1,1,1,0,1,1,0,1,0,1],
+  ];
+  const box = document.getElementById('qr-box');
+  pattern.forEach(row => {
+    row.forEach(cell => {
+      const px = document.createElement('div');
+      px.className = cell ? 'px' : 'blank';
+      box.appendChild(px);
+    });
+  });
+})();
+</script>
+</body>
+</html>
