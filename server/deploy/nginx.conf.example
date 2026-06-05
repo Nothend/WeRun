@@ -1,0 +1,28 @@
+# WeRun nginx 反向代理示例
+# 放到 /etc/nginx/conf.d/werun.conf，替换域名与证书路径后 reload。
+
+server {
+    listen 80;
+    server_name your.domain.com;
+    # 80 强制跳转 443
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name your.domain.com;
+
+    ssl_certificate     /etc/nginx/ssl/your.domain.com.pem;
+    ssl_certificate_key /etc/nginx/ssl/your.domain.com.key;
+
+    # 允许较大的截图上传
+    client_max_body_size 12m;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

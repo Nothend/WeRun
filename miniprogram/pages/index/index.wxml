@@ -1,0 +1,47 @@
+<view class="container">
+
+  <!-- 未登录 -->
+  <view wx:if="{{!user}}" class="card login-card">
+    <view class="title">🏃 跑步群打卡</view>
+    <view class="muted">用微信登录后开始记录你的每周跑步打卡</view>
+    <button class="btn-primary login-btn" loading="{{loggingIn}}" bindtap="handleLogin">微信登录</button>
+  </view>
+
+  <!-- 已登录 -->
+  <block wx:if="{{user}}">
+
+    <!-- 个人资料 -->
+    <view class="card">
+      <view class="title">我的资料</view>
+      <view class="profile-row">
+        <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+          <image class="avatar" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"></image>
+        </button>
+        <view class="profile-fields">
+          <input type="nickname" class="nickname-input" placeholder="点击填写昵称"
+                 value="{{nickname}}" bindinput="onNicknameInput" />
+          <view class="muted">点击头像可更换</view>
+        </view>
+      </view>
+      <button class="btn-primary save-btn" size="mini" loading="{{saving}}" bindtap="saveProfile">保存资料</button>
+    </view>
+
+    <!-- 本周状态 -->
+    <view class="card status-card">
+      <view class="title">本周打卡</view>
+      <view wx:if="{{stats}}" class="status-main">
+        <text class="big-num">{{stats.weekCount}}</text>
+        <text class="slash"> / {{stats.target}} 次</text>
+      </view>
+      <view wx:if="{{stats}}" class="status-tag {{stats.achieved ? 'ok' : 'no'}}">
+        {{stats.achieved ? '✅ 本周已达标' : '继续加油，还差 ' + (stats.target - stats.weekCount) + ' 次'}}
+      </view>
+    </view>
+
+    <!-- 入口 -->
+    <button class="btn-primary entry-btn" bindtap="goCheckin">📷 上传截图打卡</button>
+    <button class="entry-btn ghost" bindtap="goRanking">🏆 查看群周榜</button>
+    <button wx:if="{{user.isAdmin}}" class="entry-btn ghost" bindtap="goAdmin">⚙️ 后台管理</button>
+
+  </block>
+</view>

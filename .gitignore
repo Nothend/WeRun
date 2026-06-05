@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Secrets — NEVER commit real config
+.env
+server/.env
+*.local.env
+
+# Runtime data (SQLite db + uploaded avatars)
+server/data/
+data/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# WeChat devtools
+miniprogram/node_modules/

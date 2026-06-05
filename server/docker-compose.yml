@@ -1,0 +1,15 @@
+# 在 ECS 上的部署目录（如 /dockers/werun/）使用：
+#   - 本文件 docker-compose.yml
+#   - 真实配置 .env（含 APPSECRET / 千问 Key / WERUN_IMAGE 等，不入库）
+#   - ./data 目录（持久化 SQLite 与头像）
+services:
+  werun:
+    image: ${WERUN_IMAGE}
+    container_name: werun
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:3000:3000"   # 仅本机可访问，由 nginx 反代到 443
+    volumes:
+      - ./data:/app/data

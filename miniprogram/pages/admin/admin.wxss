@@ -1,0 +1,59 @@
+.title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.row:last-child {
+  border-bottom: none;
+}
+.avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+  margin-right: 20rpx;
+}
+.info {
+  flex: 1;
+  min-width: 0;
+}
+.name {
+  font-size: 30rpx;
+  margin-bottom: 4rpx;
+}
+.tag-admin {
+  font-size: 22rpx;
+  color: #fff;
+  background: #07c160;
+  border-radius: 6rpx;
+  padding: 2rpx 8rpx;
+  margin-left: 8rpx;
+}
+.tag-me {
+  font-size: 22rpx;
+  color: #999;
+  margin-left: 8rpx;
+}
+.ops {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+.op-btn {
+  margin: 0;
+  font-size: 24rpx;
+}
+.op-btn.danger {
+  color: #fa5151;
+}
+.empty {
+  text-align: center;
+  padding: 30rpx 0;
+}

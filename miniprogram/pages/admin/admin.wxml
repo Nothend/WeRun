@@ -1,0 +1,29 @@
+<view class="container">
+  <view class="card">
+    <view class="title">成员管理（共 {{list.length}} 人）</view>
+    <view class="muted">可踢出成员或设置管理员</view>
+  </view>
+
+  <view class="card">
+    <view wx:for="{{list}}" wx:key="openid" class="row">
+      <image class="avatar" src="{{item.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"></image>
+      <view class="info">
+        <view class="name">
+          {{item.nickname}}
+          <text wx:if="{{item.isAdmin}}" class="tag-admin">管理员</text>
+          <text wx:if="{{item.openid === myOpenid}}" class="tag-me">我</text>
+        </view>
+        <view class="muted">累计打卡 {{item.totalCheckins}} 次</view>
+      </view>
+      <view class="ops">
+        <button size="mini" class="op-btn" data-openid="{{item.openid}}" data-nickname="{{item.nickname}}"
+                data-isadmin="{{item.isAdmin}}" bindtap="toggleAdmin">
+          {{item.isAdmin ? '取消管理' : '设管理'}}
+        </button>
+        <button wx:if="{{item.openid !== myOpenid}}" size="mini" class="op-btn danger"
+                data-openid="{{item.openid}}" data-nickname="{{item.nickname}}" bindtap="kick">踢出</button>
+      </view>
+    </view>
+    <view wx:if="{{!loading && list.length === 0}}" class="muted empty">暂无成员</view>
+  </view>
+</view>

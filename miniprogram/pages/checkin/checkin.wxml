@@ -1,0 +1,31 @@
+<view class="container">
+  <view class="card">
+    <view class="muted tip">上传你的跑步记录截图（需含运动时长），系统会自动识别，时长达标即算本周一次打卡。</view>
+
+    <view class="preview" bindtap="chooseImage">
+      <image wx:if="{{imagePath}}" src="{{imagePath}}" mode="aspectFit" class="preview-img"></image>
+      <view wx:else class="preview-empty">
+        <text class="plus">+</text>
+        <text class="muted">点击选择 / 拍摄截图</text>
+      </view>
+    </view>
+
+    <button class="btn-primary" loading="{{submitting}}" bindtap="submit">提交打卡</button>
+  </view>
+
+  <!-- 结果 -->
+  <view wx:if="{{result}}" class="card result {{result.success ? 'ok' : 'no'}}">
+    <view wx:if="{{result.success}}">
+      <view class="result-title">✅ 打卡成功</view>
+      <view>识别运动时长：约 {{result.duration}} 分钟</view>
+      <view>本周已打卡：{{result.weekCount}} / {{result.target}} 次</view>
+      <view wx:if="{{result.achieved}}" class="achieved">🎉 本周已达标！</view>
+      <view wx:if="{{result.mock}}" class="muted">（当前为千问 mock 模式的演示结果）</view>
+    </view>
+    <view wx:else>
+      <view class="result-title">❌ 未能打卡</view>
+      <view>{{result.reason}}</view>
+      <view wx:if="{{result.duration}}" class="muted">识别时长：约 {{result.duration}} 分钟</view>
+    </view>
+  </view>
+</view>

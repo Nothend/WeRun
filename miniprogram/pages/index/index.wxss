@@ -1,0 +1,79 @@
+.title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+
+.login-card {
+  text-align: center;
+  padding: 60rpx 32rpx;
+}
+.login-btn {
+  margin-top: 40rpx;
+}
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  margin: 20rpx 0;
+}
+.avatar-btn {
+  padding: 0;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f0f0f0;
+  line-height: normal;
+}
+.avatar-btn::after {
+  border: none;
+}
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+}
+.profile-fields {
+  flex: 1;
+  margin-left: 24rpx;
+}
+.nickname-input {
+  border-bottom: 1rpx solid #eee;
+  padding: 12rpx 0;
+  font-size: 30rpx;
+}
+.save-btn {
+  margin-top: 8rpx;
+}
+
+.status-card {
+  text-align: center;
+}
+.status-main {
+  margin: 16rpx 0;
+}
+.big-num {
+  font-size: 72rpx;
+  font-weight: 700;
+  color: #07c160;
+}
+.slash {
+  font-size: 32rpx;
+  color: #999;
+}
+.status-tag {
+  display: inline-block;
+  margin-top: 8rpx;
+  font-size: 28rpx;
+}
+.status-tag.ok { color: #07c160; }
+.status-tag.no { color: #ff9800; }
+
+.entry-btn {
+  margin-top: 20rpx;
+}
+.entry-btn.ghost {
+  background: #fff;
+  color: #07c160;
+  border: 1rpx solid #07c160;
+}

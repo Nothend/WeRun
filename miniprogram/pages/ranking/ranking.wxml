@@ -1,0 +1,21 @@
+<view class="container">
+  <view wx:if="{{data}}" class="card summary">
+    <view class="week">{{data.weekKey}} 本周</view>
+    <view class="muted">达标 {{data.achievedCount}} / {{data.total}} 人（每周 ≥ {{data.target}} 次）</view>
+  </view>
+
+  <view wx:if="{{data}}" class="card list">
+    <view wx:for="{{data.list}}" wx:key="openid" class="row">
+      <text class="rank">{{index + 1}}</text>
+      <image class="avatar" src="{{item.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"></image>
+      <view class="name">{{item.nickname}}</view>
+      <view class="count {{item.achieved ? 'ok' : ''}}">
+        {{item.weekCount}} 次
+        <text wx:if="{{item.achieved}}" class="badge">达标</text>
+      </view>
+    </view>
+    <view wx:if="{{data.list.length === 0}}" class="muted empty">还没有成员，快去打卡吧～</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="muted empty">加载中...</view>
+</view>

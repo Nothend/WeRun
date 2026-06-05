@@ -1,0 +1,48 @@
+.tip {
+  margin-bottom: 24rpx;
+  line-height: 1.6;
+}
+
+.preview {
+  width: 100%;
+  height: 480rpx;
+  border: 2rpx dashed #ccc;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+  background: #fafafa;
+  overflow: hidden;
+}
+.preview-img {
+  width: 100%;
+  height: 100%;
+}
+.preview-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.plus {
+  font-size: 80rpx;
+  color: #bbb;
+  line-height: 1;
+  margin-bottom: 12rpx;
+}
+
+.result {
+  line-height: 1.8;
+}
+.result-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+.result.ok .result-title { color: #07c160; }
+.result.no .result-title { color: #fa5151; }
+.achieved {
+  color: #07c160;
+  font-weight: 600;
+  margin-top: 8rpx;
+}

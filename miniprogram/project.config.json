@@ -1,0 +1,16 @@
+{
+  "description": "WeRun 微信跑步群打卡统计",
+  "miniprogramRoot": "./",
+  "appid": "wx_example_appid_xxxxxxxx",
+  "projectname": "werun",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "latest"
+}
