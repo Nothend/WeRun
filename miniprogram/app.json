@@ -6,10 +6,12 @@
     "pages/admin/admin"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#07c160",
+    "navigationBarBackgroundColor": "#070d1b",
     "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "跑步打卡",
-    "backgroundColor": "#f5f5f5"
+    "navigationBarTitleText": "WeRun",
+    "backgroundColor": "#070d1b",
+    "backgroundColorTop": "#070d1b",
+    "backgroundColorBottom": "#070d1b"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

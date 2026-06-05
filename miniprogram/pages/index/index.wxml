@@ -1,47 +1,71 @@
-<view class="container">
+<!-- 未登录 -->
+<view wx:if="{{!user}}" class="login-screen">
+  <view class="login-icon">⚡</view>
+  <view class="login-title">WeRun</view>
+  <view class="login-desc">微信跑步群打卡</view>
+  <button class="btn-primary login-btn" loading="{{loggingIn}}" bindtap="handleLogin">
+    微信登录
+  </button>
+</view>
 
-  <!-- 未登录 -->
-  <view wx:if="{{!user}}" class="card login-card">
-    <view class="title">🏃 跑步群打卡</view>
-    <view class="muted">用微信登录后开始记录你的每周跑步打卡</view>
-    <button class="btn-primary login-btn" loading="{{loggingIn}}" bindtap="handleLogin">微信登录</button>
-  </view>
+<!-- 已登录 -->
+<view wx:if="{{user}}" class="container">
 
-  <!-- 已登录 -->
-  <block wx:if="{{user}}">
-
-    <!-- 个人资料 -->
-    <view class="card">
-      <view class="title">我的资料</view>
-      <view class="profile-row">
+  <!-- 个人资料 -->
+  <view class="card profile-card">
+    <view class="profile-row">
+      <view class="avatar-wrap">
         <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-          <image class="avatar" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"></image>
+          <image class="avatar" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
         </button>
-        <view class="profile-fields">
-          <input type="nickname" class="nickname-input" placeholder="点击填写昵称"
-                 value="{{nickname}}" bindinput="onNicknameInput" />
-          <view class="muted">点击头像可更换</view>
+        <text class="avatar-hint">换头像</text>
+      </view>
+      <view class="profile-fields">
+        <input type="nickname" class="nickname-input" placeholder="输入昵称"
+               placeholder-class="input-ph"
+               value="{{nickname}}" bindinput="onNicknameInput"/>
+        <view class="profile-footer">
+          <text class="muted">WeChat 昵称或自定义</text>
+          <button class="btn-save" loading="{{saving}}" bindtap="saveProfile">保存</button>
         </view>
       </view>
-      <button class="btn-primary save-btn" size="mini" loading="{{saving}}" bindtap="saveProfile">保存资料</button>
     </view>
+  </view>
 
-    <!-- 本周状态 -->
-    <view class="card status-card">
-      <view class="title">本周打卡</view>
-      <view wx:if="{{stats}}" class="status-main">
-        <text class="big-num">{{stats.weekCount}}</text>
-        <text class="slash"> / {{stats.target}} 次</text>
-      </view>
-      <view wx:if="{{stats}}" class="status-tag {{stats.achieved ? 'ok' : 'no'}}">
-        {{stats.achieved ? '✅ 本周已达标' : '继续加油，还差 ' + (stats.target - stats.weekCount) + ' 次'}}
-      </view>
+  <!-- 本周状态 -->
+  <view class="card stats-card {{stats && stats.achieved ? 'achieved' : ''}}">
+    <view class="stats-header">本周打卡</view>
+    <view class="stats-nums">
+      <text class="stats-num">{{stats ? stats.weekCount : '-'}}</text>
+      <text class="stats-denom"> / {{stats ? stats.target : 3}}</text>
     </view>
+    <view class="progress-track">
+      <view class="progress-fill" style="width: {{stats && stats.target > 0 ? (stats.weekCount >= stats.target ? 100 : stats.weekCount / stats.target * 100) : 0}}%"></view>
+    </view>
+    <view class="stats-status">
+      <text wx:if="{{stats && stats.achieved}}">🎯 本周已达标</text>
+      <text wx:elif="{{stats}}">还差 {{stats.target - stats.weekCount}} 次达标</text>
+      <text wx:else class="muted">—</text>
+    </view>
+  </view>
 
-    <!-- 入口 -->
-    <button class="btn-primary entry-btn" bindtap="goCheckin">📷 上传截图打卡</button>
-    <button class="entry-btn ghost" bindtap="goRanking">🏆 查看群周榜</button>
-    <button wx:if="{{user.isAdmin}}" class="entry-btn ghost" bindtap="goAdmin">⚙️ 后台管理</button>
+  <!-- 快速入口 -->
+  <view class="card actions-card">
+    <view class="action-item primary" hover-class="action-hover" hover-stay-time="150" bindtap="goCheckin">
+      <view class="action-icon-wrap">📷</view>
+      <text class="action-text">上传截图打卡</text>
+      <text class="action-chevron">›</text>
+    </view>
+    <view class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goRanking">
+      <view class="action-icon-wrap">🏆</view>
+      <text class="action-text">查看群周榜</text>
+      <text class="action-chevron">›</text>
+    </view>
+    <view wx:if="{{user.isAdmin}}" class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goAdmin">
+      <view class="action-icon-wrap">⚙️</view>
+      <text class="action-text">后台管理</text>
+      <text class="action-chevron">›</text>
+    </view>
+  </view>
 
-  </block>
 </view>

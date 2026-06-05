@@ -1,31 +1,48 @@
 <view class="container">
   <view class="card">
-    <view class="muted tip">上传你的跑步记录截图（需含运动时长），系统会自动识别，时长达标即算本周一次打卡。</view>
-
-    <view class="preview" bindtap="chooseImage">
-      <image wx:if="{{imagePath}}" src="{{imagePath}}" mode="aspectFit" class="preview-img"></image>
-      <view wx:else class="preview-empty">
-        <text class="plus">+</text>
-        <text class="muted">点击选择 / 拍摄截图</text>
+    <!-- 上传区 -->
+    <view class="upload-zone" bindtap="chooseImage">
+      <image wx:if="{{imagePath}}" src="{{imagePath}}" mode="aspectFit" class="preview-img"/>
+      <view wx:else class="upload-empty">
+        <view class="upload-icon">📷</view>
+        <view class="upload-label">点击选择 / 拍摄</view>
+        <view class="muted upload-sub">支持相册或实时拍摄</view>
       </view>
     </view>
 
-    <button class="btn-primary" loading="{{submitting}}" bindtap="submit">提交打卡</button>
+    <view class="upload-meta muted">系统自动识别运动时长，≥ 30 分钟计为一次打卡</view>
+
+    <button class="btn-primary submit-btn"
+            loading="{{submitting}}"
+            disabled="{{!imagePath || submitting}}"
+            bindtap="submit">
+      提交打卡
+    </button>
   </view>
 
-  <!-- 结果 -->
-  <view wx:if="{{result}}" class="card result {{result.success ? 'ok' : 'no'}}">
+  <!-- 打卡结果 -->
+  <view wx:if="{{result}}" class="card result-card {{result.success ? 'ok' : 'no'}}">
     <view wx:if="{{result.success}}">
-      <view class="result-title">✅ 打卡成功</view>
-      <view>识别运动时长：约 {{result.duration}} 分钟</view>
-      <view>本周已打卡：{{result.weekCount}} / {{result.target}} 次</view>
-      <view wx:if="{{result.achieved}}" class="achieved">🎉 本周已达标！</view>
-      <view wx:if="{{result.mock}}" class="muted">（当前为千问 mock 模式的演示结果）</view>
+      <view class="result-icon">✅</view>
+      <view class="result-title">打卡成功</view>
+      <view class="result-row">
+        <text class="result-label">识别时长</text>
+        <text class="result-val">约 {{result.duration}} 分钟</text>
+      </view>
+      <view class="result-row">
+        <text class="result-label">本周已打卡</text>
+        <text class="result-val accent">{{result.weekCount}} / {{result.target}} 次</text>
+      </view>
+      <view wx:if="{{result.achieved}}" class="result-achieved">🎉 本周已达标！</view>
+      <view wx:if="{{result.mock}}" class="muted mock-note">（千问 mock 模式演示）</view>
     </view>
     <view wx:else>
-      <view class="result-title">❌ 未能打卡</view>
-      <view>{{result.reason}}</view>
-      <view wx:if="{{result.duration}}" class="muted">识别时长：约 {{result.duration}} 分钟</view>
+      <view class="result-icon">❌</view>
+      <view class="result-title fail">打卡未成功</view>
+      <view class="result-reason">{{result.reason}}</view>
+      <view wx:if="{{result.duration}}" class="muted" style="text-align:center">
+        识别时长：约 {{result.duration}} 分钟
+      </view>
     </view>
   </view>
 </view>

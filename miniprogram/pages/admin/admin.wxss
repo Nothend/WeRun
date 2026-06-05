@@ -1,59 +1,103 @@
-.title {
+/* ── 标题栏 ── */
+.header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 40rpx;
+}
+.header-title {
   font-size: 32rpx;
-  font-weight: 600;
-  margin-bottom: 8rpx;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 2rpx;
+}
+.header-count {
+  font-size: 24rpx;
+  color: #334155;
 }
 
+/* ── 成员列表 ── */
+.list-card {
+  padding: 0;
+  overflow: hidden;
+}
 .row {
   display: flex;
   align-items: center;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  padding: 28rpx 40rpx;
 }
-.row:last-child {
-  border-bottom: none;
+.row + .row {
+  border-top: 1rpx solid rgba(255, 255, 255, 0.04);
 }
 .avatar {
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
-  background: #f0f0f0;
+  background: #1a2942;
   margin-right: 20rpx;
+  flex-shrink: 0;
 }
 .info {
   flex: 1;
   min-width: 0;
 }
+.name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-bottom: 8rpx;
+}
 .name {
-  font-size: 30rpx;
-  margin-bottom: 4rpx;
+  font-size: 28rpx;
+  color: #e2e8f0;
 }
-.tag-admin {
-  font-size: 22rpx;
-  color: #fff;
-  background: #07c160;
+.tag {
+  font-size: 20rpx;
   border-radius: 6rpx;
-  padding: 2rpx 8rpx;
-  margin-left: 8rpx;
+  padding: 2rpx 12rpx;
+  line-height: 1.8;
 }
-.tag-me {
-  font-size: 22rpx;
-  color: #999;
-  margin-left: 8rpx;
+.admin-tag {
+  color: #22d3ee;
+  background: rgba(34, 211, 238, 0.08);
+  border: 1rpx solid rgba(34, 211, 238, 0.25);
+}
+.me-tag {
+  color: #475569;
+  background: rgba(71, 85, 105, 0.12);
+  border: 1rpx solid rgba(71, 85, 105, 0.2);
+}
+.checkins {
+  font-size: 24rpx;
 }
 .ops {
   display: flex;
   flex-direction: column;
   gap: 10rpx;
+  flex-shrink: 0;
+  margin-left: 12rpx;
 }
 .op-btn {
   margin: 0;
-  font-size: 24rpx;
+  font-size: 22rpx;
+  height: 52rpx;
+  line-height: 52rpx;
+  padding: 0 16rpx;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.07) !important;
+  border-radius: 8rpx;
+}
+.op-btn::after {
+  border: none;
 }
 .op-btn.danger {
-  color: #fa5151;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.06);
+  border: 1rpx solid rgba(248, 113, 113, 0.18) !important;
 }
 .empty {
   text-align: center;
-  padding: 30rpx 0;
+  padding: 72rpx 0;
 }
