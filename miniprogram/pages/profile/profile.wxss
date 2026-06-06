@@ -58,33 +58,24 @@
   border: none;
   padding: 0;
   margin: 0;
-  position: relative;
-  width: 160rpx;
-  height: 160rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .auth-avatar-btn::after { border: none; }
 .auth-avatar {
   width: 160rpx;
   height: 160rpx;
   border-radius: 50%;
-  border: 3rpx solid rgba(34, 211, 238, 0.5);
+  border: 3rpx dashed #22d3ee;
   box-shadow: 0 0 32rpx rgba(34, 211, 238, 0.2);
 }
-.auth-avatar-badge {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 44rpx;
-  height: 44rpx;
-  border-radius: 50%;
-  background: #22d3ee;
-  color: #0a0f1a;
-  font-size: 20rpx;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3rpx solid #070d1b;
+.auth-avatar-label {
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #22d3ee;
+  letter-spacing: 1rpx;
 }
 .auth-nickname-wrap {
   width: 480rpx;

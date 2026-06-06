@@ -10,7 +10,7 @@
   <view class="auth-user">
     <button class="auth-avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
       <image class="auth-avatar" src="{{previewUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
-      <view class="auth-avatar-badge">换</view>
+      <view class="auth-avatar-label">📷 点击设置头像</view>
     </button>
     <view class="auth-nickname-wrap">
       <input
