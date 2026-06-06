@@ -2,7 +2,7 @@ const api = require('../../utils/api');
 const config = require('../../config');
 const app = getApp();
 
-const SPONSOR_QR_URL = config.baseUrl + '/public/wechat.png?v=2';
+const SPONSOR_QR_URL = config.baseUrl + '/public/wechatpay.png?v=1';
 
 Page({
   data: {
