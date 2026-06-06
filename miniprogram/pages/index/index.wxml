@@ -23,7 +23,7 @@
     <view class="profile-stats">
       <view class="pstat-item">
         <text class="pstat-num">{{stats ? stats.weekCount : '-'}}</text>
-        <text class="pstat-label">本周打开</text>
+        <text class="pstat-label">本周打卡</text>
       </view>
       <view class="pstat-divider"></view>
       <view class="pstat-item">

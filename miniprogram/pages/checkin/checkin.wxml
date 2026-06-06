@@ -10,7 +10,7 @@
       </view>
     </view>
 
-    <view class="upload-meta muted">系统自动识别运动时长，≥ 30 分钟计为一次打卡</view>
+    <view class="upload-meta muted">系统自动识别运动时长，≥ {{minDurationMinutes}} 分钟计为一次打卡</view>
 
     <button class="btn-primary submit-btn"
             loading="{{submitting}}"

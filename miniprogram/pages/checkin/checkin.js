@@ -1,10 +1,16 @@
 const api = require('../../utils/api');
+const app = getApp();
 
 Page({
   data: {
     imagePath: '',
     submitting: false,
     result: null, // { success, reason, duration, weekCount, target, achieved, already }
+    minDurationMinutes: 30,
+  },
+
+  onLoad() {
+    this.setData({ minDurationMinutes: app.globalData.remoteConfig.minDurationMinutes });
   },
 
   chooseImage() {

@@ -191,32 +191,18 @@ Page({
       count: 1,
       type: 'file',
       extension: ['xlsx', 'xls'],
-      success: (res) => {
+      success: async (res) => {
         const file = res.tempFiles[0];
         this.setData({ importLoading: true });
-        wx.uploadFile({
-          url: require('../../config').baseUrl + '/api/admin/import',
-          filePath: file.path,
-          name: 'excel',
-          header: {
-            Authorization: app.globalData.token ? `Bearer ${app.globalData.token}` : '',
-          },
-          success: (uploadRes) => {
-            let result;
-            try { result = JSON.parse(uploadRes.data); } catch (e) {
-              wx.showToast({ title: '返回数据解析失败', icon: 'none' });
-              return;
-            }
-            if (uploadRes.statusCode >= 200 && uploadRes.statusCode < 300) {
-              this.setData({ importResult: result, showImportResult: true });
-              this.load();
-            } else {
-              wx.showToast({ title: result.error || '导入失败', icon: 'none' });
-            }
-          },
-          fail: () => wx.showToast({ title: '上传失败', icon: 'none' }),
-          complete: () => this.setData({ importLoading: false }),
-        });
+        try {
+          const result = await api.upload('/api/admin/import', file.path, { name: 'excel' });
+          this.setData({ importResult: result, showImportResult: true });
+          this.load();
+        } catch (e) {
+          wx.showToast({ title: e.message || '导入失败', icon: 'none' });
+        } finally {
+          this.setData({ importLoading: false });
+        }
       },
       fail: (err) => {
         if (err.errMsg && err.errMsg.includes('cancel')) return;

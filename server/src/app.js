@@ -21,6 +21,7 @@ app.get('/health', (req, res) => {
 });
 
 // 业务路由
+app.use('/api', require('./routes/config'));
 app.use('/api', require('./routes/login'));
 app.use('/api', require('./routes/profile'));
 app.use('/api', require('./routes/checkin'));
