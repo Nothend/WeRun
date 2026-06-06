@@ -17,7 +17,7 @@ router.get('/admin/users', (req, res) => {
   const rows = db
     .prepare(
       `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, u.is_admin AS isAdmin,
-              u.created_at AS createdAt,
+              u.notify_checkin AS notifyCheckin, u.created_at AS createdAt,
               (SELECT COUNT(*) FROM checkins c WHERE c.openid = u.openid) AS totalCheckins
          FROM users u
         ORDER BY u.is_admin DESC, u.created_at ASC`
@@ -29,6 +29,7 @@ router.get('/admin/users', (req, res) => {
       nickname: r.nickname || '未设置昵称',
       avatarUrl: r.avatarUrl || '',
       isAdmin: !!r.isAdmin,
+      notifyCheckin: !!r.notifyCheckin,
       totalCheckins: r.totalCheckins,
       createdAt: r.createdAt,
     })),
@@ -69,6 +70,44 @@ router.post('/admin/users/:openid/admin', (req, res) => {
 
   db.prepare('UPDATE users SET is_admin = ? WHERE openid = ?').run(isAdmin, target);
   res.json({ ok: true, isAdmin: !!isAdmin });
+});
+
+// GET /api/admin/checkins  打卡日志（分页，最新在前）
+router.get('/admin/checkins', (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page || '1', 10));
+  const pageSize = Math.min(50, Math.max(1, parseInt(req.query.pageSize || '20', 10)));
+  const offset = (page - 1) * pageSize;
+
+  const total = db.prepare('SELECT COUNT(*) AS n FROM checkins').get().n;
+  const list = db
+    .prepare(
+      `SELECT c.id, c.openid, c.week_key AS weekKey, c.checkin_date AS checkinDate,
+              c.duration_minutes AS durationMinutes, c.created_at AS createdAt,
+              u.nickname, u.avatar_url AS avatarUrl
+         FROM checkins c
+         LEFT JOIN users u ON c.openid = u.openid
+        ORDER BY c.created_at DESC
+        LIMIT ? OFFSET ?`
+    )
+    .all(pageSize, offset);
+
+  res.json({
+    list: list.map((r) => ({
+      ...r,
+      nickname: r.nickname || '未设置昵称',
+      avatarUrl: r.avatarUrl || '',
+    })),
+    total,
+    page,
+    pageSize,
+  });
+});
+
+// POST /api/admin/notify-setting  { notify: true|false } 管理员设置自己是否接收打卡通知
+router.post('/admin/notify-setting', (req, res) => {
+  const notify = req.body && req.body.notify ? 1 : 0;
+  db.prepare('UPDATE users SET notify_checkin = ? WHERE openid = ?').run(notify, req.user.openid);
+  res.json({ ok: true, notify: !!notify });
 });
 
 // POST /api/admin/users/:openid/nickname  { nickname: "..." } 修改用户昵称

@@ -1,3 +1,95 @@
+/* ── 标签页 ── */
+.tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20rpx;
+  padding: 8rpx;
+  margin: 0 0 24rpx;
+  gap: 8rpx;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  font-size: 26rpx;
+  color: #475569;
+  height: 64rpx;
+  line-height: 64rpx;
+  border-radius: 14rpx;
+  transition: all 0.2s;
+}
+.tab-active {
+  color: #22d3ee;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1rpx solid rgba(34, 211, 238, 0.2);
+  font-weight: 600;
+}
+
+/* ── 通知设置卡 ── */
+.notify-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 40rpx;
+}
+.notify-info {
+  flex: 1;
+  margin-right: 20rpx;
+}
+.notify-title {
+  font-size: 28rpx;
+  color: #e2e8f0;
+  font-weight: 600;
+  margin-bottom: 6rpx;
+}
+.notify-desc {
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+/* ── 打卡日志行 ── */
+.log-row {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 40rpx;
+}
+.log-row + .log-row {
+  border-top: 1rpx solid rgba(255, 255, 255, 0.04);
+}
+.log-info {
+  flex: 1;
+  min-width: 0;
+  margin-left: 20rpx;
+}
+.log-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 6rpx;
+}
+.log-week {
+  font-size: 22rpx;
+}
+.log-detail {
+  font-size: 24rpx;
+}
+
+/* ── 加载更多 ── */
+.load-more {
+  padding: 28rpx 0;
+  text-align: center;
+}
+.load-more-btn {
+  display: inline-block;
+  font-size: 24rpx;
+  color: #22d3ee;
+  padding: 12rpx 40rpx;
+  border: 1rpx solid rgba(34, 211, 238, 0.25);
+  border-radius: 40rpx;
+}
+.load-more-end {
+  font-size: 22rpx;
+}
+
 /* ── 标题栏 ── */
 .header-card {
   display: flex;

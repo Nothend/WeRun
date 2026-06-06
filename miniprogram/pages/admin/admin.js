@@ -1,20 +1,37 @@
 const api = require('../../utils/api');
+const config = require('../../config');
 const app = getApp();
 
 Page({
   data: {
+    // 标签页：'members' | 'logs'
+    activeTab: 'members',
+
+    // ── 成员管理 ──
     list: [],
     loading: true,
     myOpenid: '',
+    myNotifyCheckin: false,
+    togglingNotify: false,
+
     // 改名弹窗
     renameModal: false,
     renameTarget: null,
     newNickname: '',
     renaming: false,
+
     // Excel 导入
     importLoading: false,
     showImportResult: false,
     importResult: null,
+
+    // ── 打卡日志 ──
+    logs: [],
+    logsLoading: false,
+    logsPage: 1,
+    logsTotal: 0,
+    logsPageSize: 20,
+    logsHasMore: false,
   },
 
   onShow() {
@@ -28,11 +45,25 @@ Page({
     this.load();
   },
 
+  switchTab(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (tab === this.data.activeTab) return;
+    this.setData({ activeTab: tab });
+    if (tab === 'logs' && this.data.logs.length === 0) {
+      this.loadLogs(1);
+    }
+  },
+
+  // ── 成员管理 ──────────────────────────────────────────────
   async load() {
     this.setData({ loading: true });
     try {
       const data = await api.request('/api/admin/users');
-      this.setData({ list: data.list });
+      const me = data.list.find((u) => u.openid === this.data.myOpenid);
+      this.setData({
+        list: data.list,
+        myNotifyCheckin: me ? !!me.notifyCheckin : false,
+      });
     } catch (e) {
       wx.showToast({ title: e.message, icon: 'none' });
     } finally {
@@ -81,7 +112,39 @@ Page({
     });
   },
 
-  // ── 改名 ──────────────────────────────────────────────
+  // ── 打卡通知开关 ──────────────────────────────────────────
+  async toggleNotify() {
+    if (this.data.togglingNotify) return;
+    const newNotify = !this.data.myNotifyCheckin;
+
+    // 开启通知时先请求订阅授权
+    if (newNotify && config.notifyTemplateId) {
+      wx.requestSubscribeMessage({
+        tmplIds: [config.notifyTemplateId],
+        complete: () => { this._saveNotifySetting(newNotify); },
+      });
+    } else {
+      this._saveNotifySetting(newNotify);
+    }
+  },
+
+  async _saveNotifySetting(notify) {
+    this.setData({ togglingNotify: true });
+    try {
+      await api.request('/api/admin/notify-setting', {
+        method: 'POST',
+        data: { notify },
+      });
+      this.setData({ myNotifyCheckin: notify });
+      wx.showToast({ title: notify ? '已开启通知' : '已关闭通知', icon: 'success' });
+    } catch (err) {
+      wx.showToast({ title: err.message, icon: 'none' });
+    } finally {
+      this.setData({ togglingNotify: false });
+    }
+  },
+
+  // ── 改名 ──────────────────────────────────────────────────
   openRenameModal(e) {
     const { openid, nickname } = e.currentTarget.dataset;
     this.setData({
@@ -122,7 +185,7 @@ Page({
     }
   },
 
-  // ── Excel 导入 ────────────────────────────────────────
+  // ── Excel 导入 ────────────────────────────────────────────
   importExcel() {
     wx.chooseMessageFile({
       count: 1,
@@ -164,5 +227,36 @@ Page({
 
   closeImportResult() {
     this.setData({ showImportResult: false, importResult: null });
+  },
+
+  // ── 打卡日志 ──────────────────────────────────────────────
+  async loadLogs(page) {
+    if (this.data.logsLoading) return;
+    this.setData({ logsLoading: true });
+    try {
+      const data = await api.request(
+        `/api/admin/checkins?page=${page}&pageSize=${this.data.logsPageSize}`
+      );
+      const logs = page === 1 ? data.list : [...this.data.logs, ...data.list];
+      this.setData({
+        logs,
+        logsPage: page,
+        logsTotal: data.total,
+        logsHasMore: logs.length < data.total,
+      });
+    } catch (e) {
+      wx.showToast({ title: e.message, icon: 'none' });
+    } finally {
+      this.setData({ logsLoading: false });
+    }
+  },
+
+  loadMoreLogs() {
+    if (!this.data.logsHasMore || this.data.logsLoading) return;
+    this.loadLogs(this.data.logsPage + 1);
+  },
+
+  refreshLogs() {
+    this.loadLogs(1);
   },
 });

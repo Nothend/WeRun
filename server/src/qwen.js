@@ -2,11 +2,14 @@ const config = require('./config');
 
 const PROMPT = [
   '这是一张跑步/运动记录的截图（可能来自 Keep、悦跑圈、微信运动、华为/小米运动等）。',
-  '请你识别图中的"运动时长"（即本次运动持续的总时间，单位换算为分钟）。',
+  '请你识别以下两项内容：',
+  '1. 图中的"运动时长"（即本次运动持续的总时间，换算为分钟）',
+  '2. 图中的"运动日期"（即本次运动发生的日期，格式 YYYY-MM-DD；若无法识别则为 null）',
   '严格只返回一个 JSON 对象，不要任何多余文字或解释，格式如下：',
-  '{"has_time": true 或 false, "duration_minutes": 数字}',
+  '{"has_time": true 或 false, "duration_minutes": 数字, "exercise_date": "YYYY-MM-DD" 或 null}',
   '其中 has_time 表示图中是否包含可识别的运动时长；',
-  'duration_minutes 为该时长换算成的分钟数（例如 "32:15" → 32，"1小时05分" → 65）。',
+  'duration_minutes 为该时长换算成的分钟数（例如 "32:15" → 32，"1小时05分" → 65）；',
+  'exercise_date 为本次运动的日期（若图中有明确日期则返回，否则返回 null）。',
   '若图中没有明确的运动时长，则 has_time 为 false，duration_minutes 为 0。',
 ].join('\n');
 
@@ -26,8 +29,11 @@ function extractJson(text) {
 // 输入图片 Buffer + mime，返回 { has_time, duration_minutes }
 async function recognizeDuration(imageBuffer, mime = 'image/jpeg') {
   if (config.useMockQwen) {
-    // mock：固定返回 35 分钟，方便联调"成功打卡"路径
-    return { has_time: true, duration_minutes: 35, mock: true };
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const exercise_date = `${today.getFullYear()}-${mm}-${dd}`;
+    return { has_time: true, duration_minutes: 35, exercise_date, mock: true };
   }
 
   const dataUrl = `data:${mime};base64,${imageBuffer.toString('base64')}`;
@@ -70,6 +76,7 @@ async function recognizeDuration(imageBuffer, mime = 'image/jpeg') {
   return {
     has_time: !!parsed.has_time,
     duration_minutes: Number(parsed.duration_minutes) || 0,
+    exercise_date: parsed.exercise_date || null,
   };
 }
 

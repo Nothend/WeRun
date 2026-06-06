@@ -32,4 +32,15 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_checkins_openid ON checkins(openid);
 `);
 
+// 增量迁移：新增列（ALTER TABLE ADD COLUMN 不会破坏已有数据）
+const checkinCols = db.prepare('PRAGMA table_info(checkins)').all().map((c) => c.name);
+if (!checkinCols.includes('image_hash')) {
+  db.exec('ALTER TABLE checkins ADD COLUMN image_hash TEXT DEFAULT NULL');
+}
+
+const userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
+if (!userCols.includes('notify_checkin')) {
+  db.exec('ALTER TABLE users ADD COLUMN notify_checkin INTEGER NOT NULL DEFAULT 0');
+}
+
 module.exports = db;

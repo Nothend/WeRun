@@ -16,6 +16,7 @@ const config = {
   bootstrapAdminOpenid: process.env.BOOTSTRAP_ADMIN_OPENID || '',
   minDurationMinutes: parseFloat(process.env.MIN_DURATION_MINUTES || '30'),
   weeklyTarget: parseInt(process.env.WEEKLY_TARGET || '3', 10),
+  wechatNotifyTemplateId: process.env.WECHAT_NOTIFY_TEMPLATE_ID || '',
 
   dataDir: DATA_DIR,
   dbPath: path.join(DATA_DIR, 'app.db'),
