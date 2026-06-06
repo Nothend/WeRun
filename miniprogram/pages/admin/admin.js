@@ -144,6 +144,11 @@ Page({
     }
   },
 
+  copyOpenid(e) {
+    const openid = e.currentTarget.dataset.openid;
+    wx.setClipboardData({ data: openid, success: () => wx.showToast({ title: '已复制', icon: 'success' }) });
+  },
+
   // ── 改名 ──────────────────────────────────────────────────
   openRenameModal(e) {
     const { openid, nickname } = e.currentTarget.dataset;

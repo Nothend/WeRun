@@ -40,6 +40,9 @@
             <view wx:if="{{item.isAdmin}}" class="tag admin-tag">管理员</view>
             <view wx:if="{{item.openid === myOpenid}}" class="tag me-tag">我</view>
           </view>
+          <view class="openid-row" data-openid="{{item.openid}}" bindtap="copyOpenid">
+            <text class="openid-text">{{item.openid}}</text>
+          </view>
           <view class="checkins muted">累计 {{item.totalCheckins}} 次打卡</view>
         </view>
         <view class="ops">

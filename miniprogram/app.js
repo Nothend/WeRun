@@ -11,6 +11,11 @@ App({
     const user = wx.getStorageSync('user');
     if (token) this.globalData.token = token;
     if (user) this.globalData.user = user;
+    // 已登录时才拉取配置，未登录不请求任何接口
+    if (token) this.fetchConfig();
+  },
+
+  fetchConfig() {
     wx.request({
       url: config.baseUrl + '/api/config',
       method: 'GET',

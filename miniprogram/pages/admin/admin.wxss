@@ -177,6 +177,15 @@
   background: rgba(71, 85, 105, 0.12);
   border: 1rpx solid rgba(71, 85, 105, 0.2);
 }
+.openid-row {
+  margin: 4rpx 0 2rpx;
+}
+.openid-text {
+  font-size: 20rpx;
+  color: #334155;
+  font-family: monospace;
+  letter-spacing: 0.5rpx;
+}
 .checkins {
   font-size: 24rpx;
 }
