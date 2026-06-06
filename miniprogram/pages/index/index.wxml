@@ -79,8 +79,8 @@
 <view wx:if="{{showSponsor}}" class="sponsor-overlay" bindtap="closeSponsor">
   <view class="sponsor-modal" catchtap="">
     <view class="sponsor-title">请作者喝杯咖啡 ☕</view>
-    <image class="sponsor-qr" src="/assets/wechat.png" mode="aspectFit"/>
-    <view class="sponsor-hint">微信扫码</view>
+    <image class="sponsor-qr" src="{{sponsorQrUrl}}" mode="aspectFit" show-menu-by-longpress="true"/>
+    <view class="sponsor-hint">长按图片识别二维码</view>
     <view class="sponsor-close" bindtap="closeSponsor">关闭</view>
   </view>
 </view>

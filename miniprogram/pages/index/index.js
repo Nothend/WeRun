@@ -1,5 +1,8 @@
 const api = require('../../utils/api');
+const config = require('../../config');
 const app = getApp();
+
+const SPONSOR_QR_URL = config.baseUrl + '/public/wechat.png';
 
 Page({
   data: {
@@ -9,6 +12,7 @@ Page({
     nickname: '',
     stats: null,
     showSponsor: false,
+    sponsorQrUrl: SPONSOR_QR_URL,
     shareText: '',
     shareLoading: false,
     showShareModal: false,

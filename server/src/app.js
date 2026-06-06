@@ -9,6 +9,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // 静态托管头像：GET /avatars/<openid>.png
 app.use('/avatars', express.static(config.avatarDir, { maxAge: '7d' }));
+// 静态公共资源：GET /public/<file>
+app.use('/public', express.static(path.join(__dirname, '..', 'public'), { maxAge: '30d' }));
 
 // 健康检查
 app.get('/health', (req, res) => {
