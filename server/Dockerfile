@@ -15,6 +15,7 @@ ENV DATA_DIR=/app/data
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/src ./src
 COPY package*.json ./
+# public-version: 2
 COPY public ./public
 EXPOSE 3000
 VOLUME ["/app/data"]

@@ -1,37 +1,49 @@
 <!-- 授权模式：全屏引导 -->
 <view wx:if="{{authMode}}" class="auth-screen">
 
-  <view class="auth-top">
-    <view class="app-logo">WR</view>
-    <view class="app-name">WeRun</view>
-    <view class="auth-desc">申请获取你的头像和昵称</view>
+  <view class="auth-hero">
+    <view class="auth-hero-emoji">🏃</view>
+    <view class="auth-hero-title">让队友认识你</view>
+    <view class="auth-hero-sub">设置头像和昵称，才能出现在群周榜上</view>
   </view>
 
-  <view class="auth-user">
+  <view class="auth-form">
     <button class="auth-avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-      <image class="auth-avatar" src="{{previewUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
-      <view class="auth-avatar-label">📷 点击设置头像</view>
+      <view class="auth-avatar-wrap">
+        <image class="auth-avatar" src="{{previewUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+        <view class="auth-avatar-overlay {{previewUrl ? 'set' : ''}}">
+          <text class="auth-avatar-camera">{{previewUrl ? '✓' : '📷'}}</text>
+        </view>
+      </view>
+      <view class="auth-avatar-label {{previewUrl ? 'done' : ''}}">
+        {{previewUrl ? '头像已设置 ✓' : '点击设置头像（必填）'}}
+      </view>
     </button>
-    <view class="auth-nickname-wrap">
-      <input
-        class="auth-nickname-input"
-        type="nickname"
-        placeholder="点击设置昵称"
-        placeholder-class="auth-nickname-placeholder"
-        value="{{nickname}}"
-        bindinput="onNicknameInput"
-        confirm-type="done"
-        maxlength="30"
-      />
+
+    <view class="auth-nickname-field">
+      <view class="auth-field-label">昵称<text class="auth-required">必填</text></view>
+      <view class="auth-nickname-wrap {{nickname ? 'filled' : ''}}">
+        <input
+          class="auth-nickname-input"
+          type="nickname"
+          placeholder="点击填写，可直接使用微信昵称"
+          placeholder-class="auth-nickname-placeholder"
+          value="{{nickname}}"
+          bindinput="onNicknameInput"
+          confirm-type="done"
+          maxlength="30"
+        />
+        <view wx:if="{{nickname}}" class="auth-nickname-check">✓</view>
+      </view>
     </view>
-    <view class="auth-hint">点击头像或昵称可更换</view>
   </view>
 
   <view class="auth-bottom">
+    <view class="auth-social-tip">🏆 头像和昵称会显示在群周榜</view>
     <view class="auth-allow-btn {{saving ? 'saving' : ''}}" bindtap="save">
-      {{saving ? '保存中...' : '允许'}}
+      {{saving ? '保存中...' : '完成设置，进入跑团 →'}}
     </view>
-    <view class="auth-skip-btn" bindtap="skip">暂时跳过</view>
+    <view class="auth-skip-btn" bindtap="skip">先跳过，榜单上显示为「匿名」</view>
   </view>
 
 </view>
@@ -39,10 +51,21 @@
 <!-- 普通编辑模式 -->
 <view wx:else class="container">
 
+  <!-- 资料不完整警示 -->
+  <view wx:if="{{!previewUrl || !nickname}}" class="incomplete-banner">
+    <text class="incomplete-icon">⚠️</text>
+    <text class="incomplete-text">完善头像和昵称，才能在周榜上被队友认出</text>
+  </view>
+
   <view class="card avatar-card">
     <button class="avatar-picker-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-      <image class="avatar-preview" src="{{previewUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
-      <view class="avatar-hint">点击更换头像</view>
+      <view class="avatar-wrap">
+        <image class="avatar-preview" src="{{previewUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+        <view class="avatar-camera-overlay">
+          <text class="avatar-camera-icon">📷</text>
+          <text class="avatar-camera-text">更换头像</text>
+        </view>
+      </view>
     </button>
   </view>
 
@@ -51,7 +74,7 @@
     <input
       class="nickname-input"
       type="nickname"
-      placeholder="点击输入，可使用微信昵称"
+      placeholder="点击填写，可直接使用微信昵称"
       placeholder-class="input-placeholder"
       value="{{nickname}}"
       bindinput="onNicknameInput"
