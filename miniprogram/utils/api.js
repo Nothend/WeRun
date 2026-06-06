@@ -85,7 +85,7 @@ function login() {
         request('/api/login', { method: 'POST', data: { code: res.code } })
           .then((data) => {
             getApp_().setAuth(data.token, data.user);
-            resolve(data.user);
+            resolve(data);
           })
           .catch(reject);
       },

@@ -144,6 +144,37 @@ Page({
     }
   },
 
+  deleteAccount() {
+    wx.showModal({
+      title: '注销账号',
+      content: '将永久删除当前账号及所有打卡记录，无法恢复。确认注销？',
+      confirmText: '确认注销',
+      confirmColor: '#ef4444',
+      cancelText: '取消',
+      success: (res) => {
+        if (!res.confirm) return;
+        // 二次确认
+        wx.showModal({
+          title: '再次确认',
+          content: '注销后需重新登录，历史数据将全部清空。',
+          confirmText: '注销',
+          confirmColor: '#ef4444',
+          cancelText: '取消',
+          success: async (res2) => {
+            if (!res2.confirm) return;
+            try {
+              await api.request('/api/account/delete', { method: 'POST' });
+              getApp().clearAuth();
+              wx.reLaunch({ url: '/pages/index/index' });
+            } catch (e) {
+              wx.showToast({ title: e.message || '注销失败', icon: 'none' });
+            }
+          },
+        });
+      },
+    });
+  },
+
   copyOpenid(e) {
     const openid = e.currentTarget.dataset.openid;
     wx.setClipboardData({ data: openid, success: () => wx.showToast({ title: '已复制', icon: 'success' }) });

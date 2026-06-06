@@ -1,3 +1,20 @@
+/* ── 注销账号 ── */
+.danger-card {
+  padding: 32rpx 36rpx;
+  border-color: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.04);
+}
+.danger-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #ef4444;
+  margin-bottom: 8rpx;
+}
+.danger-sub {
+  font-size: 22rpx;
+  color: #7f1d1d;
+}
+
 /* ── 标签页 ── */
 .tabs {
   display: flex;

@@ -27,6 +27,7 @@ app.use('/api', require('./routes/profile'));
 app.use('/api', require('./routes/checkin'));
 app.use('/api', require('./routes/stats'));
 app.use('/api', require('./routes/admin'));
+app.use('/api', require('./routes/account'));
 app.use('/api', require('./routes/share'));
 
 // 404

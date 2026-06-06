@@ -13,7 +13,7 @@
 
   <!-- 个人资料 -->
   <view class="card profile-card">
-    <view class="profile-row" bindtap="openProfileModal">
+    <view class="profile-row" bindtap="openProfilePage">
       <image class="avatar" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
       <view class="profile-info">
         <text class="profile-name">{{nickname || '未设置昵称'}}</text>
@@ -74,37 +74,6 @@
 
 </view>
 
-<!-- 编辑资料蒙层 -->
-<view wx:if="{{showProfileModal}}" class="profile-overlay" bindtap="closeProfileModal">
-  <view class="profile-modal" catchtap="">
-    <view class="profile-modal-title">编辑资料</view>
-
-    <!-- 头像选择 -->
-    <button class="avatar-picker-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-      <image class="avatar-edit" src="{{editAvatarTemp || avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
-      <view class="avatar-edit-hint">点击更换头像</view>
-    </button>
-
-    <!-- 昵称输入（微信原生昵称组件） -->
-    <view class="nickname-input-wrap">
-      <input
-        class="nickname-input"
-        type="nickname"
-        placeholder="输入昵称"
-        placeholder-class="nickname-placeholder"
-        value="{{editNickname}}"
-        bindinput="onNicknameInput"
-        maxlength="30"
-      />
-    </view>
-
-    <!-- 操作按钮 -->
-    <view class="profile-modal-actions">
-      <view class="profile-cancel-btn" bindtap="closeProfileModal">取消</view>
-      <view class="profile-save-btn" bindtap="saveProfile">{{saving ? '保存中...' : '保存'}}</view>
-    </view>
-  </view>
-</view>
 
 <!-- 赞助二维码蒙层 -->
 <view wx:if="{{showSponsor}}" class="sponsor-overlay" bindtap="closeSponsor">

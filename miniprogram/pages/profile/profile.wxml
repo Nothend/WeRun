@@ -1,0 +1,67 @@
+<!-- 授权模式：全屏引导 -->
+<view wx:if="{{authMode}}" class="auth-screen">
+
+  <view class="auth-top">
+    <view class="app-logo">WR</view>
+    <view class="app-name">WeRun</view>
+    <view class="auth-desc">申请获取你的头像和昵称</view>
+  </view>
+
+  <view class="auth-user">
+    <button class="auth-avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+      <image class="auth-avatar" src="{{previewUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+      <view class="auth-avatar-badge">换</view>
+    </button>
+    <view class="auth-nickname-wrap">
+      <input
+        class="auth-nickname-input"
+        type="nickname"
+        placeholder="点击设置昵称"
+        placeholder-class="auth-nickname-placeholder"
+        value="{{nickname}}"
+        bindinput="onNicknameInput"
+        confirm-type="done"
+        maxlength="30"
+      />
+    </view>
+    <view class="auth-hint">点击头像或昵称可更换</view>
+  </view>
+
+  <view class="auth-bottom">
+    <view class="auth-allow-btn {{saving ? 'saving' : ''}}" bindtap="save">
+      {{saving ? '保存中...' : '允许'}}
+    </view>
+    <view class="auth-skip-btn" bindtap="skip">暂时跳过</view>
+  </view>
+
+</view>
+
+<!-- 普通编辑模式 -->
+<view wx:else class="container">
+
+  <view class="card avatar-card">
+    <button class="avatar-picker-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+      <image class="avatar-preview" src="{{previewUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+      <view class="avatar-hint">点击更换头像</view>
+    </button>
+  </view>
+
+  <view class="card input-card">
+    <view class="input-label">昵称</view>
+    <input
+      class="nickname-input"
+      type="nickname"
+      placeholder="点击输入，可使用微信昵称"
+      placeholder-class="input-placeholder"
+      value="{{nickname}}"
+      bindinput="onNicknameInput"
+      confirm-type="done"
+      maxlength="30"
+    />
+  </view>
+
+  <view class="save-btn {{saving ? 'saving' : ''}}" bindtap="save">
+    {{saving ? '保存中...' : '保存资料'}}
+  </view>
+
+</view>

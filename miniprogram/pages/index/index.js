@@ -12,10 +12,6 @@ Page({
     shareText: '',
     shareLoading: false,
     showShareModal: false,
-    showProfileModal: false,
-    editNickname: '',
-    editAvatarTemp: '',
-    saving: false,
   },
 
   onShareAppMessage() {
@@ -39,13 +35,12 @@ Page({
     if (this.data.loggingIn) return;
     this.setData({ loggingIn: true });
     try {
-      const user = await api.login();
+      const { user, isNewUser } = await api.login();
       app.fetchConfig();
       this.setData({ user, avatarUrl: user.avatarUrl, nickname: user.nickname });
       this.loadStats();
-      // 首次登录无昵称，引导完善资料（由用户点击登录按钮触发，非自动弹窗）
-      if (!user.nickname) {
-        this.setData({ showProfileModal: true, editNickname: '', editAvatarTemp: '' });
+      if (isNewUser) {
+        wx.navigateTo({ url: '/pages/profile/profile?mode=auth' });
       }
     } catch (e) {
       wx.showToast({ title: e.message, icon: 'none' });
@@ -89,61 +84,8 @@ Page({
   },
 
   // ── 编辑资料 ───────────────────────────────────────────
-  openProfileModal() {
-    this.setData({ showProfileModal: true, editNickname: this.data.nickname, editAvatarTemp: '' });
-  },
-
-  closeProfileModal() {
-    this.setData({ showProfileModal: false });
-  },
-
-  onChooseAvatar(e) {
-    this.setData({ editAvatarTemp: e.detail.avatarUrl });
-  },
-
-  onNicknameInput(e) {
-    this.setData({ editNickname: e.detail.value });
-  },
-
-  async saveProfile() {
-    if (this.data.saving) return;
-    const { editNickname, editAvatarTemp, nickname } = this.data;
-    const finalNickname = (editNickname || '').trim() || nickname;
-    if (!finalNickname) {
-      wx.showToast({ title: '昵称不能为空', icon: 'none' });
-      return;
-    }
-    this.setData({ saving: true });
-    try {
-      let result;
-      if (editAvatarTemp && editAvatarTemp.startsWith('https://')) {
-        // 微信 chooseAvatar 返回 CDN 地址，直接传给服务端存库，无需上传文件
-        result = await api.request('/api/profile', {
-          method: 'POST',
-          data: { nickname: finalNickname, avatarUrl: editAvatarTemp },
-        });
-      } else if (editAvatarTemp) {
-        // 本地文件路径（兼容旧格式）：文件上传
-        result = await api.upload('/api/profile', editAvatarTemp, {
-          name: 'avatar',
-          formData: { nickname: finalNickname },
-        });
-      } else {
-        result = await api.request('/api/profile', { method: 'POST', data: { nickname: finalNickname } });
-      }
-      app.setUser(result.user);
-      this.setData({
-        user: result.user,
-        nickname: result.user.nickname,
-        avatarUrl: result.user.avatarUrl,
-        showProfileModal: false,
-      });
-      wx.showToast({ title: '保存成功', icon: 'success' });
-    } catch (e) {
-      wx.showToast({ title: e.message || '保存失败', icon: 'none' });
-    } finally {
-      this.setData({ saving: false });
-    }
+  openProfilePage() {
+    wx.navigateTo({ url: '/pages/profile/profile' });
   },
 
   // ── 导航 ──────────────────────────────────────────────

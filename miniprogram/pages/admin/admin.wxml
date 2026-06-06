@@ -63,6 +63,12 @@
       <view wx:if="{{!loading && list.length === 0}}" class="empty muted">暂无成员</view>
     </view>
 
+    <!-- 注销账号 -->
+    <view class="card danger-card" bindtap="deleteAccount">
+      <view class="danger-text">注销账号（永久删除）</view>
+      <view class="danger-sub">删除当前微信账号及全部打卡记录，不可恢复</view>
+    </view>
+
     <!-- 导入说明 -->
     <view class="card hint-card">
       <view class="hint-title">Excel 导入格式说明</view>

@@ -15,22 +15,26 @@ router.post('/login', async (req, res) => {
     const { openid } = await code2session(code);
 
     let user = db.prepare('SELECT * FROM users WHERE openid = ?').get(openid);
+    let isNewUser = false;
     if (!user) {
+      isNewUser = true;
       // 决定是否为首个管理员：env 指定，或库中还没有任何管理员
       const adminCount = db.prepare('SELECT COUNT(*) AS n FROM users WHERE is_admin = 1').get().n;
       const isFirstAdmin =
         (config.bootstrapAdminOpenid && config.bootstrapAdminOpenid === openid) ||
         (!config.bootstrapAdminOpenid && adminCount === 0);
 
+      const defaultNickname = '跑友' + openid.slice(-4);
       db.prepare(
         'INSERT INTO users (openid, nickname, avatar_url, is_admin, created_at) VALUES (?, ?, ?, ?, ?)'
-      ).run(openid, '', '', isFirstAdmin ? 1 : 0, Date.now());
+      ).run(openid, defaultNickname, '', isFirstAdmin ? 1 : 0, Date.now());
       user = db.prepare('SELECT * FROM users WHERE openid = ?').get(openid);
     }
 
     const token = signToken(openid);
     res.json({
       token,
+      isNewUser,
       user: {
         openid: user.openid,
         nickname: user.nickname,

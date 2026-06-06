@@ -1,0 +1,223 @@
+/* ══════════════════════════════════════
+   授权模式（首次登录）
+══════════════════════════════════════ */
+.auth-screen {
+  min-height: 100vh;
+  background: #070d1b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 120rpx 60rpx 100rpx;
+  box-sizing: border-box;
+}
+
+/* 顶部 App 信息 */
+.auth-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+.app-logo {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 32rpx;
+  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  font-weight: 900;
+  color: #0a0f1a;
+  letter-spacing: 2rpx;
+  box-shadow: 0 8rpx 32rpx rgba(34, 211, 238, 0.35);
+  margin-bottom: 8rpx;
+}
+.app-name {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #e2e8f0;
+  letter-spacing: 4rpx;
+}
+.auth-desc {
+  font-size: 26rpx;
+  color: #475569;
+  letter-spacing: 1rpx;
+}
+
+/* 用户信息区 */
+.auth-user {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+}
+.auth-avatar-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  width: 160rpx;
+  height: 160rpx;
+}
+.auth-avatar-btn::after { border: none; }
+.auth-avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  border: 3rpx solid rgba(34, 211, 238, 0.5);
+  box-shadow: 0 0 32rpx rgba(34, 211, 238, 0.2);
+}
+.auth-avatar-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #22d3ee;
+  color: #0a0f1a;
+  font-size: 20rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3rpx solid #070d1b;
+}
+.auth-nickname-wrap {
+  width: 480rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(34, 211, 238, 0.15);
+  border-radius: 20rpx;
+  padding: 0 32rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+}
+.auth-nickname-input {
+  width: 100%;
+  height: 96rpx;
+  font-size: 32rpx;
+  color: #e2e8f0;
+  text-align: center;
+}
+.auth-nickname-placeholder {
+  color: #334155;
+  text-align: center;
+}
+.auth-hint {
+  font-size: 22rpx;
+  color: #334155;
+  letter-spacing: 1rpx;
+}
+
+/* 底部按钮 */
+.auth-bottom {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32rpx;
+}
+.auth-allow-btn {
+  width: 100%;
+  height: 96rpx;
+  line-height: 96rpx;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #0a0f1a;
+  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+  border-radius: 24rpx;
+  box-shadow: 0 6rpx 28rpx rgba(34, 211, 238, 0.35);
+  letter-spacing: 4rpx;
+}
+.auth-allow-btn.saving {
+  opacity: 0.6;
+}
+.auth-skip-btn {
+  font-size: 26rpx;
+  color: #334155;
+  letter-spacing: 1rpx;
+  padding: 12rpx 32rpx;
+}
+
+/* ══════════════════════════════════════
+   普通编辑模式
+══════════════════════════════════════ */
+.container {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 60rpx;
+  box-sizing: border-box;
+  background: #070d1b;
+}
+.card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1rpx solid rgba(34, 211, 238, 0.1);
+  border-radius: 24rpx;
+  margin-bottom: 24rpx;
+}
+.avatar-card {
+  display: flex;
+  justify-content: center;
+  padding: 48rpx 0;
+}
+.avatar-picker-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+}
+.avatar-picker-btn::after { border: none; }
+.avatar-preview {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  border: 3rpx solid rgba(34, 211, 238, 0.4);
+  box-shadow: 0 0 24rpx rgba(34, 211, 238, 0.15);
+}
+.avatar-hint {
+  font-size: 24rpx;
+  color: #22d3ee;
+  letter-spacing: 1rpx;
+}
+.input-card {
+  padding: 0 32rpx;
+}
+.input-label {
+  font-size: 24rpx;
+  color: #475569;
+  padding-top: 28rpx;
+  padding-bottom: 8rpx;
+  letter-spacing: 1rpx;
+}
+.nickname-input {
+  width: 100%;
+  height: 88rpx;
+  font-size: 30rpx;
+  color: #e2e8f0;
+  border-bottom: 1rpx solid rgba(34, 211, 238, 0.1);
+  box-sizing: border-box;
+  padding-bottom: 16rpx;
+}
+.input-placeholder { color: #334155; }
+.save-btn {
+  margin-top: 16rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #0a0f1a;
+  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(34, 211, 238, 0.3);
+  letter-spacing: 2rpx;
+}
+.save-btn.saving { opacity: 0.6; }

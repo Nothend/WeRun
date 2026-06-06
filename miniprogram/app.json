@@ -3,7 +3,8 @@
     "pages/index/index",
     "pages/checkin/checkin",
     "pages/ranking/ranking",
-    "pages/admin/admin"
+    "pages/admin/admin",
+    "pages/profile/profile"
   ],
   "window": {
     "navigationBarBackgroundColor": "#070d1b",
