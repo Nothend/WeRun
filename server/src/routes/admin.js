@@ -147,8 +147,13 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
     `INSERT OR IGNORE INTO checkins (openid, week_key, checkin_date, duration_minutes, created_at)
      VALUES (?, ?, ?, ?, ?)`
   );
+  // 昵称暂时匹配不到现有用户：先存起来，等该成员加入后由管理员手动匹配
+  const insertPending = db.prepare(
+    `INSERT OR IGNORE INTO import_pending (nickname, checkin_date, duration_minutes, week_key, created_at)
+     VALUES (?, ?, ?, ?, ?)`
+  );
 
-  const result = { total: rows.length, matched: 0, inserted: 0, skipped: 0, errors: [] };
+  const result = { total: rows.length, matched: 0, inserted: 0, pending: 0, skipped: 0, errors: [] };
 
   const tx = db.transaction(() => {
     for (const row of rows) {
@@ -156,13 +161,6 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
       const rawDate = row['打卡时间'] || row['日期'] || row['date'] || row['checkin_date'] || '';
 
       if (!nickname || !rawDate) { result.skipped++; continue; }
-
-      const openid = nicknameMap[nickname];
-      if (!openid) {
-        if (result.errors.length < 20) result.errors.push(`未找到用户：${nickname}`);
-        result.skipped++;
-        continue;
-      }
 
       // 解析日期：支持 Date 对象 / "YYYY-MM-DD" / "YYYY/MM/DD"
       let dateStr;
@@ -178,11 +176,20 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
         continue;
       }
 
-      result.matched++;
       const weekKey = weekKeyForDate(dateStr);
-      const info = insert.run(openid, weekKey, dateStr, config.minDurationMinutes, Date.now());
-      if (info.changes) result.inserted++;
-      else result.skipped++; // 当天已有打卡，跳过
+      const openid = nicknameMap[nickname];
+
+      if (openid) {
+        result.matched++;
+        const info = insert.run(openid, weekKey, dateStr, config.minDurationMinutes, Date.now());
+        if (info.changes) result.inserted++;
+        else result.skipped++; // 当天已有打卡，跳过
+      } else {
+        // 该成员尚未加入小程序：暂存，待加入后在「待匹配导入记录」中手动关联
+        const info = insertPending.run(nickname, dateStr, config.minDurationMinutes, weekKey, Date.now());
+        if (info.changes) result.pending++;
+        else result.skipped++;
+      }
     }
   });
 
@@ -192,6 +199,63 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// GET /api/admin/import/pending  按昵称分组的待匹配导入记录
+router.get('/admin/import/pending', (req, res) => {
+  const rows = db
+    .prepare(
+      `SELECT nickname, COUNT(*) AS count,
+              MIN(checkin_date) AS firstDate, MAX(checkin_date) AS lastDate
+         FROM import_pending
+        GROUP BY nickname
+        ORDER BY nickname`
+    )
+    .all();
+  res.json({ list: rows });
+});
+
+// POST /api/admin/import/match  { nickname, openid }  将待匹配记录关联到现有用户并写入打卡
+router.post('/admin/import/match', (req, res) => {
+  const nickname = ((req.body && req.body.nickname) || '').toString().trim();
+  const openid = (req.body && req.body.openid) || '';
+  if (!nickname || !openid) return res.status(400).json({ error: '缺少昵称或目标用户' });
+
+  const user = db.prepare('SELECT openid FROM users WHERE openid = ?').get(openid);
+  if (!user) return res.status(404).json({ error: '用户不存在' });
+
+  const pendingRows = db.prepare('SELECT * FROM import_pending WHERE nickname = ?').all(nickname);
+  if (!pendingRows.length) return res.status(404).json({ error: '没有待匹配的导入记录' });
+
+  const insert = db.prepare(
+    `INSERT OR IGNORE INTO checkins (openid, week_key, checkin_date, duration_minutes, created_at)
+     VALUES (?, ?, ?, ?, ?)`
+  );
+  const clearPending = db.prepare('DELETE FROM import_pending WHERE id = ?');
+
+  let inserted = 0;
+  let skipped = 0;
+  const tx = db.transaction(() => {
+    for (const row of pendingRows) {
+      const info = insert.run(openid, row.week_key, row.checkin_date, row.duration_minutes, Date.now());
+      if (info.changes) inserted++;
+      else skipped++; // 当天已有打卡，跳过
+      clearPending.run(row.id);
+    }
+  });
+  tx();
+
+  res.json({ ok: true, matched: pendingRows.length, inserted, skipped });
+});
+
+// POST /api/admin/import/discard  { nickname }  丢弃某昵称下所有待匹配记录
+router.post('/admin/import/discard', (req, res) => {
+  const nickname = ((req.body && req.body.nickname) || '').toString().trim();
+  if (!nickname) return res.status(400).json({ error: '缺少昵称' });
+
+  const info = db.prepare('DELETE FROM import_pending WHERE nickname = ?').run(nickname);
+  if (!info.changes) return res.status(404).json({ error: '没有待匹配的导入记录' });
+  res.json({ ok: true, deleted: info.changes });
 });
 
 module.exports = router;

@@ -25,6 +25,11 @@ Page({
     showImportResult: false,
     importResult: null,
 
+    // 待匹配导入记录
+    pendingImports: [],
+    matchModal: false,
+    matchTarget: null, // { nickname, count }
+
     // ── 打卡日志 ──
     logs: [],
     logsLoading: false,
@@ -43,6 +48,7 @@ Page({
     }
     this.setData({ myOpenid: user.openid });
     this.load();
+    this.loadPendingImports();
   },
 
   switchTab(e) {
@@ -234,6 +240,7 @@ Page({
           const result = await api.upload('/api/admin/import', file.path, { name: 'excel' });
           this.setData({ importResult: result, showImportResult: true });
           this.load();
+          this.loadPendingImports();
         } catch (e) {
           wx.showToast({ title: e.message || '导入失败', icon: 'none' });
         } finally {
@@ -249,6 +256,72 @@ Page({
 
   closeImportResult() {
     this.setData({ showImportResult: false, importResult: null });
+  },
+
+  // ── 待匹配导入记录 ─────────────────────────────────────────
+  async loadPendingImports() {
+    try {
+      const data = await api.request('/api/admin/import/pending');
+      this.setData({ pendingImports: data.list });
+    } catch (e) {
+      // 静默
+    }
+  },
+
+  openMatchModal(e) {
+    const { nickname, count } = e.currentTarget.dataset;
+    this.setData({ matchModal: true, matchTarget: { nickname, count } });
+  },
+
+  closeMatchModal() {
+    this.setData({ matchModal: false, matchTarget: null });
+  },
+
+  pickMatchUser(e) {
+    const { openid, nickname: userNickname } = e.currentTarget.dataset;
+    const { nickname: importNickname, count } = this.data.matchTarget;
+    wx.showModal({
+      title: '确认匹配',
+      content: `将「${importNickname}」的 ${count} 条导入记录关联到「${userNickname}」？`,
+      success: (res) => {
+        if (!res.confirm) return;
+        this._doMatch(importNickname, openid);
+      },
+    });
+  },
+
+  async _doMatch(nickname, openid) {
+    try {
+      const result = await api.request('/api/admin/import/match', {
+        method: 'POST',
+        data: { nickname, openid },
+      });
+      wx.showToast({ title: `已匹配 ${result.inserted} 条`, icon: 'success' });
+      this.closeMatchModal();
+      this.loadPendingImports();
+      this.load();
+    } catch (err) {
+      wx.showToast({ title: err.message, icon: 'none' });
+    }
+  },
+
+  discardPending(e) {
+    const { nickname, count } = e.currentTarget.dataset;
+    wx.showModal({
+      title: '丢弃记录',
+      content: `确定丢弃「${nickname}」的 ${count} 条待匹配记录吗？此操作不可恢复。`,
+      confirmColor: '#fa5151',
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await api.request('/api/admin/import/discard', { method: 'POST', data: { nickname } });
+          wx.showToast({ title: '已丢弃', icon: 'success' });
+          this.loadPendingImports();
+        } catch (err) {
+          wx.showToast({ title: err.message, icon: 'none' });
+        }
+      },
+    });
   },
 
   // ── 打卡日志 ──────────────────────────────────────────────

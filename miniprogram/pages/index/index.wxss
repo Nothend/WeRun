@@ -318,6 +318,7 @@
   color: #475569;
   margin-top: 24rpx;
   letter-spacing: 2rpx;
+  line-height: 1.6;
 }
 .sponsor-close {
   margin-top: 36rpx;

@@ -15,5 +15,14 @@
     "backgroundColorBottom": "#070d1b"
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "supportedMaterials": [
+    {
+      "materialType": "image/*",
+      "name": "用${nickname}打卡",
+      "desc": "自动识别截图时长并打卡",
+      "path": "pages/checkin/checkin"
+    }
+  ]
 }

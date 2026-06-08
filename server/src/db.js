@@ -30,6 +30,17 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_checkins_week ON checkins(week_key);
   CREATE INDEX IF NOT EXISTS idx_checkins_openid ON checkins(openid);
+
+  -- Excel 导入时未能匹配到现有用户的记录，等待新成员加入后由管理员手动匹配
+  CREATE TABLE IF NOT EXISTS import_pending (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    nickname         TEXT NOT NULL,
+    checkin_date     TEXT NOT NULL,
+    duration_minutes REAL NOT NULL,
+    week_key         TEXT NOT NULL,
+    created_at       INTEGER NOT NULL,
+    UNIQUE(nickname, checkin_date)
+  );
 `);
 
 // 增量迁移：新增列（ALTER TABLE ADD COLUMN 不会破坏已有数据）

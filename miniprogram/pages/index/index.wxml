@@ -80,7 +80,10 @@
   <view class="sponsor-modal" catchtap="">
     <view class="sponsor-title">请作者喝杯咖啡 ☕</view>
     <image class="sponsor-qr" src="{{sponsorQrUrl}}" mode="aspectFit" show-menu-by-longpress="true"/>
-    <view class="sponsor-hint">长按图片识别二维码</view>
+    <view class="sponsor-hint">
+      <view>受微信小程序限制，无法长按识别</view>
+      <view>请先保存图片，再到微信「扫一扫」选择相册识别</view>
+    </view>
     <view class="sponsor-close" bindtap="closeSponsor">关闭</view>
   </view>
 </view>

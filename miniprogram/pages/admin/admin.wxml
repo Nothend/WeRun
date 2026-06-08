@@ -77,6 +77,24 @@
       <view class="hint-row muted">需先将 Excel 文件发到微信聊天，再点「导入数据」从文件中选取</view>
     </view>
 
+    <!-- 待匹配导入记录：导入时尚未加入小程序的成员 -->
+    <view wx:if="{{pendingImports.length > 0}}" class="card pending-card">
+      <view class="header-title">待匹配导入记录</view>
+      <view class="hint-row muted" style="margin-top:8rpx">这些昵称导入时尚未加入小程序，待其登录后可关联到对应成员</view>
+      <view wx:for="{{pendingImports}}" wx:key="nickname" class="pending-row">
+        <view class="pending-info">
+          <text class="name">{{item.nickname}}</text>
+          <view class="muted pending-meta">{{item.count}} 条 · {{item.firstDate}} ~ {{item.lastDate}}</view>
+        </view>
+        <view class="ops">
+          <button size="mini" class="op-btn rename-btn"
+                  data-nickname="{{item.nickname}}" data-count="{{item.count}}" bindtap="openMatchModal">匹配</button>
+          <button size="mini" class="op-btn danger"
+                  data-nickname="{{item.nickname}}" data-count="{{item.count}}" bindtap="discardPending">丢弃</button>
+        </view>
+      </view>
+    </view>
+
   </block>
 
   <!-- ══════════════════ 打卡日志 tab ══════════════════ -->
@@ -149,14 +167,39 @@
       <text class="result-lbl">成功插入</text>
       <text class="result-val green">{{importResult.inserted}} 条</text>
     </view>
+    <view wx:if="{{importResult.pending > 0}}" class="result-row">
+      <text class="result-lbl">待匹配（成员未加入）</text>
+      <text class="result-val">{{importResult.pending}} 条</text>
+    </view>
     <view class="result-row">
       <text class="result-lbl">已跳过</text>
       <text class="result-val">{{importResult.skipped}} 条</text>
     </view>
+    <view wx:if="{{importResult.pending > 0}}" class="muted" style="font-size:22rpx;margin-top:16rpx;line-height:1.6">
+      未匹配到现有成员的记录已暂存，可在「待匹配导入记录」中等成员加入后手动关联
+    </view>
     <view wx:if="{{importResult.errors.length > 0}}" class="result-errors">
-      <view class="result-err-title muted">未匹配用户：</view>
+      <view class="result-err-title muted">格式错误：</view>
       <view wx:for="{{importResult.errors}}" wx:key="index" class="result-err-item">{{item}}</view>
     </view>
     <view class="modal-btn-confirm" style="margin-top:28rpx;text-align:center" bindtap="closeImportResult">关闭</view>
+  </view>
+</view>
+
+<!-- 匹配用户弹窗 -->
+<view wx:if="{{matchModal}}" class="modal-overlay" catchtap="closeMatchModal">
+  <view class="modal-box" catchtap="">
+    <view class="modal-title">匹配用户</view>
+    <view class="modal-cur muted">将「{{matchTarget.nickname}}」的 {{matchTarget.count}} 条记录关联到：</view>
+    <scroll-view scroll-y class="match-list">
+      <view wx:for="{{list}}" wx:key="openid" class="match-row"
+            data-openid="{{item.openid}}" data-nickname="{{item.nickname}}" bindtap="pickMatchUser">
+        <image class="avatar" src="{{item.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+        <text class="name">{{item.nickname || '未设昵称'}}</text>
+      </view>
+    </scroll-view>
+    <view class="modal-btns">
+      <view class="modal-btn-cancel" bindtap="closeMatchModal">取消</view>
+    </view>
   </view>
 </view>
