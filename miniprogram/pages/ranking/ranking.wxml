@@ -1,52 +1,82 @@
-<view class="container">
-  <!-- 本周概览 -->
-  <view wx:if="{{data}}" class="card summary-card">
-    <view class="week-label">{{data.weekKey}}</view>
-    <view class="summary-row">
-      <view class="summary-item">
-        <text class="summary-num">{{data.achievedCount}}</text>
-        <text class="summary-sub">已达标</text>
-      </view>
-      <view class="summary-sep"></view>
-      <view class="summary-item">
-        <text class="summary-num">{{data.total}}</text>
-        <text class="summary-sub">总人数</text>
-      </view>
-      <view class="summary-sep"></view>
-      <view class="summary-item">
-        <text class="summary-num">≥ {{data.target}}</text>
-        <text class="summary-sub">达标次数</text>
-      </view>
-    </view>
-    <!-- 管理员：分享群总览 -->
-    <view wx:if="{{isAdmin}}" class="share-group-btn {{shareGroupLoading ? 'btn-loading' : ''}}"
-          bindtap="openGroupShareModal">
-      {{shareGroupLoading ? '生成中…' : '📤 分享群总览'}}
+<view class="page">
+  <!-- 顶部标签栏 -->
+  <view class="tabs">
+    <view wx:for="{{boards}}" wx:key="key"
+          class="tab {{current === index ? 'tab-active' : ''}}"
+          data-index="{{index}}" bindtap="onTapTab">
+      {{item.label}}
     </view>
   </view>
 
-  <!-- 排行榜 -->
-  <view wx:if="{{data}}" class="card list-card">
-    <view wx:for="{{data.list}}" wx:key="openid"
-          class="row {{index < 3 ? 'top-row' : ''}}">
-      <view class="rank-cell">
-        <text wx:if="{{index === 0}}" class="medal">🥇</text>
-        <text wx:elif="{{index === 1}}" class="medal">🥈</text>
-        <text wx:elif="{{index === 2}}" class="medal">🥉</text>
-        <text wx:else class="rank-num">{{index + 1}}</text>
-      </view>
-      <image class="avatar" src="{{item.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
-      <view class="name">{{item.nickname || '未设昵称'}}</view>
-      <view class="count-cell">
-        <text class="count {{item.achieved ? 'achieved' : ''}}">{{item.weekCount}}</text>
-        <text class="count-unit muted">次</text>
-        <view wx:if="{{item.achieved}}" class="badge">达标</view>
-      </view>
-    </view>
-    <view wx:if="{{data.list.length === 0}}" class="empty">
-      还没有成员，快去打卡吧～
-    </view>
-  </view>
+  <!-- 榜单滑动区 -->
+  <swiper wx:if="{{boards.length}}" class="boards"
+          style="height: {{swiperHeight ? swiperHeight + 'px' : '80vh'}}"
+          current="{{current}}" bindchange="onSwiperChange">
+    <swiper-item wx:for="{{boards}}" wx:key="key" wx:for-item="board" wx:for-index="bIdx">
+      <scroll-view scroll-y class="board-scroll">
+        <!-- 前三名奖牌 -->
+        <view class="podium" wx:if="{{board.top3.length}}">
+          <!-- 第二名 -->
+          <view class="podium-slot slot-2" wx:if="{{board.top3[1]}}">
+            <image class="podium-avatar avatar-2" src="{{board.top3[1].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+            <text class="podium-medal">🥈</text>
+            <view class="podium-name">{{board.top3[1].nickname}}</view>
+            <view class="podium-count {{board.top3[1].achieved ? 'achieved' : ''}}">{{board.top3[1].count}} 次</view>
+          </view>
+          <!-- 第一名 -->
+          <view class="podium-slot slot-1" wx:if="{{board.top3[0]}}">
+            <text class="crown">👑</text>
+            <image class="podium-avatar avatar-1" src="{{board.top3[0].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+            <text class="podium-medal">🥇</text>
+            <view class="podium-name">{{board.top3[0].nickname}}</view>
+            <view class="podium-count {{board.top3[0].achieved ? 'achieved' : ''}}">{{board.top3[0].count}} 次</view>
+          </view>
+          <!-- 第三名 -->
+          <view class="podium-slot slot-3" wx:if="{{board.top3[2]}}">
+            <image class="podium-avatar avatar-3" src="{{board.top3[2].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+            <text class="podium-medal">🥉</text>
+            <view class="podium-name">{{board.top3[2].nickname}}</view>
+            <view class="podium-count {{board.top3[2].achieved ? 'achieved' : ''}}">{{board.top3[2].count}} 次</view>
+          </view>
+        </view>
+
+        <!-- 第四名起列表 -->
+        <view class="list-card" wx:if="{{board.rest.length}}">
+          <view wx:for="{{board.visibleRest}}" wx:key="openid" wx:for-item="row" class="row">
+            <view class="rank-num">{{row.rank}}</view>
+            <image class="avatar" src="{{row.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+            <view class="name">{{row.nickname}}</view>
+            <view class="count-cell">
+              <text class="count {{row.achieved ? 'achieved' : ''}}">{{row.count}}</text>
+              <text class="count-unit muted">次</text>
+              <view wx:if="{{row.achieved}}" class="badge">达标</view>
+            </view>
+          </view>
+
+          <!-- 分页器 -->
+          <view class="pager" wx:if="{{board.totalPages > 1}}">
+            <view class="pager-btn {{board.page === 0 ? 'disabled' : ''}}"
+                  data-index="{{bIdx}}" bindtap="onPrevPage">上一页</view>
+            <text class="pager-info">{{board.page + 1}} / {{board.totalPages}}</text>
+            <view class="pager-btn {{board.page >= board.totalPages - 1 ? 'disabled' : ''}}"
+                  data-index="{{bIdx}}" bindtap="onNextPage">下一页</view>
+          </view>
+        </view>
+
+        <!-- 空态 -->
+        <view wx:if="{{board.total === 0}}" class="empty">本榜暂无数据，快去打卡吧～</view>
+
+        <!-- 管理员：分享群总览（仅本周榜显示） -->
+        <view wx:if="{{isAdmin && board.key === 'thisWeek'}}"
+              class="share-group-btn {{shareGroupLoading ? 'btn-loading' : ''}}"
+              bindtap="openGroupShareModal">
+          {{shareGroupLoading ? '生成中…' : '📤 分享群总览'}}
+        </view>
+
+        <view class="scroll-bottom"></view>
+      </scroll-view>
+    </swiper-item>
+  </swiper>
 
   <view wx:if="{{loading}}" class="loading muted">加载中...</view>
 </view>

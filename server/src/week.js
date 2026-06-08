@@ -32,4 +32,35 @@ function weekKeyForDate(dateStr) {
   return `${year}-W${String(week).padStart(2, '0')}`;
 }
 
-module.exports = { currentWeekKey, localDateStr, weekKeyForDate };
+// 上一周的 week_key（取 7 天前那天所属的 ISO 周）
+function lastWeekKey(now = new Date()) {
+  const d = new Date(now);
+  d.setDate(d.getDate() - 7);
+  return currentWeekKey(d);
+}
+
+// 本月前缀 "YYYY-MM"（用于按 checkin_date LIKE 'YYYY-MM%' 过滤）
+function currentMonthStr(now = new Date()) {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// 上月前缀 "YYYY-MM"
+function lastMonthStr(now = new Date()) {
+  const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// 本年前缀 "YYYY"
+function currentYearStr(now = new Date()) {
+  return String(now.getFullYear());
+}
+
+module.exports = {
+  currentWeekKey,
+  localDateStr,
+  weekKeyForDate,
+  lastWeekKey,
+  currentMonthStr,
+  lastMonthStr,
+  currentYearStr,
+};

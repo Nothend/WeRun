@@ -1,82 +1,162 @@
-/* ── 概览卡 ── */
-.summary-card {
-  text-align: center;
-  padding: 40rpx;
+/* ── 页面 ── */
+.page {
+  display: flex;
+  flex-direction: column;
 }
-.week-label {
-  font-size: 24rpx;
-  font-weight: 600;
-  color: #22d3ee;
-  letter-spacing: 3rpx;
-  margin-bottom: 32rpx;
+
+/* ── 顶部标签栏 ── */
+.tabs {
+  display: flex;
+  height: 96rpx;
+  align-items: stretch;
+  background: #0b1626;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
-.summary-row {
+.tab {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 26rpx;
+  color: #475569;
+  position: relative;
+  letter-spacing: 1rpx;
 }
-.summary-item {
-  flex: 1;
+.tab-active {
+  color: #22d3ee;
+  font-weight: 600;
+}
+.tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 4rpx;
+  border-radius: 4rpx;
+  background: #22d3ee;
+}
+
+/* ── 榜单滑动区 ── */
+.boards {
+  width: 100%;
+}
+.board-scroll {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* ── 前三名领奖台 ── */
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 24rpx;
+  padding: 56rpx 32rpx 40rpx;
+}
+.podium-slot {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8rpx;
+  flex: 1;
+  max-width: 200rpx;
+  position: relative;
 }
-.summary-num {
-  font-size: 44rpx;
+.slot-1 {
+  order: 2;
+  transform: translateY(-20rpx);
+}
+.slot-2 {
+  order: 1;
+}
+.slot-3 {
+  order: 3;
+}
+.crown {
+  font-size: 40rpx;
+  line-height: 1;
+  margin-bottom: 4rpx;
+}
+.podium-avatar {
+  border-radius: 50%;
+  background: #1a2942;
+  border: 3rpx solid rgba(255, 255, 255, 0.08);
+}
+.avatar-1 {
+  width: 132rpx;
+  height: 132rpx;
+  border-color: rgba(250, 204, 21, 0.6);
+}
+.avatar-2 {
+  width: 108rpx;
+  height: 108rpx;
+  border-color: rgba(203, 213, 225, 0.5);
+}
+.avatar-3 {
+  width: 108rpx;
+  height: 108rpx;
+  border-color: rgba(217, 119, 6, 0.5);
+}
+.podium-medal {
+  font-size: 40rpx;
+  line-height: 1;
+  margin-top: -24rpx;
+  margin-bottom: 8rpx;
+}
+.podium-name {
+  font-size: 26rpx;
+  color: #cbd5e1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+.podium-count {
+  font-size: 24rpx;
   font-weight: 700;
-  color: #e2e8f0;
-  letter-spacing: -1rpx;
+  color: #64748b;
+  margin-top: 6rpx;
 }
-.summary-sub {
-  font-size: 22rpx;
-  color: #334155;
-  letter-spacing: 1rpx;
-}
-.summary-sep {
-  width: 1rpx;
-  height: 56rpx;
-  background: rgba(255, 255, 255, 0.06);
-  margin: 0 8rpx;
+.podium-count.achieved {
+  color: #4ade80;
 }
 
-/* ── 列表卡 ── */
+/* ── 第四名起列表 ── */
 .list-card {
-  padding: 0;
+  margin: 0 24rpx;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1rpx solid rgba(255, 255, 255, 0.05);
+  border-radius: 20rpx;
   overflow: hidden;
 }
 .row {
   display: flex;
   align-items: center;
-  padding: 24rpx 40rpx;
+  padding: 22rpx 28rpx;
 }
 .row + .row {
   border-top: 1rpx solid rgba(255, 255, 255, 0.04);
 }
-.top-row {
-  background: rgba(34, 211, 238, 0.02);
-}
-.rank-cell {
-  width: 60rpx;
+.rank-num {
+  width: 52rpx;
   text-align: center;
   flex-shrink: 0;
   margin-right: 12rpx;
-}
-.medal {
-  font-size: 36rpx;
-  line-height: 1;
-}
-.rank-num {
   font-size: 26rpx;
-  color: #2d3e56;
+  color: #475569;
   font-weight: 600;
 }
 .avatar {
-  width: 72rpx;
-  height: 72rpx;
+  width: 68rpx;
+  height: 68rpx;
   border-radius: 50%;
   background: #1a2942;
-  margin-right: 20rpx;
+  margin-right: 18rpx;
   flex-shrink: 0;
 }
 .name {
@@ -95,7 +175,7 @@
   flex-shrink: 0;
 }
 .count {
-  font-size: 34rpx;
+  font-size: 32rpx;
   font-weight: 700;
   color: #2d3e56;
 }
@@ -115,9 +195,39 @@
   border-radius: 6rpx;
   padding: 2rpx 12rpx;
 }
+
+/* ── 分页器 ── */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32rpx;
+  padding: 28rpx 0;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.04);
+}
+.pager-btn {
+  font-size: 24rpx;
+  color: #22d3ee;
+  padding: 10rpx 28rpx;
+  border: 1rpx solid rgba(34, 211, 238, 0.25);
+  border-radius: 12rpx;
+  background: rgba(34, 211, 238, 0.06);
+}
+.pager-btn.disabled {
+  color: #334155;
+  border-color: rgba(255, 255, 255, 0.05);
+  background: transparent;
+}
+.pager-info {
+  font-size: 24rpx;
+  color: #64748b;
+  letter-spacing: 1rpx;
+}
+
+/* ── 空态 / 加载 ── */
 .empty {
   text-align: center;
-  padding: 72rpx 0;
+  padding: 96rpx 0;
   color: #2d3e56;
   font-size: 26rpx;
 }
@@ -125,10 +235,13 @@
   text-align: center;
   padding: 48rpx 0;
 }
+.scroll-bottom {
+  height: 48rpx;
+}
 
 /* ── 分享群总览按钮 ── */
 .share-group-btn {
-  margin-top: 32rpx;
+  margin: 32rpx 24rpx 0;
   height: 64rpx;
   line-height: 64rpx;
   text-align: center;
