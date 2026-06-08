@@ -1,8 +1,5 @@
 const api = require('../../utils/api');
-const config = require('../../config');
 const app = getApp();
-
-const SPONSOR_QR_URL = config.baseUrl + '/public/wechatpay.png?v=2';
 
 Page({
   data: {
@@ -11,8 +8,6 @@ Page({
     avatarUrl: '',
     nickname: '',
     stats: null,
-    showSponsor: false,
-    sponsorQrUrl: SPONSOR_QR_URL,
     shareText: '',
     shareLoading: false,
     showShareModal: false,
@@ -35,8 +30,9 @@ Page({
     if (user) this.loadStats();
   },
 
-  async handleLogin() {
-    if (this.data.loggingIn) return;
+  // 实际执行登录，不带确认弹窗（用于用户主动点击「微信登录」）
+  async doLogin() {
+    if (this.data.loggingIn) return false;
     this.setData({ loggingIn: true });
     try {
       const { user, isNewUser } = await api.login();
@@ -46,11 +42,35 @@ Page({
       if (isNewUser) {
         wx.navigateTo({ url: '/pages/profile/profile?mode=auth' });
       }
+      return true;
     } catch (e) {
       wx.showToast({ title: e.message, icon: 'none' });
+      return false;
     } finally {
       this.setData({ loggingIn: false });
     }
+  },
+
+  handleLogin() {
+    this.doLogin();
+  },
+
+  // 进入需要登录的功能前先征求同意，用户可选择暂不登录
+  requireLogin(content) {
+    if (this.data.user) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      wx.showModal({
+        title: '需要登录',
+        content,
+        confirmText: '去登录',
+        cancelText: '暂不',
+        success: async (res) => {
+          if (!res.confirm) { resolve(false); return; }
+          resolve(await this.doLogin());
+        },
+        fail: () => resolve(false),
+      });
+    });
   },
 
   async loadStats() {
@@ -64,7 +84,8 @@ Page({
 
   // ── 分享 ──────────────────────────────────────────────
   async openShareModal() {
-    if (this.data.shareLoading) return;
+    const ok = await this.requireLogin('分享运动数据需要先登录微信账号，是否登录？');
+    if (!ok || this.data.shareLoading) return;
     this.setData({ shareLoading: true });
     try {
       const data = await api.request('/api/share/me');
@@ -87,9 +108,13 @@ Page({
     });
   },
 
-  // ── 编辑资料 ───────────────────────────────────────────
-  openProfilePage() {
-    wx.navigateTo({ url: '/pages/profile/profile' });
+  // ── 个人资料 ───────────────────────────────────────────
+  onProfileTap() {
+    if (this.data.user) {
+      wx.navigateTo({ url: '/pages/profile/profile' });
+    } else {
+      this.handleLogin();
+    }
   },
 
   // ── 导航 ──────────────────────────────────────────────
@@ -108,7 +133,9 @@ Page({
     });
   },
 
-  goCheckin() {
+  async goCheckin() {
+    const ok = await this.requireLogin('打卡需要先登录微信账号，是否登录？');
+    if (!ok) return;
     wx.navigateTo({ url: '/pages/checkin/checkin' });
   },
   goRanking() {
@@ -116,11 +143,5 @@ Page({
   },
   goAdmin() {
     wx.navigateTo({ url: '/pages/admin/admin' });
-  },
-  openSponsor() {
-    this.setData({ showSponsor: true });
-  },
-  closeSponsor() {
-    this.setData({ showSponsor: false });
   },
 });

@@ -6,6 +6,8 @@ const PAGE_SIZE = 10;
 Page({
   data: {
     loading: true,
+    loggedIn: false,
+    loggingIn: false,
     target: 3,
     boards: [], // 视图用榜单（含 top3 / 分页后的 rest）
     current: 0, // 当前 swiper 下标
@@ -38,8 +40,29 @@ Page({
 
   onShow() {
     const user = app.globalData.user;
-    this.setData({ isAdmin: !!(user && user.isAdmin) });
-    this.load();
+    this.setData({ isAdmin: !!(user && user.isAdmin), loggedIn: !!user });
+    if (user) {
+      this.load();
+    } else {
+      this.setData({ loading: false, boards: [] });
+    }
+  },
+
+  // 未登录时点击登录，仅在用户主动选择时才发起微信登录
+  async goLogin() {
+    if (this.data.loggingIn) return;
+    this.setData({ loggingIn: true });
+    try {
+      await api.login();
+      app.fetchConfig();
+      const user = app.globalData.user;
+      this.setData({ loggedIn: !!user, isAdmin: !!(user && user.isAdmin) });
+      this.load();
+    } catch (e) {
+      wx.showToast({ title: e.message, icon: 'none' });
+    } finally {
+      this.setData({ loggingIn: false });
+    }
   },
 
   async load() {

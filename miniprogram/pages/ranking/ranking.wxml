@@ -1,4 +1,15 @@
 <view class="page">
+
+  <!-- 未登录：仅展示功能概览，登录后查看完整数据 -->
+  <view wx:if="{{!loggedIn}}" class="guest-tip">
+    <view class="guest-icon">🏆</view>
+    <view class="guest-title">排行榜</view>
+    <view class="guest-desc">登录后可查看本周 / 本月 / 总榜等完整排行数据</view>
+    <button class="btn-primary guest-login-btn" loading="{{loggingIn}}" bindtap="goLogin">微信登录</button>
+  </view>
+
+  <!-- 已登录：完整榜单 -->
+  <block wx:if="{{loggedIn}}">
   <!-- 顶部标签栏 -->
   <view class="tabs">
     <view wx:for="{{boards}}" wx:key="key"
@@ -79,6 +90,7 @@
   </swiper>
 
   <view wx:if="{{loading}}" class="loading muted">加载中...</view>
+  </block>
 </view>
 
 <!-- 群总览分享弹窗 -->

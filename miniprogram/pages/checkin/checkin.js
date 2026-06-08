@@ -95,6 +95,12 @@ Page({
       return;
     }
     if (this.data.submitting) return;
+
+    if (!app.globalData.user) {
+      const loggedIn = await this.ensureLogin();
+      if (!loggedIn) return;
+    }
+
     this.setData({ submitting: true, result: null });
     wx.showLoading({ title: '识别中...' });
     try {

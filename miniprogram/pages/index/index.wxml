@@ -1,24 +1,14 @@
-<!-- 未登录 -->
-<view wx:if="{{!user}}" class="login-screen">
-  <view class="login-icon">⚡</view>
-  <view class="login-title">WeRun</view>
-  <view class="login-desc">微信跑步群打卡</view>
-  <button class="btn-primary login-btn" loading="{{loggingIn}}" bindtap="handleLogin">
-    微信登录
-  </button>
-</view>
-
-<!-- 已登录 -->
-<view wx:if="{{user}}" class="container">
+<view class="container">
 
   <!-- 个人资料 -->
   <view class="card profile-card">
-    <view class="profile-row" bindtap="openProfilePage">
+    <view class="profile-row" bindtap="onProfileTap">
       <image class="avatar" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
       <view class="profile-info">
-        <text class="profile-name">{{nickname || '未设置昵称'}}</text>
-        <text class="profile-sub">跑团成员 · 点击编辑资料</text>
+        <text class="profile-name">{{user ? (nickname || '未设置昵称') : '未登录'}}</text>
+        <text class="profile-sub">{{user ? '跑团成员 · 点击编辑资料' : '点击微信登录，解锁打卡与个人数据'}}</text>
       </view>
+      <text wx:if="{{!user}}" class="profile-login-badge" hover-class="action-hover">{{loggingIn ? '登录中…' : '去登录'}}</text>
     </view>
     <view class="profile-stats">
       <view class="pstat-item">
@@ -45,14 +35,9 @@
 
   <!-- 快速入口 -->
   <view class="card actions-card">
-    <view class="action-item sponsor-item" hover-class="action-hover" hover-stay-time="150" bindtap="openSponsor">
-      <view class="action-icon-wrap">☕</view>
-      <text class="action-text sponsor-text">支持作者</text>
-      <text class="action-chevron">›</text>
-    </view>
     <view class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goRanking">
       <view class="action-icon-wrap">🏆</view>
-      <text class="action-text">查看群周榜</text>
+      <text class="action-text">查看排行榜</text>
       <text class="action-chevron">›</text>
     </view>
     <view class="action-item" hover-class="action-hover" hover-stay-time="150" loading="{{shareLoading}}" bindtap="openShareModal">
@@ -65,27 +50,18 @@
       <text class="action-text">后台管理</text>
       <text class="action-chevron">›</text>
     </view>
-    <view class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="handleLogout">
+    <view wx:if="{{user}}" class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="handleLogout">
       <view class="action-icon-wrap">🚪</view>
       <text class="action-text logout-text">退出登录</text>
       <text class="action-chevron">›</text>
     </view>
-  </view>
-
-</view>
-
-
-<!-- 赞助二维码蒙层 -->
-<view wx:if="{{showSponsor}}" class="sponsor-overlay" bindtap="closeSponsor">
-  <view class="sponsor-modal" catchtap="">
-    <view class="sponsor-title">请作者喝杯咖啡 ☕</view>
-    <image class="sponsor-qr" src="{{sponsorQrUrl}}" mode="aspectFit" show-menu-by-longpress="true"/>
-    <view class="sponsor-hint">
-      <view>受微信小程序限制，无法长按识别</view>
-      <view>请先保存图片，再到微信「扫一扫」选择相册识别</view>
+    <view wx:if="{{!user}}" class="action-item" hover-class="action-hover" hover-stay-time="150" loading="{{loggingIn}}" bindtap="handleLogin">
+      <view class="action-icon-wrap">👤</view>
+      <text class="action-text">微信登录</text>
+      <text class="action-chevron">›</text>
     </view>
-    <view class="sponsor-close" bindtap="closeSponsor">关闭</view>
   </view>
+
 </view>
 
 <!-- 分享运动数据蒙层 -->
