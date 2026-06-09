@@ -12,7 +12,7 @@ const xlsUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 
 // 所有 /api/admin/* 都需要登录 + 管理员
 router.use(authRequired, adminRequired);
 
-// GET /api/admin/users  用户列表（含本周次数）
+// GET /api/admin/users  已通过成员列表（含本周次数）
 router.get('/admin/users', (req, res) => {
   const rows = db
     .prepare(
@@ -20,6 +20,7 @@ router.get('/admin/users', (req, res) => {
               u.notify_checkin AS notifyCheckin, u.created_at AS createdAt,
               (SELECT COUNT(*) FROM checkins c WHERE c.openid = u.openid) AS totalCheckins
          FROM users u
+        WHERE u.status = 'active'
         ORDER BY u.is_admin DESC, u.created_at ASC`
     )
     .all();
@@ -34,6 +35,36 @@ router.get('/admin/users', (req, res) => {
       createdAt: r.createdAt,
     })),
   });
+});
+
+// GET /api/admin/applications  待审核的加入申请
+router.get('/admin/applications', (req, res) => {
+  const rows = db
+    .prepare(
+      `SELECT openid, nickname, avatar_url AS avatarUrl, created_at AS createdAt
+         FROM users
+        WHERE status = 'pending'
+        ORDER BY created_at ASC`
+    )
+    .all();
+  res.json({
+    list: rows.map((r) => ({
+      openid: r.openid,
+      nickname: r.nickname || '',
+      avatarUrl: r.avatarUrl || '',
+      createdAt: r.createdAt,
+    })),
+  });
+});
+
+// POST /api/admin/users/:openid/approve  审核通过申请
+router.post('/admin/users/:openid/approve', (req, res) => {
+  const target = req.params.openid;
+  const user = db.prepare('SELECT * FROM users WHERE openid = ?').get(target);
+  if (!user) return res.status(404).json({ error: '用户不存在' });
+  if (user.status !== 'pending') return res.status(400).json({ error: '该用户不是待审核状态' });
+  db.prepare("UPDATE users SET status = 'active' WHERE openid = ?").run(target);
+  res.json({ ok: true });
 });
 
 // POST /api/admin/users/:openid/kick  踢出用户（删用户 + 其打卡记录）

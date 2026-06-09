@@ -53,5 +53,8 @@ const userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name)
 if (!userCols.includes('notify_checkin')) {
   db.exec('ALTER TABLE users ADD COLUMN notify_checkin INTEGER NOT NULL DEFAULT 0');
 }
+if (!userCols.includes('status')) {
+  db.exec("ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
+}
 
 module.exports = db;

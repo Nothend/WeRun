@@ -1,3 +1,27 @@
+/* ── 待审核锁定状态 ── */
+.pending-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 160rpx 60rpx;
+  gap: 28rpx;
+}
+.pending-state-icon {
+  font-size: 80rpx;
+}
+.pending-state-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #94a3b8;
+}
+.pending-state-desc {
+  font-size: 26rpx;
+  color: #475569;
+  text-align: center;
+  line-height: 1.6;
+}
+
 /* ── 上传区 ── */
 .upload-zone {
   width: 100%;

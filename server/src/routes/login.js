@@ -25,9 +25,10 @@ router.post('/login', async (req, res) => {
         (!config.bootstrapAdminOpenid && adminCount === 0);
 
       const defaultNickname = '跑友' + openid.slice(-4);
+      const newStatus = isFirstAdmin ? 'active' : 'pending';
       db.prepare(
-        'INSERT INTO users (openid, nickname, avatar_url, is_admin, created_at) VALUES (?, ?, ?, ?, ?)'
-      ).run(openid, defaultNickname, '', isFirstAdmin ? 1 : 0, Date.now());
+        'INSERT INTO users (openid, nickname, avatar_url, is_admin, status, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+      ).run(openid, defaultNickname, '', isFirstAdmin ? 1 : 0, newStatus, Date.now());
       user = db.prepare('SELECT * FROM users WHERE openid = ?').get(openid);
     }
 
@@ -40,6 +41,7 @@ router.post('/login', async (req, res) => {
         nickname: user.nickname,
         avatarUrl: user.avatar_url,
         isAdmin: !!user.is_admin,
+        status: user.status || 'active',
       },
     });
   } catch (e) {

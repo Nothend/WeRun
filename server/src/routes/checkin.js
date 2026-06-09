@@ -3,7 +3,7 @@ const express = require('express');
 const multer = require('multer');
 const db = require('../db');
 const config = require('../config');
-const { authRequired } = require('../auth');
+const { authRequired, activeRequired } = require('../auth');
 const { recognizeDuration } = require('../qwen');
 const { sendCheckinNotify } = require('../wechat');
 const { currentWeekKey, localDateStr } = require('../week');
@@ -42,7 +42,7 @@ async function notifyAdmins(checkerOpenid, durationMinutes, weekCount) {
 }
 
 // POST /api/checkin  multipart: image(file)
-router.post('/checkin', authRequired, upload.single('image'), async (req, res) => {
+router.post('/checkin', authRequired, activeRequired, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: '缺少图片' });
 
@@ -137,7 +137,7 @@ router.post('/checkin', authRequired, upload.single('image'), async (req, res) =
 });
 
 // DELETE /api/checkin/today  撤销当天打卡（仅限当天）
-router.delete('/checkin/today', authRequired, (req, res) => {
+router.delete('/checkin/today', authRequired, activeRequired, (req, res) => {
   const today = localDateStr();
   const info = db
     .prepare('DELETE FROM checkins WHERE openid = ? AND checkin_date = ?')

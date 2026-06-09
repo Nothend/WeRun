@@ -1,11 +1,18 @@
 <view class="page">
 
-  <!-- 未登录：仅展示功能概览，登录后查看完整数据 -->
-  <view wx:if="{{!loggedIn}}" class="guest-tip">
+  <!-- 未登录 -->
+  <view wx:if="{{!loggedIn && !isPending}}" class="guest-tip">
     <view class="guest-icon">🏆</view>
     <view class="guest-title">排行榜</view>
     <view class="guest-desc">登录后可查看本周 / 本月 / 总榜等完整排行数据</view>
     <button class="btn-primary guest-login-btn" loading="{{loggingIn}}" bindtap="goLogin">微信登录</button>
+  </view>
+
+  <!-- 待审核 -->
+  <view wx:elif="{{isPending}}" class="guest-tip">
+    <view class="guest-icon">🔒</view>
+    <view class="guest-title">排行榜</view>
+    <view class="guest-desc">管理员审核通过后即可查看完整排行数据</view>
   </view>
 
   <!-- 已登录：完整榜单 -->

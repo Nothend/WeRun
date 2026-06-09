@@ -30,4 +30,16 @@ function adminRequired(req, res, next) {
   next();
 }
 
-module.exports = { signToken, authRequired, adminRequired };
+// 必须是已审核通过的成员（非 pending / blocked）
+function activeRequired(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: '未登录' });
+  if (req.user.status === 'pending') {
+    return res.status(403).json({ error: '加入申请待管理员审核', code: 'PENDING' });
+  }
+  if (req.user.status === 'blocked') {
+    return res.status(403).json({ error: '加入申请已被拒绝，请联系管理员', code: 'BLOCKED' });
+  }
+  next();
+}
+
+module.exports = { signToken, authRequired, adminRequired, activeRequired };

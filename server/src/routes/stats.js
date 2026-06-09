@@ -1,7 +1,7 @@
 const express = require('express');
 const db = require('../db');
 const config = require('../config');
-const { authRequired } = require('../auth');
+const { authRequired, activeRequired } = require('../auth');
 const {
   currentWeekKey,
   lastWeekKey,
@@ -14,7 +14,7 @@ const {
 const router = express.Router();
 
 // GET /api/stats/me  我的本周状态
-router.get('/stats/me', authRequired, (req, res) => {
+router.get('/stats/me', authRequired, activeRequired, (req, res) => {
   const weekKey = currentWeekKey();
   const today = localDateStr();
   const weekCount = db
@@ -37,7 +37,7 @@ router.get('/stats/me', authRequired, (req, res) => {
 });
 
 // GET /api/stats/group  群周榜（本周）
-router.get('/stats/group', authRequired, (req, res) => {
+router.get('/stats/group', authRequired, activeRequired, (req, res) => {
   const weekKey = currentWeekKey();
   const rows = db
     .prepare(
@@ -45,6 +45,7 @@ router.get('/stats/group', authRequired, (req, res) => {
               COUNT(c.id) AS weekCount
          FROM users u
          LEFT JOIN checkins c ON c.openid = u.openid AND c.week_key = ?
+        WHERE u.status = 'active'
         GROUP BY u.openid
         ORDER BY weekCount DESC, u.created_at ASC`
     )
@@ -76,6 +77,7 @@ function buildBoard({ weekKey, datePrefix }) {
         `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, COUNT(c.id) AS count
            FROM users u
            LEFT JOIN checkins c ON c.openid = u.openid AND c.week_key = ?
+          WHERE u.status = 'active'
           GROUP BY u.openid
           ORDER BY count DESC, u.created_at ASC`
       )
@@ -86,6 +88,7 @@ function buildBoard({ weekKey, datePrefix }) {
         `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, COUNT(c.id) AS count
            FROM users u
            LEFT JOIN checkins c ON c.openid = u.openid AND c.checkin_date LIKE ?
+          WHERE u.status = 'active'
           GROUP BY u.openid
           ORDER BY count DESC, u.created_at ASC`
       )
@@ -96,6 +99,7 @@ function buildBoard({ weekKey, datePrefix }) {
         `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, COUNT(c.id) AS count
            FROM users u
            LEFT JOIN checkins c ON c.openid = u.openid
+          WHERE u.status = 'active'
           GROUP BY u.openid
           ORDER BY count DESC, u.created_at ASC`
       )
@@ -110,7 +114,7 @@ function buildBoard({ weekKey, datePrefix }) {
 }
 
 // GET /api/stats/rankings  多榜单：本周/上周/本月/上月/本年/总榜
-router.get('/stats/rankings', authRequired, (req, res) => {
+router.get('/stats/rankings', authRequired, activeRequired, (req, res) => {
   const defs = [
     { key: 'thisWeek', label: '本周', weekly: true, weekKey: currentWeekKey() },
     { key: 'lastWeek', label: '上周', weekly: true, weekKey: lastWeekKey() },

@@ -7,6 +7,7 @@ Page({
     submitting: false,
     result: null, // { success, reason, duration, weekCount, target, achieved, already }
     minDurationMinutes: 30,
+    isPending: false,
   },
 
   onLoad() {
@@ -14,7 +15,10 @@ Page({
   },
 
   onShow() {
-    this.consumePendingMaterial();
+    const user = app.globalData.user;
+    const isPending = !!(user && user.status === 'pending');
+    this.setData({ isPending });
+    if (!isPending) this.consumePendingMaterial();
   },
 
   // 从微信聊天素材直接打开时，自动取图、识别并打卡

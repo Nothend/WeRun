@@ -25,6 +25,10 @@ Page({
     showImportResult: false,
     importResult: null,
 
+    // 待审核申请
+    applications: [],
+    approvingOpenid: '',
+
     // 待匹配导入记录
     pendingImports: [],
     matchModal: false,
@@ -48,6 +52,7 @@ Page({
     }
     this.setData({ myOpenid: user.openid });
     this.load();
+    this.loadApplications();
     this.loadPendingImports();
   },
 
@@ -58,6 +63,57 @@ Page({
     if (tab === 'logs' && this.data.logs.length === 0) {
       this.loadLogs(1);
     }
+  },
+
+  // ── 待审核申请 ────────────────────────────────────────────
+  async loadApplications() {
+    try {
+      const data = await api.request('/api/admin/applications');
+      this.setData({ applications: data.list });
+    } catch (e) {
+      // 静默
+    }
+  },
+
+  approveUser(e) {
+    const { openid, nickname } = e.currentTarget.dataset;
+    wx.showModal({
+      title: '通过申请',
+      content: `确定通过「${nickname || '该用户'}」的加入申请吗？`,
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          this.setData({ approvingOpenid: openid });
+          await api.request(`/api/admin/users/${openid}/approve`, { method: 'POST' });
+          wx.showToast({ title: '已通过申请', icon: 'success' });
+          this.loadApplications();
+          this.load();
+        } catch (err) {
+          wx.showToast({ title: err.message, icon: 'none' });
+        } finally {
+          this.setData({ approvingOpenid: '' });
+        }
+      },
+    });
+  },
+
+  rejectUser(e) {
+    const { openid, nickname } = e.currentTarget.dataset;
+    wx.showModal({
+      title: '拒绝申请',
+      content: `确定拒绝「${nickname || '该用户'}」的加入申请吗？其账号将被删除。`,
+      confirmColor: '#fa5151',
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await api.request(`/api/admin/users/${openid}/kick`, { method: 'POST' });
+          wx.showToast({ title: '已拒绝', icon: 'success' });
+          this.loadApplications();
+        } catch (err) {
+          wx.showToast({ title: err.message, icon: 'none' });
+        }
+      },
+    });
   },
 
   // ── 成员管理 ──────────────────────────────────────────────

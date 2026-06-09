@@ -8,6 +8,7 @@ Page({
     loading: true,
     loggedIn: false,
     loggingIn: false,
+    isPending: false,
     target: 3,
     boards: [], // 视图用榜单（含 top3 / 分页后的 rest）
     current: 0, // 当前 swiper 下标
@@ -40,8 +41,9 @@ Page({
 
   onShow() {
     const user = app.globalData.user;
-    this.setData({ isAdmin: !!(user && user.isAdmin), loggedIn: !!user });
-    if (user) {
+    const isPending = !!(user && user.status === 'pending');
+    this.setData({ isAdmin: !!(user && user.isAdmin), loggedIn: !!user, isPending });
+    if (user && !isPending) {
       this.load();
     } else {
       this.setData({ loading: false, boards: [] });

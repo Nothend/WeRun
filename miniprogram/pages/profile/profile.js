@@ -4,6 +4,7 @@ const app = getApp();
 Page({
   data: {
     authMode: false,
+    applyMode: false,
     nickname: '',
     previewUrl: '',
     avatarTemp: '',
@@ -12,15 +13,16 @@ Page({
 
   onLoad(options) {
     const authMode = options.mode === 'auth';
+    const applyMode = options.mode === 'apply';
     const user = app.globalData.user;
     this.setData({
       authMode,
+      applyMode,
       nickname: user ? user.nickname : '',
       previewUrl: user ? user.avatarUrl : '',
     });
-    if (authMode) {
-      wx.setNavigationBarTitle({ title: '' });
-    }
+    if (authMode) wx.setNavigationBarTitle({ title: '' });
+    if (applyMode) wx.setNavigationBarTitle({ title: '提交加入申请' });
   },
 
   onChooseAvatar(e) {
@@ -66,7 +68,7 @@ Page({
         });
       }
       app.setUser(result.user);
-      wx.showToast({ title: '保存成功', icon: 'success' });
+      wx.showToast({ title: this.data.applyMode ? '申请已提交，等待审核' : '保存成功', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 800);
     } catch (e) {
       wx.showToast({ title: e.message || '保存失败', icon: 'none' });

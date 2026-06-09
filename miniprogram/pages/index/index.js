@@ -8,6 +8,8 @@ Page({
     avatarUrl: '',
     nickname: '',
     stats: null,
+    isPending: false,
+    nicknameIsDefault: false,
     shareText: '',
     shareLoading: false,
     showShareModal: false,
@@ -22,12 +24,16 @@ Page({
 
   onShow() {
     const user = app.globalData.user;
+    const isPending = !!(user && user.status === 'pending');
+    const nicknameIsDefault = isPending && (!user.nickname || /^跑友.{4}$/.test(user.nickname));
     this.setData({
       user,
       avatarUrl: user ? user.avatarUrl : '',
       nickname: user ? user.nickname : '',
+      isPending,
+      nicknameIsDefault,
     });
-    if (user) this.loadStats();
+    if (user && !isPending) this.loadStats();
   },
 
   // 实际执行登录，不带确认弹窗（用于用户主动点击「微信登录」）
@@ -37,9 +43,13 @@ Page({
     try {
       const { user, isNewUser } = await api.login();
       app.fetchConfig();
-      this.setData({ user, avatarUrl: user.avatarUrl, nickname: user.nickname });
-      this.loadStats();
-      if (isNewUser) {
+      const isPending = user.status === 'pending';
+      const nicknameIsDefault = isPending && (!user.nickname || /^跑友.{4}$/.test(user.nickname));
+      this.setData({ user, avatarUrl: user.avatarUrl, nickname: user.nickname, isPending, nicknameIsDefault });
+      if (!isPending) this.loadStats();
+      if (isPending) {
+        wx.navigateTo({ url: '/pages/profile/profile?mode=apply' });
+      } else if (isNewUser) {
         wx.navigateTo({ url: '/pages/profile/profile?mode=auth' });
       }
       return true;
@@ -153,9 +163,17 @@ Page({
   },
 
   async goCheckin() {
+    if (this.data.isPending) {
+      wx.showToast({ title: '审核通过后才能打卡', icon: 'none' });
+      return;
+    }
     const ok = await this.requireLogin('打卡需要先登录微信账号，是否登录？');
     if (!ok) return;
     wx.navigateTo({ url: '/pages/checkin/checkin' });
+  },
+
+  goApply() {
+    wx.navigateTo({ url: '/pages/profile/profile?mode=apply' });
   },
   goRanking() {
     wx.navigateTo({ url: '/pages/ranking/ranking' });

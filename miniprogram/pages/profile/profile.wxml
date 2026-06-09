@@ -1,10 +1,10 @@
-<!-- 授权模式：全屏引导 -->
-<view wx:if="{{authMode}}" class="auth-screen">
+<!-- 授权模式 / 申请模式：全屏引导 -->
+<view wx:if="{{authMode || applyMode}}" class="auth-screen">
 
   <view class="auth-hero">
     <view class="auth-hero-emoji">🏃</view>
-    <view class="auth-hero-title">让队友认识你</view>
-    <view class="auth-hero-sub">设置头像和昵称，才能出现在群周榜上</view>
+    <view class="auth-hero-title">{{applyMode ? '申请加入跑团' : '让队友认识你'}}</view>
+    <view class="auth-hero-sub">{{applyMode ? '请使用你的微信昵称，方便管理员识别你' : '设置头像和昵称，才能出现在群周榜上'}}</view>
   </view>
 
   <view class="auth-form">
@@ -16,12 +16,13 @@
         </view>
       </view>
       <view class="auth-avatar-label {{previewUrl ? 'done' : ''}}">
-        {{previewUrl ? '头像已设置 ✓' : '点击设置头像（必填）'}}
+        {{previewUrl ? '头像已设置 ✓' : '点击设置头像'}}
       </view>
     </button>
 
     <view class="auth-nickname-field">
       <view class="auth-field-label">昵称<text class="auth-required">必填</text></view>
+      <view wx:if="{{applyMode}}" class="auth-field-hint">请使用你的微信昵称，管理员依此识别你</view>
       <view class="auth-nickname-wrap {{nickname ? 'filled' : ''}}">
         <input
           class="auth-nickname-input"
@@ -39,11 +40,11 @@
   </view>
 
   <view class="auth-bottom">
-    <view class="auth-social-tip">🏆 头像和昵称会显示在群周榜</view>
+    <view class="auth-social-tip">{{applyMode ? '⏳ 管理员审核通过后即可参与打卡' : '🏆 头像和昵称会显示在群周榜'}}</view>
     <view class="auth-allow-btn {{saving ? 'saving' : ''}}" bindtap="save">
-      {{saving ? '保存中...' : '完成设置，进入跑团 →'}}
+      {{saving ? (applyMode ? '提交中...' : '保存中...') : (applyMode ? '提交加入申请 →' : '完成设置，进入跑团 →')}}
     </view>
-    <view class="auth-skip-btn" bindtap="skip">先跳过，榜单上显示为「匿名」</view>
+    <view wx:if="{{!applyMode}}" class="auth-skip-btn" bindtap="skip">先跳过，榜单上显示为「匿名」</view>
   </view>
 
 </view>

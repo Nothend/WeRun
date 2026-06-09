@@ -119,6 +119,12 @@
   padding: 2rpx 12rpx;
   letter-spacing: 0;
 }
+.auth-field-hint {
+  font-size: 22rpx;
+  color: #eab308;
+  margin-bottom: 12rpx;
+  line-height: 1.5;
+}
 .auth-nickname-wrap {
   width: 100%;
   background: rgba(255, 255, 255, 0.04);

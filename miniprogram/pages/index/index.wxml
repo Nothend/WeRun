@@ -1,12 +1,28 @@
 <view class="container">
 
+  <!-- 待审核申请提示卡 -->
+  <view wx:if="{{isPending}}" class="card pending-banner">
+    <view class="pending-banner-top">
+      <text class="pending-banner-icon">⏳</text>
+      <text class="pending-banner-title">申请审核中</text>
+    </view>
+    <view wx:if="{{nicknameIsDefault}}" class="pending-banner-body">
+      <view class="pending-banner-msg">请设置你的昵称（使用微信昵称），方便管理员识别你的申请</view>
+      <view class="pending-banner-btn" bindtap="goApply">设置昵称，提交申请 →</view>
+    </view>
+    <view wx:else class="pending-banner-body">
+      <view class="pending-banner-msg">你的加入申请等待管理员审核，通过后即可参与打卡和查看排行榜</view>
+      <view class="pending-banner-edit" bindtap="goApply">修改昵称</view>
+    </view>
+  </view>
+
   <!-- 个人资料 -->
   <view class="card profile-card">
     <view class="profile-row" bindtap="onProfileTap">
       <image class="avatar" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
       <view class="profile-info">
         <text class="profile-name">{{user ? (nickname || '未设置昵称') : '未登录'}}</text>
-        <text class="profile-sub">{{user ? '跑团成员 · 点击编辑资料' : '点击微信登录，解锁打卡与个人数据'}}</text>
+        <text class="profile-sub">{{isPending ? '申请审核中 · 点击编辑资料' : (user ? '跑团成员 · 点击编辑资料' : '点击微信登录，解锁打卡与个人数据')}}</text>
       </view>
       <text wx:if="{{!user}}" class="profile-login-badge" hover-class="action-hover">{{loggingIn ? '登录中…' : '去登录'}}</text>
     </view>

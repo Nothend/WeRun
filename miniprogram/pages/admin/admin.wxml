@@ -20,6 +20,35 @@
       <button class="import-btn" loading="{{importLoading}}" bindtap="importExcel">导入数据</button>
     </view>
 
+    <!-- 待审核申请 -->
+    <view wx:if="{{applications.length > 0}}" class="card applications-card">
+      <view class="applications-header">
+        <view class="header-title">待审核申请</view>
+        <view class="applications-count">{{applications.length}}</view>
+      </view>
+      <view wx:for="{{applications}}" wx:key="openid" class="row">
+        <image class="avatar" src="{{item.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+        <view class="info">
+          <view class="name-row">
+            <text class="name">{{item.nickname || '未设昵称'}}</text>
+            <view class="tag pending-tag">待审核</view>
+          </view>
+          <view class="openid-row" data-openid="{{item.openid}}" bindtap="copyOpenid">
+            <text class="openid-text">{{item.openid}}</text>
+          </view>
+        </view>
+        <view class="ops">
+          <button size="mini" class="op-btn approve-btn"
+                  data-openid="{{item.openid}}" data-nickname="{{item.nickname}}"
+                  loading="{{approvingOpenid === item.openid}}"
+                  bindtap="approveUser">通过</button>
+          <button size="mini" class="op-btn danger"
+                  data-openid="{{item.openid}}" data-nickname="{{item.nickname}}"
+                  bindtap="rejectUser">拒绝</button>
+        </view>
+      </view>
+    </view>
+
     <!-- 通知设置卡（仅管理员可见） -->
     <view class="card notify-card">
       <view class="notify-info">

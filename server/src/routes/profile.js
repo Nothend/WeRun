@@ -41,6 +41,7 @@ router.post('/profile', authRequired, upload.single('avatar'), (req, res) => {
         nickname: user.nickname,
         avatarUrl: user.avatar_url,
         isAdmin: !!user.is_admin,
+        status: user.status || 'active',
       },
     });
   } catch (e) {
