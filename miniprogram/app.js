@@ -4,7 +4,7 @@ App({
   globalData: {
     token: '',
     user: null, // { openid, nickname, avatarUrl, isAdmin }
-    remoteConfig: { minDurationMinutes: 30, weeklyTarget: 3 }, // 默认值，拉取成功后覆盖
+    remoteConfig: { minDurationMinutes: 30, weeklyTarget: 3, applyTemplateId: '', weeklyTemplateId: '' }, // 默认值，拉取成功后覆盖
     pendingMaterial: null, // 从微信聊天素材打开时待识别的图片 { path, name }
   },
   onLaunch(options) {

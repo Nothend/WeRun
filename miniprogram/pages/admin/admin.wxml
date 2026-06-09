@@ -51,12 +51,21 @@
 
     <!-- 通知设置卡（仅管理员可见） -->
     <view class="card notify-card">
-      <view class="notify-info">
-        <view class="notify-title">打卡通知</view>
-        <view class="notify-desc muted">开启后，有成员打卡时你将收到微信通知</view>
+      <view class="notify-row">
+        <view class="notify-info">
+          <view class="notify-title">打卡通知</view>
+          <view class="notify-desc muted">开启后，有成员打卡时你将收到微信通知</view>
+        </view>
+        <switch checked="{{myNotifyCheckin}}" disabled="{{togglingNotify}}"
+                color="#22d3ee" bindchange="toggleNotify"/>
       </view>
-      <switch checked="{{myNotifyCheckin}}" disabled="{{togglingNotify}}"
-              color="#22d3ee" bindchange="toggleNotify"/>
+      <view class="notify-row notify-row-border">
+        <view class="notify-info">
+          <view class="notify-title">新成员申请通知</view>
+          <view class="notify-desc muted">订阅后，有新成员申请时你将收到微信通知（每次点击订阅一次）</view>
+        </view>
+        <button class="subscribe-apply-btn" bindtap="subscribeApplyNotify">订阅</button>
+      </view>
     </view>
 
     <!-- 成员列表 -->

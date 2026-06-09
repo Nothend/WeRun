@@ -121,6 +121,14 @@ Page({
       this.setData({ result: data });
       if (data.success) {
         wx.showToast({ title: '打卡成功！', icon: 'success' });
+        // 攒一次「每周打卡周报」订阅额度，用于周日自动推送
+        const weeklyTmpl = app.globalData.remoteConfig.weeklyTemplateId;
+        if (weeklyTmpl) {
+          wx.requestSubscribeMessage({
+            tmplIds: [weeklyTmpl],
+            fail: () => {}, // 用户拒绝或环境不支持时静默忽略
+          });
+        }
       }
     } catch (e) {
       wx.showToast({ title: e.message, icon: 'none' });

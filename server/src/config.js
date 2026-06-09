@@ -17,6 +17,10 @@ const config = {
   minDurationMinutes: parseFloat(process.env.MIN_DURATION_MINUTES || '30'),
   weeklyTarget: parseInt(process.env.WEEKLY_TARGET || '3', 10),
   wechatNotifyTemplateId: process.env.WECHAT_NOTIFY_TEMPLATE_ID || '',
+  // 订阅消息模板A：有新用户申请时通知管理员
+  applyTemplateId: process.env.APPLY_TEMPLATE_ID || '',
+  // 订阅消息模板B：每周日统计推送给成员
+  weeklyTemplateId: process.env.WEEKLY_TEMPLATE_ID || '',
 
   dataDir: DATA_DIR,
   dbPath: path.join(DATA_DIR, 'app.db'),

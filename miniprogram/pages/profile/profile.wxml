@@ -41,9 +41,10 @@
 
   <view class="auth-bottom">
     <view class="auth-social-tip">{{applyMode ? '⏳ 管理员审核通过后即可参与打卡' : '🏆 头像和昵称会显示在群周榜'}}</view>
-    <view class="auth-allow-btn {{saving ? 'saving' : ''}}" bindtap="save">
+    <view class="auth-allow-btn {{saving ? 'saving' : ''}} {{applyMode && !canSubmit ? 'disabled' : ''}}" bindtap="save">
       {{saving ? (applyMode ? '提交中...' : '保存中...') : (applyMode ? '提交加入申请 →' : '完成设置，进入跑团 →')}}
     </view>
+    <view wx:if="{{applyMode && !canSubmit}}" class="apply-hint">请先设置头像，并填写昵称（至少 2 个字）</view>
     <view wx:if="{{!applyMode}}" class="auth-skip-btn" bindtap="skip">先跳过，榜单上显示为「匿名」</view>
   </view>
 

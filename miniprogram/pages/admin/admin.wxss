@@ -75,10 +75,17 @@
 
 /* ── 通知设置卡 ── */
 .notify-card {
+  padding: 0;
+  flex-direction: column;
+}
+.notify-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 28rpx 40rpx;
+}
+.notify-row-border {
+  border-top: 1rpx solid rgba(255, 255, 255, 0.04);
 }
 .notify-info {
   flex: 1;
@@ -94,6 +101,18 @@
   font-size: 22rpx;
   line-height: 1.5;
 }
+.subscribe-apply-btn {
+  font-size: 24rpx !important;
+  color: #22d3ee !important;
+  background: rgba(34, 211, 238, 0.08) !important;
+  border: 1rpx solid rgba(34, 211, 238, 0.3) !important;
+  border-radius: 16rpx !important;
+  padding: 0 28rpx !important;
+  height: 64rpx !important;
+  line-height: 64rpx !important;
+  flex-shrink: 0;
+}
+.subscribe-apply-btn::after { border: none; }
 
 /* ── 打卡日志行 ── */
 .log-row {

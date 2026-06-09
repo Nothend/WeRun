@@ -179,15 +179,41 @@ Page({
     if (this.data.togglingNotify) return;
     const newNotify = !this.data.myNotifyCheckin;
 
-    // 开启通知时先请求订阅授权
-    if (newNotify && config.notifyTemplateId) {
-      wx.requestSubscribeMessage({
-        tmplIds: [config.notifyTemplateId],
-        complete: () => { this._saveNotifySetting(newNotify); },
-      });
-    } else {
-      this._saveNotifySetting(newNotify);
+    if (newNotify) {
+      // 开启时一并订阅：旧打卡通知模板 + 模板A（新成员申请通知）
+      const rc = app.globalData.remoteConfig;
+      const tmplIds = [];
+      if (config.notifyTemplateId)  tmplIds.push(config.notifyTemplateId);
+      if (rc.applyTemplateId)       tmplIds.push(rc.applyTemplateId);
+      if (tmplIds.length) {
+        wx.requestSubscribeMessage({
+          tmplIds,
+          complete: () => { this._saveNotifySetting(newNotify); },
+        });
+        return;
+      }
     }
+    this._saveNotifySetting(newNotify);
+  },
+
+  // 独立订阅新成员申请通知（管理员可单独刷新额度）
+  subscribeApplyNotify() {
+    const tmplId = app.globalData.remoteConfig.applyTemplateId;
+    if (!tmplId) {
+      wx.showToast({ title: '服务端未配置通知模板', icon: 'none' });
+      return;
+    }
+    wx.requestSubscribeMessage({
+      tmplIds: [tmplId],
+      success: (res) => {
+        if (res[tmplId] === 'accept') {
+          wx.showToast({ title: '已订阅申请通知', icon: 'success' });
+        } else {
+          wx.showToast({ title: '未授权，可稍后重试', icon: 'none' });
+        }
+      },
+      fail: () => wx.showToast({ title: '订阅失败', icon: 'none' }),
+    });
   },
 
   async _saveNotifySetting(notify) {

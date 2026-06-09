@@ -191,6 +191,19 @@
 .auth-allow-btn.saving {
   opacity: 0.6;
 }
+.auth-allow-btn.disabled {
+  background: #1e293b;
+  color: #475569;
+  box-shadow: none;
+  pointer-events: none;
+}
+.apply-hint {
+  font-size: 22rpx;
+  color: #64748b;
+  text-align: center;
+  letter-spacing: 0.5rpx;
+  margin-top: -8rpx;
+}
 .auth-skip-btn {
   font-size: 24rpx;
   color: #334155;

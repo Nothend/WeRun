@@ -77,4 +77,29 @@ async function sendCheckinNotify(toOpenid, { nickname, durationMinutes, weekCoun
   }
 }
 
-module.exports = { code2session, getAccessToken, sendCheckinNotify };
+// 通用订阅消息发送。调用方负责 catch，失败不影响主流程。
+// mock 模式时只打印日志，不发起真实请求。
+async function sendSubscribeMessage(toOpenid, templateId, data, page = 'pages/index/index') {
+  const token = await getAccessToken();
+  if (!token) {
+    console.log(`[mock] subscribe msg → ${toOpenid} tpl=${templateId.slice(0, 8)}…`);
+    return;
+  }
+  const body = {
+    touser: toOpenid,
+    template_id: templateId,
+    page,
+    miniprogram_state: 'formal',
+    data,
+  };
+  const resp = await fetch(
+    `https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=${token}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  const result = await resp.json();
+  if (result.errcode && result.errcode !== 0) {
+    console.warn(`[subscribe] → ${toOpenid} errcode=${result.errcode}: ${result.errmsg}`);
+  }
+}
+
+module.exports = { code2session, getAccessToken, sendCheckinNotify, sendSubscribeMessage };
