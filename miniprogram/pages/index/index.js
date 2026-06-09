@@ -82,6 +82,25 @@ Page({
     }
   },
 
+  deleteCheckinToday() {
+    wx.showModal({
+      title: '撤销今日打卡',
+      content: '确认删除今天的打卡记录？删除后可重新打卡。',
+      confirmText: '确认',
+      confirmColor: '#ef4444',
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await api.request('/api/checkin/today', { method: 'DELETE' });
+          wx.showToast({ title: '已撤销', icon: 'success' });
+          this.loadStats();
+        } catch (e) {
+          wx.showToast({ title: e.message || '撤销失败', icon: 'none' });
+        }
+      },
+    });
+  },
+
   // ── 分享 ──────────────────────────────────────────────
   async openShareModal() {
     const ok = await this.requireLogin('分享运动数据需要先登录微信账号，是否登录？');

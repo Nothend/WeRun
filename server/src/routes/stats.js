@@ -8,6 +8,7 @@ const {
   currentMonthStr,
   lastMonthStr,
   currentYearStr,
+  localDateStr,
 } = require('../week');
 
 const router = express.Router();
@@ -15,18 +16,23 @@ const router = express.Router();
 // GET /api/stats/me  我的本周状态
 router.get('/stats/me', authRequired, (req, res) => {
   const weekKey = currentWeekKey();
+  const today = localDateStr();
   const weekCount = db
     .prepare('SELECT COUNT(*) AS n FROM checkins WHERE openid = ? AND week_key = ?')
     .get(req.user.openid, weekKey).n;
   const totalCount = db
     .prepare('SELECT COUNT(*) AS n FROM checkins WHERE openid = ?')
     .get(req.user.openid).n;
+  const todayRow = db
+    .prepare('SELECT duration_minutes FROM checkins WHERE openid = ? AND checkin_date = ?')
+    .get(req.user.openid, today);
   res.json({
     weekKey,
     weekCount,
     totalCount,
     target: config.weeklyTarget,
     achieved: weekCount >= config.weeklyTarget,
+    todayCheckin: todayRow ? { duration: todayRow.duration_minutes } : null,
   });
 });
 

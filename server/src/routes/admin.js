@@ -122,8 +122,42 @@ router.post('/admin/users/:openid/nickname', (req, res) => {
   res.json({ ok: true, nickname });
 });
 
+// 解析 Excel 单元格中的日期，兼容：
+//   - cellDates:true 产生的真实 Date 对象（取 UTC 日期，避免时区偏移）
+//   - Excel 序列号（数字，无日期格式）
+//   - 各种文本格式："2026-6-9"、"2026/6/9"、"2026.6.9"、"2026-06-09 10:30:00" 等
+function parseExcelDate(raw) {
+  if (raw instanceof Date && !isNaN(raw)) {
+    const y = raw.getUTCFullYear();
+    const m = String(raw.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(raw.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  // Excel 序列号（1900 纪元，Lotus 兼容偏移 -1）
+  if (typeof raw === 'number' && raw > 0) {
+    const epoch = new Date(Date.UTC(1899, 11, 30) + Math.floor(raw) * 86400000);
+    const y = epoch.getUTCFullYear();
+    const m = String(epoch.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(epoch.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  const s = String(raw).trim();
+  if (!s) return null;
+  // 去掉时间部分："2026-06-09 10:30:00" / "2026-06-09T00:00:00" → "2026-06-09"
+  const datePart = s.split(/[T ]/)[0].trim();
+  // 统一分隔符：/  .  → -
+  const parts = datePart.replace(/[/\.]/g, '-').split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    const y = parts[0];
+    const m = parts[1].padStart(2, '0');
+    const d = parts[2].slice(0, 2).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  return null;
+}
+
 // POST /api/admin/import  导入 Excel 打卡数据
-// Excel 格式：列名"用户昵称"/"昵称"  + "打卡时间"/"日期"（YYYY-MM-DD 或 YYYY/MM/DD）
+// Excel 格式：列名"用户昵称"/"昵称"  + "打卡时间"/"日期"（支持多种日期格式）
 router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: '请上传 Excel 文件' });
 
@@ -131,7 +165,8 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
   try {
     const wb = XLSX.read(req.file.buffer, { type: 'buffer', cellDates: true });
     const sheet = wb.Sheets[wb.SheetNames[0]];
-    rows = XLSX.utils.sheet_to_json(sheet, { raw: false, defval: '' });
+    // raw:true 使真实日期单元格返回 Date 对象，文本单元格仍为字符串
+    rows = XLSX.utils.sheet_to_json(sheet, { raw: true, defval: '' });
   } catch (e) {
     return res.status(400).json({ error: `Excel 解析失败: ${e.message}` });
   }
@@ -147,6 +182,9 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
     `INSERT OR IGNORE INTO checkins (openid, week_key, checkin_date, duration_minutes, created_at)
      VALUES (?, ?, ?, ?, ?)`
   );
+  const deletePendingByNicknameDate = db.prepare(
+    'DELETE FROM import_pending WHERE nickname = ? AND checkin_date = ?'
+  );
   // 昵称暂时匹配不到现有用户：先存起来，等该成员加入后由管理员手动匹配
   const insertPending = db.prepare(
     `INSERT OR IGNORE INTO import_pending (nickname, checkin_date, duration_minutes, week_key, created_at)
@@ -160,17 +198,11 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
       const nickname = (row['用户昵称'] || row['昵称'] || row['nickname'] || '').toString().trim();
       const rawDate = row['打卡时间'] || row['日期'] || row['date'] || row['checkin_date'] || '';
 
-      if (!nickname || !rawDate) { result.skipped++; continue; }
+      if (!nickname || (rawDate === '' && rawDate !== 0)) { result.skipped++; continue; }
 
-      // 解析日期：支持 Date 对象 / "YYYY-MM-DD" / "YYYY/MM/DD"
-      let dateStr;
-      if (typeof rawDate === 'object' && rawDate instanceof Date) {
-        dateStr = rawDate.toISOString().slice(0, 10);
-      } else {
-        dateStr = String(rawDate).replace(/\//g, '-').slice(0, 10);
-      }
+      const dateStr = parseExcelDate(rawDate);
 
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
         if (result.errors.length < 20) result.errors.push(`日期格式错误 (${nickname}): ${rawDate}`);
         result.skipped++;
         continue;
@@ -184,8 +216,11 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
         const info = insert.run(openid, weekKey, dateStr, config.minDurationMinutes, Date.now());
         if (info.changes) result.inserted++;
         else result.skipped++; // 当天已有打卡，跳过
+        // 清理该昵称同日期的待匹配记录（成员已加入，不再需要待匹配）
+        deletePendingByNicknameDate.run(nickname, dateStr);
       } else {
         // 该成员尚未加入小程序：暂存，待加入后在「待匹配导入记录」中手动关联
+        // INSERT OR IGNORE 保证增量导入时已有记录不重复插入
         const info = insertPending.run(nickname, dateStr, config.minDurationMinutes, weekKey, Date.now());
         if (info.changes) result.pending++;
         else result.skipped++;

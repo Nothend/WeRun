@@ -80,27 +80,26 @@ router.post('/checkin', authRequired, upload.single('image'), async (req, res) =
     // 调用千问识别时长与运动日期（不保存原图）
     const result = await recognizeDuration(req.file.buffer, req.file.mimetype || 'image/jpeg');
 
-    if (!result.has_time) {
-      return res.json({ success: false, reason: '未在图中识别到运动时间，请上传清晰的跑步记录截图' });
-    }
-
-    // ── 防作弊：校验运动日期 ──────────────────────────────────
-    // 允许今天或昨天（跨午夜上传容错），若识别出明确日期但不在范围内则拒绝
-    if (result.exercise_date) {
-      const yesterday = localDateStr(new Date(Date.now() - 86400000));
-      if (result.exercise_date !== today && result.exercise_date !== yesterday) {
-        return res.json({
-          success: false,
-          reason: `截图显示的运动日期为 ${result.exercise_date}，请上传今日的运动记录截图`,
-        });
-      }
-    }
-
+    // AI 识别的日期和时长——无论成功失败都返回给前端展示
+    const recognizedDate = result.exercise_date || null;
     const duration = Number(result.duration_minutes) || 0;
+
+    if (!result.has_time) {
+      return res.json({
+        success: false,
+        reason: '未在图中识别到运动时间，请上传清晰的跑步记录截图',
+        exercise_date: recognizedDate,
+        duration: 0,
+      });
+    }
+
+    // 运动日期仅供展示，不作为拒绝依据：
+    // AI 可能因图片压缩等原因识别出错，打卡日期统一以服务器当日为准
     if (duration < config.minDurationMinutes) {
       return res.json({
         success: false,
         duration,
+        exercise_date: recognizedDate,
         reason: `识别到运动时长约 ${duration} 分钟，未达到 ${config.minDurationMinutes} 分钟`,
       });
     }
@@ -125,6 +124,7 @@ router.post('/checkin', authRequired, upload.single('image'), async (req, res) =
     res.json({
       success: true,
       duration,
+      exercise_date: recognizedDate,
       weekCount,
       target: config.weeklyTarget,
       achieved: weekCount >= config.weeklyTarget,
@@ -134,6 +134,16 @@ router.post('/checkin', authRequired, upload.single('image'), async (req, res) =
     console.error('checkin error:', e);
     res.status(500).json({ error: e.message || '打卡失败' });
   }
+});
+
+// DELETE /api/checkin/today  撤销当天打卡（仅限当天）
+router.delete('/checkin/today', authRequired, (req, res) => {
+  const today = localDateStr();
+  const info = db
+    .prepare('DELETE FROM checkins WHERE openid = ? AND checkin_date = ?')
+    .run(req.user.openid, today);
+  if (!info.changes) return res.status(404).json({ error: '今天尚未打卡' });
+  res.json({ ok: true });
 });
 
 module.exports = router;

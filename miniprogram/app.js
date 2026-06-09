@@ -25,7 +25,7 @@ App({
     const materials = options && options.forwardMaterials;
     if (!Array.isArray(materials) || !materials.length) return;
     const image = materials.find((m) => m.type && m.type.indexOf('image') === 0);
-    if (image) this.globalData.pendingMaterial = { path: image.path, name: image.name || '' };
+    if (image) this.globalData.pendingMaterial = { path: image.path, name: image.name || '', ts: Date.now() };
   },
 
   fetchConfig() {

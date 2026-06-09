@@ -21,6 +21,15 @@ Page({
   async consumePendingMaterial() {
     const material = app.globalData.pendingMaterial;
     if (!material || this.data.submitting) return;
+    // 素材带时间戳时，若不是今天（本地日期）则视为过期丢弃，防止昨天或更早的聊天截图误触发
+    if (material.ts) {
+      const matDay = new Date(material.ts);
+      const nowDay = new Date();
+      if (matDay.toDateString() !== nowDay.toDateString()) {
+        app.globalData.pendingMaterial = null;
+        return;
+      }
+    }
     app.globalData.pendingMaterial = null; // 只消费一次
 
     if (!app.globalData.user) {
@@ -115,6 +124,25 @@ Page({
       wx.hideLoading();
       this.setData({ submitting: false });
     }
+  },
+
+  deleteCheckin() {
+    wx.showModal({
+      title: '撤销今日打卡',
+      content: '确认删除今天的打卡记录？删除后可重新打卡。',
+      confirmText: '确认',
+      confirmColor: '#ef4444',
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await api.request('/api/checkin/today', { method: 'DELETE' });
+          wx.showToast({ title: '已撤销', icon: 'success' });
+          this.setData({ result: null, imagePath: '' });
+        } catch (e) {
+          wx.showToast({ title: e.message || '撤销失败', icon: 'none' });
+        }
+      },
+    });
   },
 
   goBack() {

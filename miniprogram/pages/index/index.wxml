@@ -21,6 +21,10 @@
         <text class="pstat-label">总打卡次数</text>
       </view>
     </view>
+    <view wx:if="{{stats && stats.todayCheckin}}" class="today-row">
+      <text class="today-label">今日已打卡 · 约 {{stats.todayCheckin.duration}} 分钟</text>
+      <text class="today-del" bindtap="deleteCheckinToday">撤销</text>
+    </view>
   </view>
 
   <!-- 上传截图打卡 -->
