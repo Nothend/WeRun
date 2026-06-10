@@ -2,15 +2,18 @@ const config = require('./config');
 
 const PROMPT = [
   '这是一张跑步/运动记录的截图（可能来自 Keep、悦跑圈、微信运动、华为/小米运动等）。',
-  '请你识别以下两项内容：',
-  '1. 图中的"运动时长"（即本次运动持续的总时间，换算为分钟）',
-  '2. 图中的"运动日期"（即本次运动发生的日期，格式 YYYY-MM-DD；若无法识别则为 null）',
+  '请你识别以下内容：',
+  '1. 图中的"运动时长"，换算为总秒数；',
+  '2. 该时长在图中是否精确显示到"秒"（即格式形如 32:18 或 01:32:18，包含秒数；',
+  '   若只显示为"32分钟"、"约30分钟"、"0.5小时"等不含秒的形式，则视为不精确到秒）；',
+  '3. 图中的"运动日期"（即本次运动发生的日期，格式 YYYY-MM-DD；若无法识别则为 null）。',
   '严格只返回一个 JSON 对象，不要任何多余文字或解释，格式如下：',
-  '{"has_time": true 或 false, "duration_minutes": 数字, "exercise_date": "YYYY-MM-DD" 或 null}',
+  '{"has_time": true 或 false, "duration_seconds": 数字, "has_seconds": true 或 false, "exercise_date": "YYYY-MM-DD" 或 null}',
   '其中 has_time 表示图中是否包含可识别的运动时长；',
-  'duration_minutes 为该时长换算成的分钟数（例如 "32:15" → 32，"1小时05分" → 65）；',
+  'duration_seconds 为该时长换算成的总秒数（例如 "32:18" → 1938，"32分钟" → 1920，"1小时05分" → 3900）；',
+  'has_seconds 表示图中显示的时长格式是否精确到秒（"32:18" → true，"32分钟"/"约30分钟" → false）；',
   'exercise_date 为本次运动的日期（若图中有明确日期则返回，否则返回 null）。',
-  '若图中没有明确的运动时长，则 has_time 为 false，duration_minutes 为 0。',
+  '若图中没有明确的运动时长，则 has_time 为 false，duration_seconds 为 0，has_seconds 为 false。',
 ].join('\n');
 
 function extractJson(text) {
@@ -26,14 +29,16 @@ function extractJson(text) {
   }
 }
 
-// 输入图片 Buffer + mime，返回 { has_time, duration_minutes }
+// 输入图片 Buffer + mime，返回 { has_time, duration_seconds, has_seconds, exercise_date }
 async function recognizeDuration(imageBuffer, mime = 'image/jpeg') {
   if (config.useMockQwen) {
     const today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const exercise_date = `${today.getFullYear()}-${mm}-${dd}`;
-    return { has_time: true, duration_minutes: 35, exercise_date, mock: true };
+    // 加入随机秒数抖动，避免同一天所有 mock 用户的「日期+秒级时长」指纹完全相同
+    const duration_seconds = 35 * 60 + Math.floor(Math.random() * 60);
+    return { has_time: true, duration_seconds, has_seconds: true, exercise_date, mock: true };
   }
 
   const dataUrl = `data:${mime};base64,${imageBuffer.toString('base64')}`;
@@ -71,11 +76,12 @@ async function recognizeDuration(imageBuffer, mime = 'image/jpeg') {
 
   const parsed = extractJson(text);
   if (!parsed) {
-    return { has_time: false, duration_minutes: 0, raw: text };
+    return { has_time: false, duration_seconds: 0, has_seconds: false, raw: text };
   }
   return {
     has_time: !!parsed.has_time,
-    duration_minutes: Number(parsed.duration_minutes) || 0,
+    duration_seconds: Math.max(0, Math.round(Number(parsed.duration_seconds) || 0)),
+    has_seconds: !!parsed.has_seconds,
     exercise_date: parsed.exercise_date || null,
   };
 }

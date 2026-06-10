@@ -19,6 +19,9 @@ const config = {
   // 感知哈希(dHash, 256bit)相似度日志阈值：汉明距离 <= 此值时记录"疑似相似截图"日志（不拦截）
   // 用于积累真实样本，评估是否启用拦截及合适阈值
   imageSimilarityLogThreshold: parseInt(process.env.IMAGE_SIMILARITY_LOG_THRESHOLD || '20', 10),
+  // 感知哈希(dHash)相似度拦截阈值：仅在"识别不到秒级时长"（无法用秒级指纹去重）时生效，
+  // 汉明距离 <= 此值时拒绝打卡。比日志阈值更严格，默认5，可据日志中的真实距离分布微调
+  imageSimilarityBlockThreshold: parseInt(process.env.IMAGE_SIMILARITY_BLOCK_THRESHOLD || '5', 10),
   wechatNotifyTemplateId: process.env.WECHAT_NOTIFY_TEMPLATE_ID || '',
   // 订阅消息模板A：有新用户申请时通知管理员
   applyTemplateId: process.env.APPLY_TEMPLATE_ID || '',

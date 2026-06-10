@@ -66,7 +66,7 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       });
     }
 
-    // ── 防作弊：图片哈希查重（全局，不限本人，防止共用同一张截图）──
+    // ── 防作弊①：图片字节哈希查重（全局，不限本人，防止重复上传同一张截图原图）──
     const imageHash = crypto.createHash('sha256').update(req.file.buffer).digest('hex');
     const hashUsed = db.prepare('SELECT id FROM checkins WHERE image_hash = ?').get(imageHash);
     if (hashUsed) {
@@ -76,26 +76,15 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       });
     }
 
-    // ── 感知哈希（dHash）计算与记录 ──────────────────────────
-    // 注：实测同一张图压缩/缩放前后的 256bit dHash 汉明距离可达 ~18，
-    // 而同一运动App模板、不同记录的两张不同截图距离可低至 ~6——两者区间有重叠，
-    // 全局阈值拦截会有误伤真实打卡的风险。因此暂不作为拦截依据，
-    // 仅记录疑似相似（distance <= IMAGE_SIMILARITY_LOG_THRESHOLD）供管理员排查，
-    // 积累真实样本后再评估是否启用拦截及合适阈值。
+    // ── 感知哈希（dHash）计算 ──────────────────────────
+    // 先算好备用：是否用于拦截取决于下面 AI 识别结果（是否精确到秒）
     let phash = null;
+    let phashRows = [];
     try {
       phash = await computeDHash(req.file.buffer);
-      const others = db
+      phashRows = db
         .prepare('SELECT id, openid, phash FROM checkins WHERE phash IS NOT NULL')
         .all();
-      for (const row of others) {
-        const dist = hammingDistance(phash, row.phash);
-        if (dist <= config.imageSimilarityLogThreshold) {
-          console.warn(
-            `[phash] 疑似相似截图: openid=${openid} 与 checkin#${row.id}(openid=${row.openid}) 汉明距离=${dist}/256`
-          );
-        }
-      }
     } catch (e) {
       console.error('[phash] compute error:', e.message);
       // 感知哈希计算失败不影响主流程
@@ -104,9 +93,10 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
     // 调用千问识别时长与运动日期（不保存原图）
     const result = await recognizeDuration(req.file.buffer, req.file.mimetype || 'image/jpeg');
 
-    // AI 识别的日期和时长——无论成功失败都返回给前端展示
+    // AI 识别的日期——无论成功失败都返回给前端展示
     const recognizedDate = result.exercise_date || null;
-    const duration = Number(result.duration_minutes) || 0;
+    const durationSeconds = Number(result.duration_seconds) || 0;
+    const hasSeconds = !!result.has_seconds;
 
     if (!result.has_time) {
       return res.json({
@@ -117,9 +107,11 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       });
     }
 
+    const duration = Math.round(durationSeconds / 60);
+
     // 运动日期仅供展示，不作为拒绝依据：
     // AI 可能因图片压缩等原因识别出错，打卡日期统一以服务器当日为准
-    if (duration < config.minDurationMinutes) {
+    if (durationSeconds < config.minDurationMinutes * 60) {
       return res.json({
         success: false,
         duration,
@@ -128,13 +120,58 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       });
     }
 
-    // 记录打卡（含图片哈希、感知哈希）
+    // ── 防作弊②：秒级时长指纹去重（主力）/ 感知哈希视觉去重（兜底）──────
+    // 两人独立运动，"日期+总秒数"完全相同的概率极低，撞上基本可判定为盗用他人截图，
+    // 比 pHash 精确且无需调参，故作主力。仅当 AI 无法识别到秒级精度（如截图只
+    // 显示"32分钟"）时，秒数粒度太粗不能作指纹（分钟级冲突概率高、会误判），
+    // 改用 dHash 视觉相似度兜底拦截，阈值待积累真实距离分布后再微调。
+    let fingerprint = null;
+    if (hasSeconds) {
+      fingerprint = `${today}_${durationSeconds}`;
+      const fpHit = db.prepare('SELECT id FROM checkins WHERE fingerprint = ?').get(fingerprint);
+      if (fpHit) {
+        return res.json({
+          success: false,
+          duration,
+          exercise_date: recognizedDate,
+          reason: '该运动时长今日已被使用，疑似使用了他人的截图，请上传你本人的运动记录',
+        });
+      }
+    } else if (phash) {
+      for (const row of phashRows) {
+        const dist = hammingDistance(phash, row.phash);
+        const willBlock = dist <= config.imageSimilarityBlockThreshold;
+        if (willBlock || dist <= config.imageSimilarityLogThreshold) {
+          console.warn(
+            `[phash] 疑似相似截图: openid=${openid} 与 checkin#${row.id}(openid=${row.openid}) 汉明距离=${dist}/256${willBlock ? ' → 已拦截' : ''}`
+          );
+        }
+        if (willBlock) {
+          return res.json({
+            success: false,
+            duration,
+            exercise_date: recognizedDate,
+            reason: '该截图与已有打卡记录过于相似，请上传你本人的运动记录截图',
+          });
+        }
+      }
+    }
+
+    // 记录打卡（含图片哈希、感知哈希、秒级指纹）
     try {
       db.prepare(
-        'INSERT INTO checkins (openid, week_key, checkin_date, duration_minutes, image_hash, phash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-      ).run(openid, weekKey, today, duration, imageHash, phash, Date.now());
+        'INSERT INTO checkins (openid, week_key, checkin_date, duration_minutes, duration_seconds, has_seconds, image_hash, phash, fingerprint, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      ).run(openid, weekKey, today, duration, durationSeconds, hasSeconds ? 1 : 0, imageHash, phash, fingerprint, Date.now());
     } catch (e) {
       if (String(e.message).includes('UNIQUE')) {
+        if (fingerprint) {
+          return res.json({
+            success: false,
+            duration,
+            exercise_date: recognizedDate,
+            reason: '该运动时长今日已被使用，疑似使用了他人的截图，请上传你本人的运动记录',
+          });
+        }
         return res.json({ success: false, already: true, reason: '今天已经打过卡啦' });
       }
       throw e;

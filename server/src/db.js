@@ -51,8 +51,19 @@ if (!checkinCols.includes('image_hash')) {
 if (!checkinCols.includes('phash')) {
   db.exec('ALTER TABLE checkins ADD COLUMN phash TEXT DEFAULT NULL');
 }
+if (!checkinCols.includes('duration_seconds')) {
+  db.exec('ALTER TABLE checkins ADD COLUMN duration_seconds INTEGER DEFAULT NULL');
+}
+if (!checkinCols.includes('has_seconds')) {
+  db.exec('ALTER TABLE checkins ADD COLUMN has_seconds INTEGER NOT NULL DEFAULT 0');
+}
+if (!checkinCols.includes('fingerprint')) {
+  db.exec('ALTER TABLE checkins ADD COLUMN fingerprint TEXT DEFAULT NULL');
+}
 
 db.exec('CREATE INDEX IF NOT EXISTS idx_checkins_image_hash ON checkins(image_hash)');
+// 「日期+秒级时长」全局指纹：唯一索引（SQLite 中多行 NULL 互不冲突，has_seconds=false 的记录不受影响）
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_checkins_fingerprint ON checkins(fingerprint)');
 
 const userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
 if (!userCols.includes('notify_checkin')) {
