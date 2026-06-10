@@ -48,6 +48,11 @@ const checkinCols = db.prepare('PRAGMA table_info(checkins)').all().map((c) => c
 if (!checkinCols.includes('image_hash')) {
   db.exec('ALTER TABLE checkins ADD COLUMN image_hash TEXT DEFAULT NULL');
 }
+if (!checkinCols.includes('phash')) {
+  db.exec('ALTER TABLE checkins ADD COLUMN phash TEXT DEFAULT NULL');
+}
+
+db.exec('CREATE INDEX IF NOT EXISTS idx_checkins_image_hash ON checkins(image_hash)');
 
 const userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
 if (!userCols.includes('notify_checkin')) {

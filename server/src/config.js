@@ -16,6 +16,9 @@ const config = {
   bootstrapAdminOpenid: process.env.BOOTSTRAP_ADMIN_OPENID || '',
   minDurationMinutes: parseFloat(process.env.MIN_DURATION_MINUTES || '30'),
   weeklyTarget: parseInt(process.env.WEEKLY_TARGET || '3', 10),
+  // 感知哈希(dHash, 256bit)相似度日志阈值：汉明距离 <= 此值时记录"疑似相似截图"日志（不拦截）
+  // 用于积累真实样本，评估是否启用拦截及合适阈值
+  imageSimilarityLogThreshold: parseInt(process.env.IMAGE_SIMILARITY_LOG_THRESHOLD || '20', 10),
   wechatNotifyTemplateId: process.env.WECHAT_NOTIFY_TEMPLATE_ID || '',
   // 订阅消息模板A：有新用户申请时通知管理员
   applyTemplateId: process.env.APPLY_TEMPLATE_ID || '',

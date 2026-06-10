@@ -5,6 +5,7 @@ const db = require('../db');
 const config = require('../config');
 const { authRequired, activeRequired } = require('../auth');
 const { recognizeDuration } = require('../qwen');
+const { computeDHash, hammingDistance } = require('../phash');
 const { sendCheckinNotify } = require('../wechat');
 const { currentWeekKey, localDateStr } = require('../week');
 
@@ -65,16 +66,39 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       });
     }
 
-    // ── 防作弊：图片哈希查重 ──────────────────────────────────
+    // ── 防作弊：图片哈希查重（全局，不限本人，防止共用同一张截图）──
     const imageHash = crypto.createHash('sha256').update(req.file.buffer).digest('hex');
-    const hashUsed = db
-      .prepare('SELECT id FROM checkins WHERE openid = ? AND image_hash = ?')
-      .get(openid, imageHash);
+    const hashUsed = db.prepare('SELECT id FROM checkins WHERE image_hash = ?').get(imageHash);
     if (hashUsed) {
       return res.json({
         success: false,
-        reason: '该截图已使用过，请上传新的运动记录截图',
+        reason: '该截图已被使用过，请上传新的运动记录截图',
       });
+    }
+
+    // ── 感知哈希（dHash）计算与记录 ──────────────────────────
+    // 注：实测同一张图压缩/缩放前后的 256bit dHash 汉明距离可达 ~18，
+    // 而同一运动App模板、不同记录的两张不同截图距离可低至 ~6——两者区间有重叠，
+    // 全局阈值拦截会有误伤真实打卡的风险。因此暂不作为拦截依据，
+    // 仅记录疑似相似（distance <= IMAGE_SIMILARITY_LOG_THRESHOLD）供管理员排查，
+    // 积累真实样本后再评估是否启用拦截及合适阈值。
+    let phash = null;
+    try {
+      phash = await computeDHash(req.file.buffer);
+      const others = db
+        .prepare('SELECT id, openid, phash FROM checkins WHERE phash IS NOT NULL')
+        .all();
+      for (const row of others) {
+        const dist = hammingDistance(phash, row.phash);
+        if (dist <= config.imageSimilarityLogThreshold) {
+          console.warn(
+            `[phash] 疑似相似截图: openid=${openid} 与 checkin#${row.id}(openid=${row.openid}) 汉明距离=${dist}/256`
+          );
+        }
+      }
+    } catch (e) {
+      console.error('[phash] compute error:', e.message);
+      // 感知哈希计算失败不影响主流程
     }
 
     // 调用千问识别时长与运动日期（不保存原图）
@@ -104,11 +128,11 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       });
     }
 
-    // 记录打卡（含图片哈希）
+    // 记录打卡（含图片哈希、感知哈希）
     try {
       db.prepare(
-        'INSERT INTO checkins (openid, week_key, checkin_date, duration_minutes, image_hash, created_at) VALUES (?, ?, ?, ?, ?, ?)'
-      ).run(openid, weekKey, today, duration, imageHash, Date.now());
+        'INSERT INTO checkins (openid, week_key, checkin_date, duration_minutes, image_hash, phash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      ).run(openid, weekKey, today, duration, imageHash, phash, Date.now());
     } catch (e) {
       if (String(e.message).includes('UNIQUE')) {
         return res.json({ success: false, already: true, reason: '今天已经打过卡啦' });
