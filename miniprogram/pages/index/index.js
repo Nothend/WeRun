@@ -162,13 +162,7 @@ Page({
     });
   },
 
-  async goCheckin() {
-    if (this.data.isPending) {
-      wx.showToast({ title: '审核通过后才能打卡', icon: 'none' });
-      return;
-    }
-    const ok = await this.requireLogin('打卡需要先登录微信账号，是否登录？');
-    if (!ok) return;
+  goCheckin() {
     wx.navigateTo({ url: '/pages/checkin/checkin' });
   },
 

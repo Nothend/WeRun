@@ -3,12 +3,19 @@ const app = getApp();
 
 const PAGE_SIZE = 10;
 
+// 未登录/待审核时展示的空壳榜单结构，与后端 /api/stats/rankings 的标签保持一致
+const PLACEHOLDER_BOARDS = [
+  { key: 'thisWeek', label: '本周', weekly: true, list: [] },
+  { key: 'lastWeek', label: '上周', weekly: true, list: [] },
+  { key: 'thisMonth', label: '本月', weekly: false, list: [] },
+  { key: 'lastMonth', label: '上月', weekly: false, list: [] },
+  { key: 'thisYear', label: '本年', weekly: false, list: [] },
+  { key: 'allTime', label: '总榜', weekly: false, list: [] },
+];
+
 Page({
   data: {
     loading: true,
-    loggedIn: false,
-    loggingIn: false,
-    isPending: false,
     target: 3,
     boards: [], // 视图用榜单（含 top3 / 分页后的 rest）
     current: 0, // 当前 swiper 下标
@@ -42,28 +49,12 @@ Page({
   onShow() {
     const user = app.globalData.user;
     const isPending = !!(user && user.status === 'pending');
-    this.setData({ isAdmin: !!(user && user.isAdmin), loggedIn: !!user, isPending });
+    this.setData({ isAdmin: !!(user && user.isAdmin) });
     if (user && !isPending) {
       this.load();
     } else {
-      this.setData({ loading: false, boards: [] });
-    }
-  },
-
-  // 未登录时点击登录，仅在用户主动选择时才发起微信登录
-  async goLogin() {
-    if (this.data.loggingIn) return;
-    this.setData({ loggingIn: true });
-    try {
-      await api.login();
-      app.fetchConfig();
-      const user = app.globalData.user;
-      this.setData({ loggedIn: !!user, isAdmin: !!(user && user.isAdmin) });
-      this.load();
-    } catch (e) {
-      wx.showToast({ title: e.message, icon: 'none' });
-    } finally {
-      this.setData({ loggingIn: false });
+      const boards = PLACEHOLDER_BOARDS.map((b) => this.buildBoardView(b));
+      this.setData({ loading: false, boards });
     }
   },
 

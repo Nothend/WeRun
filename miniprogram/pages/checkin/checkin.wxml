@@ -1,11 +1,4 @@
-<!-- 待审核：无法打卡 -->
-<view wx:if="{{isPending}}" class="pending-state">
-  <view class="pending-state-icon">🔒</view>
-  <view class="pending-state-title">暂时无法打卡</view>
-  <view class="pending-state-desc">你的加入申请审核通过后即可开始打卡</view>
-</view>
-
-<view wx:else class="container">
+<view class="container">
   <view class="card">
     <!-- 上传区 -->
     <view class="upload-zone" bindtap="chooseImage">
