@@ -234,3 +234,12 @@
   border: 1rpx solid rgba(100, 116, 139, 0.2);
   border-radius: 100rpx;
 }
+.pending-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.pending-banner-actions .pending-banner-btn,
+.pending-banner-actions .pending-banner-edit {
+  align-self: auto;
+}

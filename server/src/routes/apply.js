@@ -54,7 +54,12 @@ router.post('/apply', authRequired, upload.single('avatar'), async (req, res) =>
       return res.status(400).json({ error: '请上传头像' });
     }
 
-    db.prepare('UPDATE users SET nickname = ?, avatar_url = ? WHERE openid = ?').run(nickname, avatarUrl, openid);
+    db.prepare('UPDATE users SET nickname = ?, avatar_url = ?, applied_at = ? WHERE openid = ?').run(
+      nickname,
+      avatarUrl,
+      Date.now(),
+      openid
+    );
 
     // 异步通知管理员（fire-and-forget），失败不影响申请提交
     if (config.applyTemplateId) {
@@ -84,6 +89,7 @@ router.post('/apply', authRequired, upload.single('avatar'), async (req, res) =>
         avatarUrl: updated.avatar_url,
         isAdmin: !!updated.is_admin,
         status: updated.status,
+        hasApplied: !!updated.applied_at,
       },
     });
   } catch (e) {

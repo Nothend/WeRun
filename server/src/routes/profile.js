@@ -9,6 +9,21 @@ const { authRequired } = require('../auth');
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
+// GET /api/me  返回当前用户最新信息（待审核用户用它刷新审核结果）
+router.get('/me', authRequired, (req, res) => {
+  const user = req.user;
+  res.json({
+    user: {
+      openid: user.openid,
+      nickname: user.nickname,
+      avatarUrl: user.avatar_url,
+      isAdmin: !!user.is_admin,
+      status: user.status || 'active',
+      hasApplied: !!user.applied_at,
+    },
+  });
+});
+
 // POST /api/profile
 //   JSON:      { nickname, avatarUrl? }  avatarUrl 为微信 CDN https URL
 //   multipart: nickname(字段) + avatar(file, 可选)
@@ -42,6 +57,7 @@ router.post('/profile', authRequired, upload.single('avatar'), (req, res) => {
         avatarUrl: user.avatar_url,
         isAdmin: !!user.is_admin,
         status: user.status || 'active',
+        hasApplied: !!user.applied_at,
       },
     });
   } catch (e) {

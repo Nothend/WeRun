@@ -42,6 +42,7 @@ router.post('/login', async (req, res) => {
         avatarUrl: user.avatar_url,
         isAdmin: !!user.is_admin,
         status: user.status || 'active',
+        hasApplied: !!user.applied_at,
       },
     });
   } catch (e) {

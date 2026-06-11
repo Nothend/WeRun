@@ -43,7 +43,7 @@ router.get('/admin/applications', (req, res) => {
     .prepare(
       `SELECT openid, nickname, avatar_url AS avatarUrl, created_at AS createdAt
          FROM users
-        WHERE status = 'pending'
+        WHERE status = 'pending' AND applied_at IS NOT NULL
         ORDER BY created_at ASC`
     )
     .all();

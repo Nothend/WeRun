@@ -72,5 +72,10 @@ if (!userCols.includes('notify_checkin')) {
 if (!userCols.includes('status')) {
   db.exec("ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
 }
+if (!userCols.includes('applied_at')) {
+  db.exec('ALTER TABLE users ADD COLUMN applied_at INTEGER DEFAULT NULL');
+  // 回填存量数据：申请接口强制要求头像，有头像的 pending 用户必然提交过申请
+  db.exec("UPDATE users SET applied_at = created_at WHERE status = 'pending' AND avatar_url != ''");
+}
 
 module.exports = db;

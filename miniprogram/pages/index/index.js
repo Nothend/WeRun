@@ -9,7 +9,7 @@ Page({
     nickname: '',
     stats: null,
     isPending: false,
-    nicknameIsDefault: false,
+    hasApplied: false,
   },
 
   onShareAppMessage() {
@@ -22,15 +22,48 @@ Page({
   onShow() {
     const user = app.globalData.user;
     const isPending = !!(user && user.status === 'pending');
-    const nicknameIsDefault = isPending && (!user.nickname || /^跑友.{4}$/.test(user.nickname));
+    const hasApplied = !!(user && user.hasApplied);
     this.setData({
       user,
       avatarUrl: user ? user.avatarUrl : '',
       nickname: user ? user.nickname : '',
       isPending,
-      nicknameIsDefault,
+      hasApplied,
     });
     if (user && !isPending) this.loadStats();
+    if (user && isPending) this.refreshMe();
+  },
+
+  // 从服务端拉取最新用户状态。审核结果不会推送到客户端，
+  // 待审核用户进入首页时静默刷新，也可通过横幅按钮手动刷新（showFeedback）
+  async refreshMe(showFeedback) {
+    if (this._refreshingMe) return;
+    this._refreshingMe = true;
+    try {
+      const { user } = await api.request('/api/me');
+      app.setUser(user);
+      const isPending = user.status === 'pending';
+      const hasApplied = !!user.hasApplied;
+      this.setData({ user, avatarUrl: user.avatarUrl, nickname: user.nickname, isPending, hasApplied });
+      if (!isPending) {
+        this.loadStats();
+        if (showFeedback) wx.showToast({ title: '审核已通过', icon: 'success' });
+      } else if (showFeedback) {
+        wx.showToast({ title: '仍在审核中，请耐心等待', icon: 'none' });
+      }
+    } catch (e) {
+      // 401（被移除等）时 api.js 已清除登录态，这里同步页面回未登录状态
+      if (!app.globalData.user) {
+        this.setData({ user: null, avatarUrl: '', nickname: '', stats: null, isPending: false, hasApplied: false });
+      }
+      if (showFeedback) wx.showToast({ title: e.message || '刷新失败', icon: 'none' });
+    } finally {
+      this._refreshingMe = false;
+    }
+  },
+
+  onRefreshStatus() {
+    this.refreshMe(true);
   },
 
   // 实际执行登录，不带确认弹窗（用于用户主动点击「微信登录」）
@@ -41,10 +74,10 @@ Page({
       const { user, isNewUser } = await api.login();
       app.fetchConfig();
       const isPending = user.status === 'pending';
-      const nicknameIsDefault = isPending && (!user.nickname || /^跑友.{4}$/.test(user.nickname));
-      this.setData({ user, avatarUrl: user.avatarUrl, nickname: user.nickname, isPending, nicknameIsDefault });
+      const hasApplied = !!user.hasApplied;
+      this.setData({ user, avatarUrl: user.avatarUrl, nickname: user.nickname, isPending, hasApplied });
       if (!isPending) this.loadStats();
-      if (isPending) {
+      if (isPending && !hasApplied) {
         wx.navigateTo({ url: '/pages/profile/profile?mode=apply' });
       } else if (isNewUser) {
         wx.navigateTo({ url: '/pages/profile/profile?mode=auth' });
@@ -117,11 +150,15 @@ Page({
 
   // ── 个人资料 ───────────────────────────────────────────
   onProfileTap() {
-    if (this.data.user) {
-      wx.navigateTo({ url: '/pages/profile/profile' });
-    } else {
+    if (!this.data.user) {
       this.handleLogin();
+      return;
     }
+    if (this.data.isPending && !this.data.hasApplied) {
+      this.goApply();
+      return;
+    }
+    wx.navigateTo({ url: '/pages/profile/profile' });
   },
 
   // ── 导航 ──────────────────────────────────────────────
