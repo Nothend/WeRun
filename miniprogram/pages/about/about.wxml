@@ -3,7 +3,7 @@
   <view class="card about-card">
     <view class="about-icon">🏃</view>
     <view class="about-title">WeRun 跑团打卡</view>
-    <view class="about-desc">由跑团成员用爱发电开发和维护的小程序，希望它能帮大家把跑步坚持下去。</view>
+    <view class="about-desc">用爱发电开发的小程序，希望能帮大家把跑步坚持下去。</view>
   </view>
 
   <view class="card cost-card">
@@ -14,7 +14,7 @@
     </view>
     <view class="cost-item">
       <text class="cost-icon">🤖</text>
-      <text class="cost-text">AI 识别截图时长使用千问大模型，词元（Token）按量计费</text>
+      <text class="cost-text">AI 识图使用千问大模型，Token 按量计费</text>
     </view>
     <view class="cost-item">
       <text class="cost-icon">☁️</text>
@@ -24,7 +24,7 @@
 
   <view class="card support-card">
     <view class="support-title">💗 欢迎大家支持</view>
-    <view class="support-sub">长按识别或保存下方二维码，请作者喝杯水～金额随意，心意最重要！</view>
+    <view class="support-sub">请作者喝杯水～金额随意，心意最重要！</view>
     <image
       class="pay-qr"
       src="{{payQrUrl}}"
@@ -32,7 +32,7 @@
       show-menu-by-longpress
       bindtap="previewQr"
     />
-    <view class="support-hint">微信支付 · 长按二维码可识别</view>
+    <view class="support-hint">个人小程序不能长按识别付款码</view>
   </view>
 
 </view>
