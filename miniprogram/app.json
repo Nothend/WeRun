@@ -4,7 +4,9 @@
     "pages/checkin/checkin",
     "pages/ranking/ranking",
     "pages/admin/admin",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/about/about",
+    "pages/records/records"
   ],
   "window": {
     "navigationBarBackgroundColor": "#070d1b",

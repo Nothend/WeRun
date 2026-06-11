@@ -1,0 +1,38 @@
+<view class="container">
+
+  <view class="card about-card">
+    <view class="about-icon">🏃</view>
+    <view class="about-title">WeRun 跑团打卡</view>
+    <view class="about-desc">由跑团成员用爱发电开发和维护的小程序，希望它能帮大家把跑步坚持下去。</view>
+  </view>
+
+  <view class="card cost-card">
+    <view class="cost-title">为什么需要支持？</view>
+    <view class="cost-item">
+      <text class="cost-icon">💳</text>
+      <text class="cost-text">微信小程序认证需要每年缴纳年费</text>
+    </view>
+    <view class="cost-item">
+      <text class="cost-icon">🤖</text>
+      <text class="cost-text">AI 识别截图时长使用千问大模型，词元（Token）按量计费</text>
+    </view>
+    <view class="cost-item">
+      <text class="cost-icon">☁️</text>
+      <text class="cost-text">服务器和域名也在持续产生费用</text>
+    </view>
+  </view>
+
+  <view class="card support-card">
+    <view class="support-title">💗 欢迎大家支持</view>
+    <view class="support-sub">长按识别或保存下方二维码，请作者喝杯水～金额随意，心意最重要！</view>
+    <image
+      class="pay-qr"
+      src="{{payQrUrl}}"
+      mode="widthFix"
+      show-menu-by-longpress
+      bindtap="previewQr"
+    />
+    <view class="support-hint">微信支付 · 长按二维码可识别</view>
+  </view>
+
+</view>

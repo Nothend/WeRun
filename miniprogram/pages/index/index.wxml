@@ -27,14 +27,14 @@
       <text wx:if="{{!user}}" class="profile-login-badge" hover-class="action-hover">{{loggingIn ? '登录中…' : '去登录'}}</text>
     </view>
     <view class="profile-stats">
-      <view class="pstat-item">
+      <view class="pstat-item" hover-class="{{stats ? 'pstat-hover' : ''}}" hover-stay-time="150" data-scope="week" bindtap="openRecords">
         <text class="pstat-num">{{stats ? stats.weekCount : '-'}}</text>
-        <text class="pstat-label">本周打卡</text>
+        <text class="pstat-label">本周打卡{{stats ? ' ›' : ''}}</text>
       </view>
       <view class="pstat-divider"></view>
-      <view class="pstat-item">
+      <view class="pstat-item" hover-class="{{stats ? 'pstat-hover' : ''}}" hover-stay-time="150" data-scope="all" bindtap="openRecords">
         <text class="pstat-num">{{stats ? stats.totalCount : '-'}}</text>
-        <text class="pstat-label">总打卡次数</text>
+        <text class="pstat-label">总打卡次数{{stats ? ' ›' : ''}}</text>
       </view>
     </view>
     <view wx:if="{{stats && stats.todayCheckin}}" class="today-row">
@@ -60,9 +60,9 @@
       <text class="action-text">查看排行榜</text>
       <text class="action-chevron">›</text>
     </view>
-    <view class="action-item" hover-class="action-hover" hover-stay-time="150" loading="{{shareLoading}}" bindtap="openShareModal">
-      <view class="action-icon-wrap">📤</view>
-      <text class="action-text">分享运动数据</text>
+    <view class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goAbout">
+      <view class="action-icon-wrap">💗</view>
+      <text class="action-text">关于作者</text>
       <text class="action-chevron">›</text>
     </view>
     <view wx:if="{{user.isAdmin}}" class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goAdmin">
@@ -82,19 +82,4 @@
     </view>
   </view>
 
-</view>
-
-<!-- 分享运动数据蒙层 -->
-<view wx:if="{{showShareModal}}" class="share-overlay" bindtap="closeShareModal">
-  <view class="share-modal" catchtap="">
-    <view class="share-title">分享运动数据 📤</view>
-    <view class="share-text-box">
-      <text class="share-text">{{shareText}}</text>
-    </view>
-    <view class="share-actions">
-      <view class="share-copy-btn" bindtap="copyShareText">复制文案</view>
-      <button class="share-forward-btn" open-type="share">分享给好友</button>
-    </view>
-    <view class="share-close" bindtap="closeShareModal">关闭</view>
-  </view>
 </view>

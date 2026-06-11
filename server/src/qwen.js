@@ -89,27 +89,6 @@ async function recognizeDuration(imageBuffer, mime = 'image/jpeg') {
 // 用于分享文案生成的文字模型（非 VL）
 const SHARE_TEXT_MODEL = process.env.QWEN_TEXT_MODEL || 'qwen-turbo';
 
-// 生成个人打卡分享文案
-async function generateShareText({ nickname, weekCount, weekTarget, totalCount, achieved }) {
-  if (config.useMockQwen) {
-    const flag = achieved ? '🎯 已达标！' : '💪 继续冲！';
-    return `${flag} ${nickname} 本周跑步打卡 ${weekCount}/${weekTarget} 次，历史累计 ${totalCount} 次。来 WeRun 一起打卡吧！`;
-  }
-  const prompt = `请根据以下跑步打卡数据，为用户「${nickname}」生成一段分享到微信好友的文案（50字以内，积极励志风格，加1-2个emoji）。
-本周打卡：${weekCount}/${weekTarget} 次 ${achieved ? '（已达标）' : '（未达标）'}
-历史累计：${totalCount} 次`;
-
-  const resp = await fetch(`${config.qwenBaseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.dashscopeApiKey}` },
-    body: JSON.stringify({ model: SHARE_TEXT_MODEL, messages: [{ role: 'user', content: prompt }] }),
-  });
-  if (!resp.ok) throw new Error(`AI 文案生成失败(${resp.status})`);
-  const data = await resp.json();
-  return (data?.choices?.[0]?.message?.content || '').trim()
-    || `${nickname} 本周打卡 ${weekCount}/${weekTarget} 次，一起来 WeRun 跑步吧！`;
-}
-
 // 生成群组周报分享文案（管理员用）
 async function generateGroupShareText({ weekKey, achievedCount, total, target, topRunners }) {
   if (config.useMockQwen) {
@@ -130,4 +109,4 @@ async function generateGroupShareText({ weekKey, achievedCount, total, target, t
     || `跑步群本周 ${achievedCount}/${total} 人达标，继续加油！`;
 }
 
-module.exports = { recognizeDuration, generateShareText, generateGroupShareText };
+module.exports = { recognizeDuration, generateGroupShareText };

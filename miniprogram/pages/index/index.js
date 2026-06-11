@@ -10,14 +10,11 @@ Page({
     stats: null,
     isPending: false,
     nicknameIsDefault: false,
-    shareText: '',
-    shareLoading: false,
-    showShareModal: false,
   },
 
   onShareAppMessage() {
     return {
-      title: this.data.shareText || '我在 WeRun 坚持跑步打卡，快来一起运动！',
+      title: '我在 WeRun 坚持跑步打卡，快来一起运动！',
       path: '/pages/index/index',
     };
   },
@@ -111,30 +108,11 @@ Page({
     });
   },
 
-  // ── 分享 ──────────────────────────────────────────────
-  async openShareModal() {
-    const ok = await this.requireLogin('分享运动数据需要先登录微信账号，是否登录？');
-    if (!ok || this.data.shareLoading) return;
-    this.setData({ shareLoading: true });
-    try {
-      const data = await api.request('/api/share/me');
-      this.setData({ shareText: data.text, showShareModal: true });
-    } catch (e) {
-      wx.showToast({ title: e.message || '生成文案失败', icon: 'none' });
-    } finally {
-      this.setData({ shareLoading: false });
-    }
-  },
-
-  closeShareModal() {
-    this.setData({ showShareModal: false });
-  },
-
-  copyShareText() {
-    wx.setClipboardData({
-      data: this.data.shareText,
-      success: () => wx.showToast({ title: '已复制', icon: 'success' }),
-    });
+  // ── 打卡明细 ───────────────────────────────────────────
+  openRecords(e) {
+    if (!this.data.stats) return;
+    const scope = e.currentTarget.dataset.scope;
+    wx.navigateTo({ url: `/pages/records/records?scope=${scope}` });
   },
 
   // ── 个人资料 ───────────────────────────────────────────
@@ -171,6 +149,9 @@ Page({
   },
   goRanking() {
     wx.navigateTo({ url: '/pages/ranking/ranking' });
+  },
+  goAbout() {
+    wx.navigateTo({ url: '/pages/about/about' });
   },
   goAdmin() {
     wx.navigateTo({ url: '/pages/admin/admin' });

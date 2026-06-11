@@ -1,0 +1,72 @@
+/* ── 汇总卡 ── */
+.summary-card {
+  display: flex;
+  align-items: center;
+  padding: 32rpx 0;
+}
+.summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+.summary-num {
+  font-size: 52rpx;
+  font-weight: 800;
+  color: #22d3ee;
+  line-height: 1;
+  letter-spacing: -1rpx;
+}
+.summary-label {
+  font-size: 20rpx;
+  color: #475569;
+  letter-spacing: 2rpx;
+}
+.summary-divider {
+  width: 1rpx;
+  height: 64rpx;
+  background: rgba(34, 211, 238, 0.12);
+}
+
+/* ── 明细列表 ── */
+.list-card {
+  padding: 0;
+  overflow: hidden;
+}
+.record-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx 40rpx;
+}
+.record-item + .record-item {
+  border-top: 1rpx solid rgba(255, 255, 255, 0.04);
+}
+.record-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+.record-date {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+.record-meta {
+  font-size: 22rpx;
+  color: #475569;
+  letter-spacing: 0.5rpx;
+}
+.record-duration {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.empty-tip {
+  text-align: center;
+  font-size: 26rpx;
+  color: #475569;
+  padding: 80rpx 0;
+}

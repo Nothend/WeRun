@@ -36,6 +36,26 @@ router.get('/stats/me', authRequired, activeRequired, (req, res) => {
   });
 });
 
+// GET /api/stats/me/checkins?scope=week|all  我的打卡明细
+router.get('/stats/me/checkins', authRequired, activeRequired, (req, res) => {
+  const scope = req.query.scope === 'week' ? 'week' : 'all';
+  const weekKey = currentWeekKey();
+  const baseSql = `SELECT checkin_date AS date, duration_minutes AS duration, week_key AS weekKey
+                     FROM checkins WHERE openid = ?`;
+  const rows =
+    scope === 'week'
+      ? db.prepare(`${baseSql} AND week_key = ? ORDER BY checkin_date DESC`).all(req.user.openid, weekKey)
+      : db.prepare(`${baseSql} ORDER BY checkin_date DESC`).all(req.user.openid);
+
+  res.json({
+    scope,
+    weekKey,
+    count: rows.length,
+    totalMinutes: Math.round(rows.reduce((s, r) => s + (r.duration || 0), 0)),
+    list: rows.map((r) => ({ ...r, duration: Math.round(r.duration) })),
+  });
+});
+
 // GET /api/stats/group  群周榜（本周）
 router.get('/stats/group', authRequired, activeRequired, (req, res) => {
   const weekKey = currentWeekKey();

@@ -1,0 +1,29 @@
+<view class="container">
+
+  <!-- 汇总 -->
+  <view class="card summary-card">
+    <view class="summary-item">
+      <text class="summary-num">{{count}}</text>
+      <text class="summary-label">{{scope === 'week' ? '本周打卡' : '总打卡次数'}}</text>
+    </view>
+    <view class="summary-divider"></view>
+    <view class="summary-item">
+      <text class="summary-num">{{totalMinutes}}</text>
+      <text class="summary-label">累计分钟</text>
+    </view>
+  </view>
+
+  <!-- 明细列表 -->
+  <view wx:if="{{loading}}" class="empty-tip">加载中…</view>
+  <view wx:elif="{{list.length === 0}}" class="empty-tip">暂无打卡记录，去上传一张运动截图吧 📷</view>
+  <view wx:else class="card list-card">
+    <view class="record-item" wx:for="{{list}}" wx:key="date">
+      <view class="record-left">
+        <text class="record-date">{{item.date}}</text>
+        <text class="record-meta">{{item.weekday}}{{scope === 'all' ? ' · ' + item.weekKey : ''}}</text>
+      </view>
+      <text class="record-duration">{{item.duration}} 分钟</text>
+    </view>
+  </view>
+
+</view>
