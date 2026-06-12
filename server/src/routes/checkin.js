@@ -109,8 +109,31 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
 
     const duration = Math.round(durationSeconds / 60);
 
-    // 运动日期仅供展示，不作为拒绝依据：
-    // AI 可能因图片压缩等原因识别出错，打卡日期统一以服务器当日为准
+    // ── 防作弊⓪：运动日期校验（防止翻旧截图反复打卡）────────────
+    // 截图必须能识别出运动日期（含"今天/昨天"等相对日期，由 AI 按今天日期换算），
+    // 且在允许范围内：今天起向前 screenshotMaxLagDays 天（默认 1，照顾
+    // "晚上跑完次日早上打卡"）。无论截图日期是今天还是昨天，打卡都记在提交当天。
+    const allowedDates = new Set();
+    for (let i = 0; i <= config.screenshotMaxLagDays; i++) {
+      allowedDates.add(localDateStr(new Date(Date.now() - i * 86400000)));
+    }
+    if (!recognizedDate) {
+      return res.json({
+        success: false,
+        duration,
+        exercise_date: null,
+        reason: '未能识别到截图中的运动日期，请截取包含日期（或"今天"字样）的完整运动记录页面',
+      });
+    }
+    if (!allowedDates.has(recognizedDate)) {
+      return res.json({
+        success: false,
+        duration,
+        exercise_date: recognizedDate,
+        reason: `识别到截图中的运动日期为 ${recognizedDate}，仅支持${config.screenshotMaxLagDays > 0 ? '今天或昨天' : '今天'}的运动记录`,
+      });
+    }
+
     if (durationSeconds < config.minDurationMinutes * 60) {
       return res.json({
         success: false,

@@ -16,6 +16,9 @@ const config = {
   bootstrapAdminOpenid: process.env.BOOTSTRAP_ADMIN_OPENID || '',
   minDurationMinutes: parseFloat(process.env.MIN_DURATION_MINUTES || '30'),
   weeklyTarget: parseInt(process.env.WEEKLY_TARGET || '3', 10),
+  // 截图运动日期允许的最大滞后天数：0=只允许今天，1=允许今天或昨天（默认，
+  // 照顾"晚上跑完次日早上打卡"）。识别不出日期或超出范围的截图会被拒绝
+  screenshotMaxLagDays: parseInt(process.env.SCREENSHOT_MAX_LAG_DAYS || '1', 10),
   // 感知哈希(dHash, 256bit)相似度日志阈值：汉明距离 <= 此值时记录"疑似相似截图"日志（不拦截）
   // 用于积累真实样本，评估是否启用拦截及合适阈值
   imageSimilarityLogThreshold: parseInt(process.env.IMAGE_SIMILARITY_LOG_THRESHOLD || '20', 10),

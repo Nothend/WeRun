@@ -1,20 +1,32 @@
 const config = require('./config');
+const { localDateStr } = require('./week');
 
-const PROMPT = [
-  '这是一张跑步/运动记录的截图（可能来自 Keep、悦跑圈、微信运动、华为/小米运动等）。',
-  '请你识别以下内容：',
-  '1. 图中的"运动时长"，换算为总秒数；',
-  '2. 该时长在图中是否精确显示到"秒"（即格式形如 32:18 或 01:32:18，包含秒数；',
-  '   若只显示为"32分钟"、"约30分钟"、"0.5小时"等不含秒的形式，则视为不精确到秒）；',
-  '3. 图中的"运动日期"（即本次运动发生的日期，格式 YYYY-MM-DD；若无法识别则为 null）。',
-  '严格只返回一个 JSON 对象，不要任何多余文字或解释，格式如下：',
-  '{"has_time": true 或 false, "duration_seconds": 数字, "has_seconds": true 或 false, "exercise_date": "YYYY-MM-DD" 或 null}',
-  '其中 has_time 表示图中是否包含可识别的运动时长；',
-  'duration_seconds 为该时长换算成的总秒数（例如 "32:18" → 1938，"32分钟" → 1920，"1小时05分" → 3900）；',
-  'has_seconds 表示图中显示的时长格式是否精确到秒（"32:18" → true，"32分钟"/"约30分钟" → false）；',
-  'exercise_date 为本次运动的日期（若图中有明确日期则返回，否则返回 null）。',
-  '若图中没有明确的运动时长，则 has_time 为 false，duration_seconds 为 0，has_seconds 为 false。',
-].join('\n');
+// 注入今天的北京日期，模型才能把截图里的相对/不完整日期（"今天 07:30"、
+// "昨天"、"6月12日"）换算成完整的 YYYY-MM-DD —— 该日期用于拒绝旧截图打卡
+function buildPrompt(todayStr) {
+  return [
+    '这是一张跑步/运动记录的截图（可能来自 Keep、悦跑圈、微信运动、华为/小米运动等）。',
+    `今天的日期是 ${todayStr}（北京时间）。`,
+    '请你识别以下内容：',
+    '1. 图中的"运动时长"，换算为总秒数；',
+    '2. 该时长在图中是否精确显示到"秒"（即格式形如 32:18 或 01:32:18，包含秒数；',
+    '   若只显示为"32分钟"、"约30分钟"、"0.5小时"等不含秒的形式，则视为不精确到秒）；',
+    '3. 图中的"运动日期"（即本次运动发生的日期，格式 YYYY-MM-DD）。',
+    '   若图中显示的是相对或不完整日期（如"今天"、"昨天"、"6月12日"、"6/9"、',
+    '   "06/09"、"6-12"、"周五"等），请根据上面给出的今天日期换算成完整的 YYYY-MM-DD，',
+    '   斜杠/横线分隔的不完整日期一律按"月/日"理解（"6/9" → 6月9日）；',
+    '   不含年份的日期，年份按"不晚于今天且距今最近"推断（如今天是 1 月 1 日，',
+    '   则"12/31"应解析为去年的 12 月 31 日）；',
+    '   若图中完全没有任何日期信息（也没有"今天/昨天"等字样），则为 null，不要猜测。',
+    '严格只返回一个 JSON 对象，不要任何多余文字或解释，格式如下：',
+    '{"has_time": true 或 false, "duration_seconds": 数字, "has_seconds": true 或 false, "exercise_date": "YYYY-MM-DD" 或 null}',
+    '其中 has_time 表示图中是否包含可识别的运动时长；',
+    'duration_seconds 为该时长换算成的总秒数（例如 "32:18" → 1938，"32分钟" → 1920，"1小时05分" → 3900）；',
+    'has_seconds 表示图中显示的时长格式是否精确到秒（"32:18" → true，"32分钟"/"约30分钟" → false）；',
+    'exercise_date 为本次运动的日期（图中有日期信息则换算返回，否则返回 null）。',
+    '若图中没有明确的运动时长，则 has_time 为 false，duration_seconds 为 0，has_seconds 为 false。',
+  ].join('\n');
+}
 
 function extractJson(text) {
   if (!text) return null;
@@ -32,13 +44,9 @@ function extractJson(text) {
 // 输入图片 Buffer + mime，返回 { has_time, duration_seconds, has_seconds, exercise_date }
 async function recognizeDuration(imageBuffer, mime = 'image/jpeg') {
   if (config.useMockQwen) {
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, '0');
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const exercise_date = `${today.getFullYear()}-${mm}-${dd}`;
     // 加入随机秒数抖动，避免同一天所有 mock 用户的「日期+秒级时长」指纹完全相同
     const duration_seconds = 35 * 60 + Math.floor(Math.random() * 60);
-    return { has_time: true, duration_seconds, has_seconds: true, exercise_date, mock: true };
+    return { has_time: true, duration_seconds, has_seconds: true, exercise_date: localDateStr(), mock: true };
   }
 
   const dataUrl = `data:${mime};base64,${imageBuffer.toString('base64')}`;
@@ -54,7 +62,7 @@ async function recognizeDuration(imageBuffer, mime = 'image/jpeg') {
         {
           role: 'user',
           content: [
-            { type: 'text', text: PROMPT },
+            { type: 'text', text: buildPrompt(localDateStr()) },
             { type: 'image_url', image_url: { url: dataUrl } },
           ],
         },

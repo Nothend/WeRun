@@ -9,7 +9,7 @@ WeRun is a WeChat Mini Program for a ~20-person running group. Users log in via 
 Three cross-cutting mechanisms to know before changing code:
 
 - **Member approval**: new users get `status = 'pending'` and must be approved by an admin before they can check in or view stats. The `activeRequired` middleware (in `auth.js`) enforces this on most API routes — it is why endpoints return 403 for fresh accounts. The first user ever to log in is auto-promoted to active admin.
-- **Anti-cheat (checkin.js)**: three layers — exact image hash dedup, pHash perceptual similarity (block below `IMAGE_SIMILARITY_BLOCK_THRESHOLD` hamming distance, log below `IMAGE_SIMILARITY_LOG_THRESHOLD`), and a global unique index on the "exercise date + second-level duration" fingerprint (only when the screenshot shows seconds).
+- **Anti-cheat (checkin.js)**: four layers — screenshot exercise-date validation (Qwen-VL resolves relative dates like "今天/昨天" against today's Beijing date injected into the prompt; screenshots with no recognizable date or older than `SCREENSHOT_MAX_LAG_DAYS` days, default 1, are rejected), exact image hash dedup, pHash perceptual similarity (block below `IMAGE_SIMILARITY_BLOCK_THRESHOLD` hamming distance, log below `IMAGE_SIMILARITY_LOG_THRESHOLD`), and a global unique index on the "check-in date + second-level duration" fingerprint (only when the screenshot shows seconds).
 - **Scheduled notifications**: a cron job in `app.js` (Sundays 22:00 Asia/Shanghai) sends weekly-report WeChat subscribe messages; new-member applications also notify admins. Template IDs come from `APPLY_TEMPLATE_ID` / `WEEKLY_TEMPLATE_ID` and are served to the mini program via `GET /api/config`.
 
 ## Running the Server Locally
@@ -94,4 +94,4 @@ your.domain.com {
 ```
 The container exposes port 9056 on `127.0.0.1` (mapped from internal port 3000). No nginx needed.
 
-Key env vars to set in ECS `.env`: `APPID`, `APPSECRET`, `DASHSCOPE_API_KEY`, `JWT_SECRET`, `PUBLIC_BASE_URL=https://your.domain.com`, `WERUN_IMAGE`. Optional tuning: `MIN_DURATION_MINUTES` (default 30), `WEEKLY_TARGET` (default 3), `IMAGE_SIMILARITY_BLOCK_THRESHOLD` / `IMAGE_SIMILARITY_LOG_THRESHOLD`, `APPLY_TEMPLATE_ID` / `WEEKLY_TEMPLATE_ID` (subscribe messages), `QWEN_MODEL` / `QWEN_TEXT_MODEL`.
+Key env vars to set in ECS `.env`: `APPID`, `APPSECRET`, `DASHSCOPE_API_KEY`, `JWT_SECRET`, `PUBLIC_BASE_URL=https://your.domain.com`, `WERUN_IMAGE`. Optional tuning: `MIN_DURATION_MINUTES` (default 30), `WEEKLY_TARGET` (default 3), `SCREENSHOT_MAX_LAG_DAYS` (default 1 — screenshot exercise date may be at most this many days before today), `IMAGE_SIMILARITY_BLOCK_THRESHOLD` / `IMAGE_SIMILARITY_LOG_THRESHOLD`, `APPLY_TEMPLATE_ID` / `WEEKLY_TEMPLATE_ID` (subscribe messages), `QWEN_MODEL` / `QWEN_TEXT_MODEL`.
