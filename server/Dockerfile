@@ -10,6 +10,10 @@ COPY src ./src
 # ---- 运行阶段：只带产物，镜像更小 ----
 FROM node:18-alpine
 WORKDIR /app
+# 时区双保险：日期逻辑已在代码里显式按 UTC+8 计算（src/week.js），
+# 这里再把容器时区设为北京时间，让日志时间戳等显示一致
+RUN apk add --no-cache tzdata
+ENV TZ=Asia/Shanghai
 ENV NODE_ENV=production
 ENV DATA_DIR=/app/data
 COPY --from=build /app/node_modules ./node_modules
