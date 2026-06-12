@@ -210,8 +210,12 @@
       <text class="result-val">{{importResult.pending}} 条</text>
     </view>
     <view class="result-row">
-      <text class="result-lbl">已跳过</text>
+      <text class="result-lbl">已跳过（当天已有打卡）</text>
       <text class="result-val">{{importResult.skipped}} 条</text>
+    </view>
+    <view wx:if="{{importResult.imprecise > 0}}" class="result-row">
+      <text class="result-lbl">时间不精确跳过（缺时分秒）</text>
+      <text class="result-val warn">{{importResult.imprecise}} 条</text>
     </view>
     <view wx:if="{{importResult.pending > 0}}" class="muted" style="font-size:22rpx;margin-top:16rpx;line-height:1.6">
       未匹配到现有成员的记录已暂存，可在「待匹配导入记录」中等成员加入后手动关联

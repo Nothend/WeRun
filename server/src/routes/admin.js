@@ -176,7 +176,7 @@ function fromWallClockMs(wallMs) {
 //   - cellDates:true 产生的真实 Date 对象（其 UTC 字段即表格里的墙上时间）
 //   - Excel 序列号（1900 纪元，Lotus 兼容偏移 -1），含文本形式的数字
 //   - 文本："2026-6-9"、"2026/6/9"、"2026.6.9"、"2026-06-09 10:30:00"、"2026年6月9日 18时3分19秒" 等
-// 时间部分缺失时为当天 00:00:00
+// 时间部分缺失时为当天 00:00:00（此类"纯日期"行随后被导入门槛整行跳过）
 function parseExcelDateTime(raw) {
   if (raw instanceof Date && !isNaN(raw)) {
     return fromWallClockMs(raw.getTime());
@@ -201,6 +201,8 @@ function parseExcelDateTime(raw) {
 
 // POST /api/admin/import  导入 Excel 打卡数据
 // Excel 格式：列名"用户昵称"/"昵称"/"今日跑者"  + "打卡时间"/"日期"/"提交时间"（支持多种日期格式）
+// 提交时间必须精确到时分秒（北京时间）：解析结果恰为零点视为纯日期，整行跳过（imprecise 计数）
+// 已有打卡记录（不论来源）在任何情况下都不修改——数据库优先，导入只追加
 // 昵称单元格支持逗号/顿号拼接多个跑者（问卷一次提交多人），拆分后各自独立判重入库
 router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: '请上传 Excel 文件' });
@@ -241,25 +243,10 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
     `INSERT OR IGNORE INTO import_pending (nickname, checkin_date, duration_minutes, week_key, created_at)
      VALUES (?, ?, ?, ?, ?)`
   );
-  // created_at 精化：识别"打卡时间不真实"的历史导入记录，重导带时分秒的
-  // Excel 时刷成真实提交时间，仅动 created_at。两种特征（原生打卡均不满足）：
-  //   ① created_at 恰为北京零点 —— 新版导入遇到纯日期单元格的产物；
-  //   ② created_at 的北京日期 ≠ checkin_date —— 旧版导入把 created_at 写成了
-  //      导入操作时刻（与历史打卡日期相差数天/数月）。
-  //   注意特征②要求先跑完时区修正脚本（原生错位记录修正前也满足②）
-  const STALE_TIME_COND =
-    "((created_at + 28800000) % 86400000 = 0 OR date((created_at + 28800000)/1000, 'unixepoch') != checkin_date)";
-  const refreshCheckinTime = db.prepare(
-    `UPDATE checkins SET created_at = ?
-      WHERE openid = ? AND checkin_date = ? AND ${STALE_TIME_COND}`
-  );
-  const refreshPendingTime = db.prepare(
-    `UPDATE import_pending SET created_at = ?
-      WHERE nickname = ? AND checkin_date = ? AND ${STALE_TIME_COND}`
-  );
+  // 北京时间恰为 0:00:00.000 视为"纯日期单元格"，不满足精确时间要求
   const hasTimeOfDay = (epochMs) => (epochMs + 28800000) % 86400000 !== 0;
 
-  const result = { total: rows.length, matched: 0, inserted: 0, updated: 0, pending: 0, ignored: 0, skipped: 0, errors: [] };
+  const result = { total: rows.length, matched: 0, inserted: 0, pending: 0, ignored: 0, skipped: 0, imprecise: 0, errors: [] };
 
   const tx = db.transaction(() => {
     for (const row of rows) {
@@ -280,6 +267,11 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
       }
 
       const { dateStr, epochMs } = parsed;
+      if (!hasTimeOfDay(epochMs)) {
+        if (result.errors.length < 20) result.errors.push(`提交时间缺少时分秒 (${nameCell}): ${rawDate}`);
+        result.imprecise++;
+        continue;
+      }
       const weekKey = weekKeyForDate(dateStr);
       // 一个单元格可能拼接多个跑者："承晓东, 杨立文" → 拆分后各自按同一日期判重入库
       const nicknames = nameCell.split(/[,，、]/).map((s) => s.trim()).filter(Boolean);
@@ -296,11 +288,10 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
 
         if (openid) {
           result.matched++;
-          // created_at 写 Excel 里的真实提交时间，打卡日志按真实时刻显示/排序
+          // created_at 写 Excel 里的真实提交时间；当天已有打卡则跳过（只追加，绝不覆盖）
           const info = insert.run(openid, weekKey, dateStr, config.minDurationMinutes, epochMs);
           if (info.changes) result.inserted++;
-          else if (hasTimeOfDay(epochMs) && refreshCheckinTime.run(epochMs, openid, dateStr).changes) result.updated++;
-          else result.skipped++; // 当天已有打卡，跳过（只追加，不覆盖）
+          else result.skipped++;
           // 清理该昵称同日期的待匹配记录（成员已加入，不再需要待匹配）
           deletePendingByNicknameDate.run(nickname, dateStr);
         } else {
@@ -308,7 +299,6 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
           // INSERT OR IGNORE 保证增量导入时已有记录不重复插入
           const info = insertPending.run(nickname, dateStr, config.minDurationMinutes, weekKey, epochMs);
           if (info.changes) result.pending++;
-          else if (hasTimeOfDay(epochMs) && refreshPendingTime.run(epochMs, nickname, dateStr).changes) result.updated++;
           else result.skipped++;
         }
       }
@@ -354,30 +344,24 @@ router.post('/admin/import/match', (req, res) => {
      VALUES (?, ?, ?, ?, ?)`
   );
   const clearPending = db.prepare('DELETE FROM import_pending WHERE id = ?');
-  // 与导入接口同款的 created_at 精化：旧记录打卡时间不真实（北京零点、
-  // 或为旧版导入写入的导入操作时刻）且待匹配行带时分秒时，借匹配之机刷新
-  // （覆盖"v1.6.5 前手动匹配过、重导后重新走匹配"的存量记录）
-  const refreshTime = db.prepare(
-    `UPDATE checkins SET created_at = ?
-      WHERE openid = ? AND checkin_date = ?
-        AND ((created_at + 28800000) % 86400000 = 0
-          OR date((created_at + 28800000)/1000, 'unixepoch') != checkin_date)`
-  );
+  // 导入门槛已保证待匹配行的提交时间带时分秒；万一遇到历史遗留的纯日期行，
+  // 与导入同规则：不入库，随匹配一并清掉
   const hasTimeOfDay = (epochMs) => (epochMs + 28800000) % 86400000 !== 0;
 
   let inserted = 0;
-  let updated = 0;
   let skipped = 0;
   const tx = db.transaction(() => {
     for (const row of pendingRows) {
-      // created_at 沿用导入时保存的真实提交时间；当天已有打卡则跳过（只追加，不覆盖）
-      const info = insert.run(
-        openid, row.week_key, row.checkin_date, row.duration_minutes, row.created_at || Date.now()
-      );
-      if (info.changes) inserted++;
-      else if (row.created_at && hasTimeOfDay(row.created_at)
-        && refreshTime.run(row.created_at, openid, row.checkin_date).changes) updated++;
-      else skipped++;
+      if (row.created_at && hasTimeOfDay(row.created_at)) {
+        // created_at 沿用导入时保存的真实提交时间；当天已有打卡则跳过（只追加，绝不覆盖）
+        const info = insert.run(
+          openid, row.week_key, row.checkin_date, row.duration_minutes, row.created_at
+        );
+        if (info.changes) inserted++;
+        else skipped++;
+      } else {
+        skipped++;
+      }
       clearPending.run(row.id);
     }
     // 记住"该昵称 = 该用户"：下次重复导入全量 Excel 时自动入库，无需再手动匹配
@@ -387,7 +371,7 @@ router.post('/admin/import/match', (req, res) => {
   });
   tx();
 
-  res.json({ ok: true, matched: pendingRows.length, inserted, updated, skipped });
+  res.json({ ok: true, matched: pendingRows.length, inserted, skipped });
 });
 
 // POST /api/admin/import/discard  { nickname }  丢弃某昵称下所有待匹配记录

@@ -455,6 +455,9 @@
 .result-val.green {
   color: #4ade80;
 }
+.result-val.warn {
+  color: #fbbf24;
+}
 .result-errors {
   margin-top: 20rpx;
   background: rgba(248, 113, 113, 0.04);
