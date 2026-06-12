@@ -40,7 +40,8 @@ router.get('/stats/me', authRequired, activeRequired, (req, res) => {
 router.get('/stats/me/checkins', authRequired, activeRequired, (req, res) => {
   const scope = req.query.scope === 'week' ? 'week' : 'all';
   const weekKey = currentWeekKey();
-  const baseSql = `SELECT checkin_date AS date, duration_minutes AS duration, week_key AS weekKey
+  const baseSql = `SELECT checkin_date AS date, duration_minutes AS duration, week_key AS weekKey,
+                          created_at AS createdAt
                      FROM checkins WHERE openid = ?`;
   const rows =
     scope === 'week'

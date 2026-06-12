@@ -19,7 +19,7 @@
   <view wx:else class="card list-card">
     <view class="record-item" wx:for="{{list}}" wx:key="date">
       <view class="record-left">
-        <text class="record-date">{{item.date}}</text>
+        <text class="record-date">{{item.timeText}}</text>
         <text class="record-meta">{{item.weekday}}{{scope === 'all' ? ' · ' + item.weekKey : ''}}</text>
       </view>
       <text class="record-duration">{{item.duration}} 分钟</text>
