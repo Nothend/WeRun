@@ -27,3 +27,6 @@ miniprogram/node_modules/
 
 # 本地测试用的真实数据表格，不进仓库
 server/public/test.xlsx
+
+# 本地运维/提审备忘，不进仓库
+docs/审核整改说明.md

@@ -349,8 +349,17 @@ router.post('/admin/import/match', (req, res) => {
      VALUES (?, ?, ?, ?, ?)`
   );
   const clearPending = db.prepare('DELETE FROM import_pending WHERE id = ?');
+  // 与导入接口同款的 created_at 精化：旧记录是首批导入的"北京零点"时间、
+  // 待匹配行带时分秒时，借匹配之机刷新（覆盖"v1.6.5 前手动匹配过、
+  // 重导后重新走匹配"的存量记录）
+  const refreshTime = db.prepare(
+    `UPDATE checkins SET created_at = ?
+      WHERE openid = ? AND checkin_date = ? AND (created_at + 28800000) % 86400000 = 0`
+  );
+  const hasTimeOfDay = (epochMs) => (epochMs + 28800000) % 86400000 !== 0;
 
   let inserted = 0;
+  let updated = 0;
   let skipped = 0;
   const tx = db.transaction(() => {
     for (const row of pendingRows) {
@@ -359,6 +368,8 @@ router.post('/admin/import/match', (req, res) => {
         openid, row.week_key, row.checkin_date, row.duration_minutes, row.created_at || Date.now()
       );
       if (info.changes) inserted++;
+      else if (row.created_at && hasTimeOfDay(row.created_at)
+        && refreshTime.run(row.created_at, openid, row.checkin_date).changes) updated++;
       else skipped++;
       clearPending.run(row.id);
     }
@@ -369,7 +380,7 @@ router.post('/admin/import/match', (req, res) => {
   });
   tx();
 
-  res.json({ ok: true, matched: pendingRows.length, inserted, skipped });
+  res.json({ ok: true, matched: pendingRows.length, inserted, updated, skipped });
 });
 
 // POST /api/admin/import/discard  { nickname }  丢弃某昵称下所有待匹配记录
