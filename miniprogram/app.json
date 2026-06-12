@@ -23,7 +23,7 @@
     {
       "materialType": "image/*",
       "name": "用${nickname}打卡",
-      "desc": "自动识别截图时长并打卡",
+      "desc": "自动核验截图时长并打卡",
       "path": "pages/checkin/checkin"
     }
   ]

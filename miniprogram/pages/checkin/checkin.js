@@ -72,7 +72,7 @@ Page({
     return new Promise((resolve) => {
       wx.showModal({
         title: '需要先登录',
-        content: '识别打卡截图前请先登录 WeRun',
+        content: '上传打卡截图前请先登录 WeRun',
         confirmText: '去登录',
         success: async (res) => {
           if (!res.confirm) { resolve(false); return; }
@@ -115,7 +115,7 @@ Page({
     }
 
     this.setData({ submitting: true, result: null });
-    wx.showLoading({ title: '识别中...' });
+    wx.showLoading({ title: '核验中...' });
     try {
       const data = await api.upload('/api/checkin', this.data.imagePath, { name: 'image' });
       this.setData({ result: data });

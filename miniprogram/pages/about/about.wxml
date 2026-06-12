@@ -6,33 +6,36 @@
     <view class="about-desc">用爱发电开发的小程序，希望能帮大家把跑步坚持下去。</view>
   </view>
 
-  <view class="card cost-card">
-    <view class="cost-title">为什么需要支持？</view>
-    <view class="cost-item">
-      <text class="cost-icon">💳</text>
-      <text class="cost-text">微信小程序认证需要每年缴纳年费</text>
+  <!-- 支持区块：由服务器开关控制（remoteConfig.showSupport），默认隐藏 -->
+  <block wx:if="{{showSupport}}">
+    <view class="card cost-card">
+      <view class="cost-title">为什么需要支持？</view>
+      <view class="cost-item">
+        <text class="cost-icon">💳</text>
+        <text class="cost-text">微信小程序认证需要每年缴纳年费</text>
+      </view>
+      <view class="cost-item">
+        <text class="cost-icon">📷</text>
+        <text class="cost-text">截图自动核验服务按调用量计费</text>
+      </view>
+      <view class="cost-item">
+        <text class="cost-icon">☁️</text>
+        <text class="cost-text">服务器和域名也在持续产生费用</text>
+      </view>
     </view>
-    <view class="cost-item">
-      <text class="cost-icon">🤖</text>
-      <text class="cost-text">AI 识图使用千问大模型，Token 按量计费</text>
-    </view>
-    <view class="cost-item">
-      <text class="cost-icon">☁️</text>
-      <text class="cost-text">服务器和域名也在持续产生费用</text>
-    </view>
-  </view>
 
-  <view class="card support-card">
-    <view class="support-title">💗 欢迎大家支持</view>
-    <view class="support-sub">请作者喝杯水～金额随意，心意最重要！</view>
-    <image
-      class="pay-qr"
-      src="{{payQrUrl}}"
-      mode="widthFix"
-      show-menu-by-longpress
-      bindtap="previewQr"
-    />
-    <view class="support-hint">个人小程序不能长按识别付款码</view>
-  </view>
+    <view class="card support-card">
+      <view class="support-title">💗 欢迎大家支持</view>
+      <view class="support-sub">请作者喝杯水～金额随意，心意最重要！</view>
+      <image
+        class="pay-qr"
+        src="{{payQrUrl}}"
+        mode="widthFix"
+        show-menu-by-longpress
+        bindtap="previewQr"
+      />
+      <view class="support-hint">个人小程序不能长按识别付款码</view>
+    </view>
+  </block>
 
 </view>

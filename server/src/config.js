@@ -19,6 +19,9 @@ const config = {
   // 截图运动日期允许的最大滞后天数：0=只允许今天，1=允许今天或昨天（默认，
   // 照顾"晚上跑完次日早上打卡"）。识别不出日期或超出范围的截图会被拒绝
   screenshotMaxLagDays: parseInt(process.env.SCREENSHOT_MAX_LAG_DAYS || '1', 10),
+  // 「关于作者」页是否显示运营成本说明与赞赏码。默认隐藏——平台不允许个人
+  // 主体小程序出现赞赏内容，提审时务必保持 false
+  showSupport: process.env.SHOW_SUPPORT === 'true',
   // 感知哈希(dHash, 256bit)相似度日志阈值：汉明距离 <= 此值时记录"疑似相似截图"日志（不拦截）
   // 用于积累真实样本，评估是否启用拦截及合适阈值
   imageSimilarityLogThreshold: parseInt(process.env.IMAGE_SIMILARITY_LOG_THRESHOLD || '20', 10),
@@ -34,6 +37,9 @@ const config = {
   dataDir: DATA_DIR,
   dbPath: path.join(DATA_DIR, 'app.db'),
   avatarDir: path.join(DATA_DIR, 'avatars'),
+  // 自定义千问识别提示词模板（可选）：放在 data 卷里，改完即生效，无需发版/重启。
+  // 模板中用 {{TODAY}} 占位今天的北京日期；文件不存在时使用代码内置的默认提示词
+  qwenPromptPath: path.join(DATA_DIR, 'qwen-prompt.txt'),
 
   // 没有真实 APPID 时进入 mock 模式：跳过真实 code2session，便于本地/未配置时联调
   get useMockWechat() {

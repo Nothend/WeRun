@@ -6,7 +6,7 @@ const config = require('../config');
 const { authRequired, activeRequired } = require('../auth');
 const { recognizeDuration } = require('../qwen');
 const { computeDHash, hammingDistance } = require('../phash');
-const { sendCheckinNotify } = require('../wechat');
+const { sendCheckinNotify, imgSecCheck } = require('../wechat');
 const { currentWeekKey, localDateStr } = require('../week');
 
 const router = express.Router();
@@ -76,6 +76,11 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       });
     }
 
+    // ── 平台内容安全检测：违规图片直接拒绝（接口异常 fail-open 放行）──
+    if (!(await imgSecCheck(req.file.buffer))) {
+      return res.json({ success: false, reason: '图片含违规信息，请更换截图' });
+    }
+
     // ── 感知哈希（dHash）计算 ──────────────────────────
     // 先算好备用：是否用于拦截取决于下面 AI 识别结果（是否精确到秒）
     let phash = null;
@@ -101,7 +106,7 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
     if (!result.has_time) {
       return res.json({
         success: false,
-        reason: '未在图中识别到运动时间，请上传清晰的跑步记录截图',
+        reason: '未能从截图中读取到运动时长，请上传清晰的跑步记录截图',
         exercise_date: recognizedDate,
         duration: 0,
       });
@@ -122,7 +127,7 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
         success: false,
         duration,
         exercise_date: null,
-        reason: '未能识别到截图中的运动日期，请截取包含日期（或"今天"字样）的完整运动记录页面',
+        reason: '未能从截图中读取到运动日期，请截取包含日期（或"今天"字样）的完整运动记录页面',
       });
     }
     if (!allowedDates.has(recognizedDate)) {
@@ -130,7 +135,7 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
         success: false,
         duration,
         exercise_date: recognizedDate,
-        reason: `识别到截图中的运动日期为 ${recognizedDate}，仅支持${config.screenshotMaxLagDays > 0 ? '今天或昨天' : '今天'}的运动记录`,
+        reason: `截图中的运动日期为 ${recognizedDate}，仅支持${config.screenshotMaxLagDays > 0 ? '今天或昨天' : '今天'}的运动记录`,
       });
     }
 
@@ -139,7 +144,7 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
         success: false,
         duration,
         exercise_date: recognizedDate,
-        reason: `识别到运动时长约 ${duration} 分钟，未达到 ${config.minDurationMinutes} 分钟`,
+        reason: `截图中的运动时长约 ${duration} 分钟，未达到 ${config.minDurationMinutes} 分钟`,
       });
     }
 

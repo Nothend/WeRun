@@ -5,7 +5,7 @@ const multer = require('multer');
 const db = require('../db');
 const config = require('../config');
 const { authRequired } = require('../auth');
-const { sendSubscribeMessage } = require('../wechat');
+const { sendSubscribeMessage, msgSecCheck, imgSecCheck } = require('../wechat');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -30,8 +30,16 @@ router.post('/apply', authRequired, upload.single('avatar'), async (req, res) =>
       return res.status(400).json({ error: '昵称不能超过 20 字' });
     }
 
+    // 平台内容安全检测：昵称文本 + 上传的头像图片
+    if (!(await msgSecCheck(openid, nickname))) {
+      return res.status(400).json({ error: '内容含违规信息，请修改昵称后重试' });
+    }
+
     let avatarUrl = '';
     if (req.file) {
+      if (!(await imgSecCheck(req.file.buffer))) {
+        return res.status(400).json({ error: '图片含违规信息，请更换头像后重试' });
+      }
       // 文件上传：存为 <openid>.png
       const filename = `${openid}.png`;
       fs.writeFileSync(path.join(config.avatarDir, filename), req.file.buffer);

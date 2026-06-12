@@ -4,7 +4,7 @@
   <view class="auth-hero">
     <view class="auth-hero-emoji">🏃</view>
     <view class="auth-hero-title">{{applyMode ? '申请加入跑团' : '让队友认识你'}}</view>
-    <view class="auth-hero-sub">{{applyMode ? '请使用你的微信昵称，方便管理员识别你' : '设置头像和昵称，才能出现在群周榜上'}}</view>
+    <view class="auth-hero-sub">{{applyMode ? '请使用你的微信昵称，方便管理员认出你' : '设置头像和昵称，才能出现在群周榜上'}}</view>
   </view>
 
   <view class="auth-form">
@@ -22,7 +22,7 @@
 
     <view class="auth-nickname-field">
       <view class="auth-field-label">昵称<text class="auth-required">必填</text></view>
-      <view wx:if="{{applyMode}}" class="auth-field-hint">请使用你的微信昵称，管理员依此识别你</view>
+      <view wx:if="{{applyMode}}" class="auth-field-hint">请使用你的微信昵称，管理员依此认出你</view>
       <view class="auth-nickname-wrap {{nickname ? 'filled' : ''}}">
         <input
           class="auth-nickname-input"

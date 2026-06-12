@@ -59,7 +59,7 @@
     <view class="checkin-icon-wrap">📷</view>
     <view class="checkin-content">
       <text class="checkin-title">上传截图打卡</text>
-      <text class="checkin-sub">上传运动截图，AI 识别时长</text>
+      <text class="checkin-sub">上传运动截图，自动核验时长</text>
     </view>
     <text class="action-chevron">›</text>
   </view>

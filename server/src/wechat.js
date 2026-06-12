@@ -36,6 +36,68 @@ async function getAccessToken() {
   return _accessToken;
 }
 
+// ── 内容安全检查（平台审核要求：用户发布内容须经安全检测）────────
+// 返回 true=通过 / false=违规。设计为 fail-open：微信接口异常时放行并记日志，
+// 避免安全接口抖动拖垮主流程；mock 模式直接放行。
+
+// 文本检查（昵称等）。msg_sec_check v2 需要最近 5 天内活跃用户的 openid
+async function msgSecCheck(openid, content) {
+  if (config.useMockWechat || !content) return true;
+  try {
+    const token = await getAccessToken();
+    const resp = await fetch(`https://api.weixin.qq.com/wxa/msg_sec_check?access_token=${token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ version: 2, openid, scene: 1, content }),
+    });
+    const data = await resp.json();
+    if (data.errcode === 0) return !data.result || data.result.suggest !== 'risky';
+    if (data.errcode === 87014) return false; // 内容违规
+    console.error(`[sec] msgSecCheck 接口异常 errcode=${data.errcode}: ${data.errmsg}`);
+    return true;
+  } catch (e) {
+    console.error('[sec] msgSecCheck error:', e.message);
+    return true;
+  }
+}
+
+// 图片检查（头像、打卡截图）。img_sec_check 限制 1MB / 建议 750x1334 以下，
+// 先用 sharp 压缩到限制内再送检
+async function imgSecCheck(imageBuffer) {
+  if (config.useMockWechat || !imageBuffer) return true;
+  try {
+    const sharp = require('sharp');
+    const compress = (quality) =>
+      sharp(imageBuffer)
+        .rotate()
+        .resize(750, 1334, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality })
+        .toBuffer();
+    let quality = 75;
+    let buf = await compress(quality);
+    while (buf.length > 950 * 1024 && quality > 30) {
+      quality -= 15;
+      buf = await compress(quality);
+    }
+
+    const token = await getAccessToken();
+    const fd = new FormData();
+    fd.append('media', new Blob([buf], { type: 'image/jpeg' }), 'check.jpg');
+    const resp = await fetch(`https://api.weixin.qq.com/wxa/img_sec_check?access_token=${token}`, {
+      method: 'POST',
+      body: fd,
+    });
+    const data = await resp.json();
+    if (data.errcode === 0) return true;
+    if (data.errcode === 87014) return false; // 图片违规
+    console.error(`[sec] imgSecCheck 接口异常 errcode=${data.errcode}: ${data.errmsg}`);
+    return true;
+  } catch (e) {
+    console.error('[sec] imgSecCheck error:', e.message);
+    return true;
+  }
+}
+
 // 向指定 openid 发送打卡订阅消息。调用方负责 try/catch，失败不影响主流程。
 // 模板字段约定（在微信公众平台创建模板时按此定义）：
 //   thing1  → 打卡成员
@@ -102,4 +164,11 @@ async function sendSubscribeMessage(toOpenid, templateId, data, page = 'pages/in
   }
 }
 
-module.exports = { code2session, getAccessToken, sendCheckinNotify, sendSubscribeMessage };
+module.exports = {
+  code2session,
+  getAccessToken,
+  sendCheckinNotify,
+  sendSubscribeMessage,
+  msgSecCheck,
+  imgSecCheck,
+};

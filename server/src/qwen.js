@@ -1,11 +1,32 @@
+const fs = require('fs');
 const config = require('./config');
 const { localDateStr } = require('./week');
+
+// 自定义提示词模板（可选）：data 卷中的 qwen-prompt.txt，按 mtime 热加载，
+// 在 ECS 上直接编辑 ./data/qwen-prompt.txt 即可调整提示词，无需发版/重启。
+// 模板用 {{TODAY}} 占位今天的北京日期；文件不存在/为空时回退到内置默认提示词
+let promptCache = { mtimeMs: -1, text: null };
+function loadPromptTemplate() {
+  try {
+    const { mtimeMs } = fs.statSync(config.qwenPromptPath);
+    if (mtimeMs !== promptCache.mtimeMs) {
+      promptCache = { mtimeMs, text: fs.readFileSync(config.qwenPromptPath, 'utf8').trim() || null };
+      console.log(`[qwen] 已加载自定义提示词：${config.qwenPromptPath}`);
+    }
+  } catch {
+    if (promptCache.text) console.log('[qwen] 自定义提示词文件已移除，恢复内置默认');
+    promptCache = { mtimeMs: -1, text: null };
+  }
+  return promptCache.text;
+}
 
 // 注入今天的北京日期，模型才能把截图里的相对/不完整日期（"今天 07:30"、
 // "昨天"、"6月12日"）换算成完整的 YYYY-MM-DD —— 该日期用于拒绝旧截图打卡
 function buildPrompt(todayStr) {
+  const tpl = loadPromptTemplate();
+  if (tpl) return tpl.replaceAll('{{TODAY}}', todayStr);
   return [
-    '这是一张跑步/运动记录的截图（可能来自 Keep、悦跑圈、微信运动、华为/小米运动等）。',
+    '这是一张跑步/运动记录的截图（可能来自 Keep、悦跑圈、微信运动、咕咚、苹果/华为/小米运动等）。',
     `今天的日期是 ${todayStr}（北京时间）。`,
     '请你识别以下内容：',
     '1. 图中的"运动时长"，换算为总秒数；',
@@ -117,4 +138,4 @@ async function generateGroupShareText({ weekKey, achievedCount, total, target, t
     || `跑步群本周 ${achievedCount}/${total} 人达标，继续加油！`;
 }
 
-module.exports = { recognizeDuration, generateGroupShareText };
+module.exports = { recognizeDuration, generateGroupShareText, buildPrompt };

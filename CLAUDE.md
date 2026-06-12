@@ -50,8 +50,8 @@ Both external integrations auto-mock when real keys are absent:
 | `config.js` | All env vars in one place; exposes `useMockWechat` / `useMockQwen` getters |
 | `db.js` | Opens SQLite via `better-sqlite3`, runs incremental schema migration on startup |
 | `auth.js` | JWT sign/verify; `authRequired`, `activeRequired`, `adminRequired` middleware |
-| `wechat.js` | `code2session` + subscribe-message sending via WeChat API (or mock) |
-| `qwen.js` | Qwen-VL duration recognition (image as base64 data-URL); Qwen text model for the admin group-share blurb |
+| `wechat.js` | `code2session` + subscribe-message sending via WeChat API (or mock); content-security checks `msgSecCheck` (nicknames) / `imgSecCheck` (avatars & screenshots, sharp-compressed to API limits) — fail-open on API errors, skipped in mock mode |
+| `qwen.js` | Qwen-VL duration recognition (image as base64 data-URL); Qwen text model for the admin group-share blurb. Recognition prompt can be overridden without a release by placing `data/qwen-prompt.txt` (hot-reloaded by mtime, `{{TODAY}}` = Beijing date placeholder; template: `deploy/qwen-prompt.example.txt`) |
 | `phash.js` | Perceptual hash for anti-cheat image similarity |
 | `week.js` | ISO week key (`"2026-W23"`), month/year prefixes, local date string utilities |
 | `routes/login.js` | `POST /api/login` — WeChat code → openid → JWT; first user ever becomes active admin, others start `pending` |
@@ -82,7 +82,7 @@ CI/CD: push a git tag (`v1.x.x`) → GitHub Actions builds the Docker image → 
 
 **The server deploys automatically; the mini program never does.** A full release = tag push (server) **plus** manually uploading from WeChat DevTools and submitting for platform review. Before uploading, set `baseUrl` in `miniprogram/config.js` to the production domain — in the repo it is a placeholder (`https://your.domain.com`).
 
-The `data/` directory is a Docker volume mount — it survives container rebuilds. It contains `app.db` and `avatars/`.
+The `data/` directory is a Docker volume mount — it survives container rebuilds. It contains `app.db`, `avatars/`, and the optional `qwen-prompt.txt` (custom recognition prompt, editable on the host with immediate effect — no rebuild or restart).
 
 **Reverse proxy**: Caddy on the host handles HTTPS. The relevant block is already in the Caddyfile:
 ```
@@ -94,4 +94,4 @@ your.domain.com {
 ```
 The container exposes port 9056 on `127.0.0.1` (mapped from internal port 3000). No nginx needed.
 
-Key env vars to set in ECS `.env`: `APPID`, `APPSECRET`, `DASHSCOPE_API_KEY`, `JWT_SECRET`, `PUBLIC_BASE_URL=https://your.domain.com`, `WERUN_IMAGE`. Optional tuning: `MIN_DURATION_MINUTES` (default 30), `WEEKLY_TARGET` (default 3), `SCREENSHOT_MAX_LAG_DAYS` (default 1 — screenshot exercise date may be at most this many days before today), `IMAGE_SIMILARITY_BLOCK_THRESHOLD` / `IMAGE_SIMILARITY_LOG_THRESHOLD`, `APPLY_TEMPLATE_ID` / `WEEKLY_TEMPLATE_ID` (subscribe messages), `QWEN_MODEL` / `QWEN_TEXT_MODEL`.
+Key env vars to set in ECS `.env`: `APPID`, `APPSECRET`, `DASHSCOPE_API_KEY`, `JWT_SECRET`, `PUBLIC_BASE_URL=https://your.domain.com`, `WERUN_IMAGE`. Optional tuning: `MIN_DURATION_MINUTES` (default 30), `WEEKLY_TARGET` (default 3), `SCREENSHOT_MAX_LAG_DAYS` (default 1 — screenshot exercise date may be at most this many days before today), `SHOW_SUPPORT` (default false — shows the about-page cost/donation section; keep false when submitting for platform review), `IMAGE_SIMILARITY_BLOCK_THRESHOLD` / `IMAGE_SIMILARITY_LOG_THRESHOLD`, `APPLY_TEMPLATE_ID` / `WEEKLY_TEMPLATE_ID` (subscribe messages), `QWEN_MODEL` / `QWEN_TEXT_MODEL`.

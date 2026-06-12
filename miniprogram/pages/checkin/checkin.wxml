@@ -10,7 +10,7 @@
       </view>
     </view>
 
-    <view class="upload-meta muted">系统自动识别运动时长，≥ {{minDurationMinutes}} 分钟计为一次打卡</view>
+    <view class="upload-meta muted">系统自动核验运动时长，≥ {{minDurationMinutes}} 分钟计为一次打卡</view>
 
     <!-- 打卡成功/今日已打卡后按钮变为不可点的完成态，避免误以为还没提交 -->
     <button wx:if="{{result && (result.success || result.already)}}"
@@ -33,11 +33,11 @@
       <view class="result-icon">✅</view>
       <view class="result-title">打卡成功</view>
       <view class="result-row">
-        <text class="result-label">识别日期</text>
+        <text class="result-label">运动日期</text>
         <text class="result-val">{{result.exercise_date || '今日'}}</text>
       </view>
       <view class="result-row">
-        <text class="result-label">识别时长</text>
+        <text class="result-label">运动时长</text>
         <text class="result-val">约 {{result.duration}} 分钟</text>
       </view>
       <view class="result-row">
@@ -45,7 +45,7 @@
         <text class="result-val accent">{{result.weekCount}} / {{result.target}} 次</text>
       </view>
       <view wx:if="{{result.achieved}}" class="result-achieved">🎉 本周已达标！</view>
-      <view wx:if="{{result.mock}}" class="muted mock-note">（千问 mock 模式演示）</view>
+      <view wx:if="{{result.mock}}" class="muted mock-note">（演示模式数据）</view>
     </view>
     <!-- 今天已打过卡（不是错误，是提示） -->
     <view wx:elif="{{result.already}}">
@@ -66,15 +66,15 @@
       <view class="result-icon">❌</view>
       <view class="result-title fail">打卡未成功</view>
       <view class="result-reason">{{result.reason}}</view>
-      <!-- AI 识别详情：让用户直观看到 AI 识别了什么 -->
+      <!-- 核验详情：让用户直观看到系统从截图中读取了什么 -->
       <view wx:if="{{result.exercise_date || result.duration > 0}}" class="ai-detail">
-        <view class="ai-detail-title">AI 识别结果</view>
+        <view class="ai-detail-title">截图核验结果</view>
         <view wx:if="{{result.exercise_date}}" class="ai-detail-row">
-          <text class="ai-detail-label">识别日期</text>
+          <text class="ai-detail-label">运动日期</text>
           <text class="ai-detail-val">{{result.exercise_date}}</text>
         </view>
         <view wx:if="{{result.duration > 0}}" class="ai-detail-row">
-          <text class="ai-detail-label">识别时长</text>
+          <text class="ai-detail-label">运动时长</text>
           <text class="ai-detail-val">约 {{result.duration}} 分钟</text>
         </view>
       </view>
