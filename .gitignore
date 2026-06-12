@@ -24,3 +24,6 @@ Thumbs.db
 
 # WeChat devtools
 miniprogram/node_modules/
+
+# 本地测试用的真实数据表格，不进仓库
+server/public/test.xlsx

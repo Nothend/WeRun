@@ -156,7 +156,7 @@
             <text class="name">{{item.nickname}}</text>
             <text class="log-week muted">{{item.weekKey}}</text>
           </view>
-          <view class="log-detail muted">{{item.checkinDate}}  · {{item.durationMinutes}} 分钟</view>
+          <view class="log-detail muted">{{item.createdAtText}}  · {{item.durationMinutes}} 分钟</view>
         </view>
       </view>
 

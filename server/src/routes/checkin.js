@@ -134,7 +134,7 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
           success: false,
           duration,
           exercise_date: recognizedDate,
-          reason: '该运动时长今日已被使用，疑似使用了他人的截图，请上传你本人的运动记录',
+          reason: '疑似使用了他人的截图，请上传你本人的运动记录',
         });
       }
     } else if (phash) {
@@ -169,7 +169,7 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
             success: false,
             duration,
             exercise_date: recognizedDate,
-            reason: '该运动时长今日已被使用，疑似使用了他人的截图，请上传你本人的运动记录',
+            reason: '疑似使用了他人的截图，请上传你本人的运动记录',
           });
         }
         return res.json({ success: false, already: true, reason: '今天已经打过卡啦' });

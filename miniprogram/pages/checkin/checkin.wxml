@@ -12,7 +12,13 @@
 
     <view class="upload-meta muted">系统自动识别运动时长，≥ {{minDurationMinutes}} 分钟计为一次打卡</view>
 
-    <button class="btn-primary submit-btn"
+    <!-- 打卡成功/今日已打卡后按钮变为不可点的完成态，避免误以为还没提交 -->
+    <button wx:if="{{result && (result.success || result.already)}}"
+            class="btn-primary submit-btn submit-btn-done" disabled>
+      ✅ 今日已打卡
+    </button>
+    <button wx:else
+            class="btn-primary submit-btn"
             loading="{{submitting}}"
             disabled="{{!imagePath || submitting}}"
             bindtap="submit">

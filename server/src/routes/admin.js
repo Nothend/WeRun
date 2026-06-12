@@ -153,42 +153,49 @@ router.post('/admin/users/:openid/nickname', (req, res) => {
   res.json({ ok: true, nickname });
 });
 
-// 解析 Excel 单元格中的日期，兼容：
-//   - cellDates:true 产生的真实 Date 对象（取 UTC 日期，避免时区偏移）
-//   - Excel 序列号（数字，无日期格式）
-//   - 各种文本格式："2026-6-9"、"2026/6/9"、"2026.6.9"、"2026-06-09 10:30:00" 等
-function parseExcelDate(raw) {
+// Excel 序列号 / Date 对象不带时区信息，统一按北京时间(+08:00)理解墙上时间
+const CN_TZ_OFFSET_MS = 8 * 3600 * 1000;
+
+// wallMs：把"墙上时间"当作 UTC 存的毫秒数 → { dateStr, epochMs }
+// epochMs 是该墙上时间在北京时区对应的真实 Unix 毫秒，存入 created_at 后按本地时区显示即还原
+function fromWallClockMs(wallMs) {
+  const d = new Date(wallMs);
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  return { dateStr: `${y}-${m}-${day}`, epochMs: wallMs - CN_TZ_OFFSET_MS };
+}
+
+// 解析 Excel 单元格中的日期时间 → { dateStr: 'YYYY-MM-DD', epochMs }，解析失败返回 null。兼容：
+//   - cellDates:true 产生的真实 Date 对象（其 UTC 字段即表格里的墙上时间）
+//   - Excel 序列号（1900 纪元，Lotus 兼容偏移 -1），含文本形式的数字
+//   - 文本："2026-6-9"、"2026/6/9"、"2026.6.9"、"2026-06-09 10:30:00"、"2026年6月9日 18时3分19秒" 等
+// 时间部分缺失时为当天 00:00:00
+function parseExcelDateTime(raw) {
   if (raw instanceof Date && !isNaN(raw)) {
-    const y = raw.getUTCFullYear();
-    const m = String(raw.getUTCMonth() + 1).padStart(2, '0');
-    const d = String(raw.getUTCDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
+    return fromWallClockMs(raw.getTime());
   }
-  // Excel 序列号（1900 纪元，Lotus 兼容偏移 -1）
-  if (typeof raw === 'number' && raw > 0) {
-    const epoch = new Date(Date.UTC(1899, 11, 30) + Math.floor(raw) * 86400000);
-    const y = epoch.getUTCFullYear();
-    const m = String(epoch.getUTCMonth() + 1).padStart(2, '0');
-    const d = String(epoch.getUTCDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
+  const num =
+    typeof raw === 'number' ? raw : /^\d+(\.\d+)?$/.test(String(raw).trim()) ? parseFloat(raw) : NaN;
+  if (!isNaN(num) && num > 0) {
+    return fromWallClockMs(Date.UTC(1899, 11, 30) + Math.round(num * 86400000));
   }
-  const s = String(raw).trim();
+  let s = String(raw).trim();
   if (!s) return null;
-  // 去掉时间部分："2026-06-09 10:30:00" / "2026-06-09T00:00:00" → "2026-06-09"
-  const datePart = s.split(/[T ]/)[0].trim();
-  // 统一分隔符：/  .  → -
-  const parts = datePart.replace(/[/\.]/g, '-').split('-');
-  if (parts.length === 3 && parts[0].length === 4) {
-    const y = parts[0];
-    const m = parts[1].padStart(2, '0');
-    const d = parts[2].slice(0, 2).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  }
-  return null;
+  // 中文格式归一化：2026年6月9日 18时3分19秒 → 2026-6-9 18:3:19
+  s = s.replace(/[年月]/g, '-').replace(/日/g, ' ').replace(/[时分]/g, ':').replace(/秒/g, '');
+  const m = s.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?:[T\s]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+  if (!m) return null;
+  const y = +m[1];
+  const mo = +m[2];
+  const d = +m[3];
+  if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+  return fromWallClockMs(Date.UTC(y, mo - 1, d, +m[4] || 0, +m[5] || 0, +m[6] || 0));
 }
 
 // POST /api/admin/import  导入 Excel 打卡数据
-// Excel 格式：列名"用户昵称"/"昵称"  + "打卡时间"/"日期"（支持多种日期格式）
+// Excel 格式：列名"用户昵称"/"昵称"/"今日跑者"  + "打卡时间"/"日期"/"提交时间"（支持多种日期格式）
+// 昵称单元格支持逗号/顿号拼接多个跑者（问卷一次提交多人），拆分后各自独立判重入库
 router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: '请上传 Excel 文件' });
 
@@ -226,35 +233,45 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
 
   const tx = db.transaction(() => {
     for (const row of rows) {
-      const nickname = (row['用户昵称'] || row['昵称'] || row['nickname'] || '').toString().trim();
-      const rawDate = row['打卡时间'] || row['日期'] || row['date'] || row['checkin_date'] || '';
+      const nameCell = (row['用户昵称'] || row['昵称'] || row['nickname'] || row['今日跑者'] || '')
+        .toString()
+        .trim();
+      const rawDate =
+        row['打卡时间'] || row['日期'] || row['date'] || row['checkin_date'] || row['提交时间'] || '';
 
-      if (!nickname || (rawDate === '' && rawDate !== 0)) { result.skipped++; continue; }
+      if (!nameCell || (rawDate === '' && rawDate !== 0)) { result.skipped++; continue; }
 
-      const dateStr = parseExcelDate(rawDate);
+      const parsed = parseExcelDateTime(rawDate);
 
-      if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-        if (result.errors.length < 20) result.errors.push(`日期格式错误 (${nickname}): ${rawDate}`);
+      if (!parsed) {
+        if (result.errors.length < 20) result.errors.push(`日期格式错误 (${nameCell}): ${rawDate}`);
         result.skipped++;
         continue;
       }
 
+      const { dateStr, epochMs } = parsed;
       const weekKey = weekKeyForDate(dateStr);
-      const openid = nicknameMap[nickname];
+      // 一个单元格可能拼接多个跑者："承晓东, 杨立文" → 拆分后各自按同一日期判重入库
+      const nicknames = nameCell.split(/[,，、]/).map((s) => s.trim()).filter(Boolean);
 
-      if (openid) {
-        result.matched++;
-        const info = insert.run(openid, weekKey, dateStr, config.minDurationMinutes, Date.now());
-        if (info.changes) result.inserted++;
-        else result.skipped++; // 当天已有打卡，跳过
-        // 清理该昵称同日期的待匹配记录（成员已加入，不再需要待匹配）
-        deletePendingByNicknameDate.run(nickname, dateStr);
-      } else {
-        // 该成员尚未加入小程序：暂存，待加入后在「待匹配导入记录」中手动关联
-        // INSERT OR IGNORE 保证增量导入时已有记录不重复插入
-        const info = insertPending.run(nickname, dateStr, config.minDurationMinutes, weekKey, Date.now());
-        if (info.changes) result.pending++;
-        else result.skipped++;
+      for (const nickname of nicknames) {
+        const openid = nicknameMap[nickname];
+
+        if (openid) {
+          result.matched++;
+          // created_at 写 Excel 里的真实提交时间，打卡日志按真实时刻显示/排序
+          const info = insert.run(openid, weekKey, dateStr, config.minDurationMinutes, epochMs);
+          if (info.changes) result.inserted++;
+          else result.skipped++; // 当天已有打卡，跳过（只追加，不覆盖）
+          // 清理该昵称同日期的待匹配记录（成员已加入，不再需要待匹配）
+          deletePendingByNicknameDate.run(nickname, dateStr);
+        } else {
+          // 该成员尚未加入小程序：暂存，待加入后在「待匹配导入记录」中手动关联
+          // INSERT OR IGNORE 保证增量导入时已有记录不重复插入
+          const info = insertPending.run(nickname, dateStr, config.minDurationMinutes, weekKey, epochMs);
+          if (info.changes) result.pending++;
+          else result.skipped++;
+        }
       }
     }
   });
@@ -303,9 +320,12 @@ router.post('/admin/import/match', (req, res) => {
   let skipped = 0;
   const tx = db.transaction(() => {
     for (const row of pendingRows) {
-      const info = insert.run(openid, row.week_key, row.checkin_date, row.duration_minutes, Date.now());
+      // created_at 沿用导入时保存的真实提交时间；当天已有打卡则跳过（只追加，不覆盖）
+      const info = insert.run(
+        openid, row.week_key, row.checkin_date, row.duration_minutes, row.created_at || Date.now()
+      );
       if (info.changes) inserted++;
-      else skipped++; // 当天已有打卡，跳过
+      else skipped++;
       clearPending.run(row.id);
     }
   });

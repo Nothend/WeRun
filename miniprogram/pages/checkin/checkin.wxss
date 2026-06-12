@@ -45,6 +45,13 @@
   font-size: 30rpx;
 }
 
+/* 已打卡完成态：绿色实底，区别于"不可用"的半透明置灰 */
+.submit-btn-done[disabled] {
+  opacity: 1;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  box-shadow: none;
+}
+
 /* ── 结果卡 ── */
 .result-card {
   border-left: 4rpx solid transparent;

@@ -2,6 +2,14 @@ const api = require('../../utils/api');
 const config = require('../../config');
 const app = getApp();
 
+// epoch 毫秒 → "2026-03-03 18:03:19"（设备本地时区）
+function formatDateTime(ms) {
+  const d = new Date(ms);
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ` +
+    `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+
 Page({
   data: {
     // 标签页：'members' | 'logs'
@@ -414,7 +422,12 @@ Page({
       const data = await api.request(
         `/api/admin/checkins?page=${page}&pageSize=${this.data.logsPageSize}`
       );
-      const logs = page === 1 ? data.list : [...this.data.logs, ...data.list];
+      // 提交时间精确到时分秒；来源只有日期的（如 Excel 导入）时分秒为 00:00:00
+      const list = data.list.map((item) => ({
+        ...item,
+        createdAtText: formatDateTime(item.createdAt),
+      }));
+      const logs = page === 1 ? list : [...this.data.logs, ...list];
       this.setData({
         logs,
         logsPage: page,
