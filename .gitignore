@@ -28,5 +28,8 @@ miniprogram/node_modules/
 # 本地测试用的真实数据表格，不进仓库
 server/public/test.xlsx
 
+# 临时下载到 public 下分析的生产库副本，严禁入库（public/ 会被静态服务）
+server/public/app.db*
+
 # 本地运维/提审备忘，不进仓库
 docs/审核整改说明.md

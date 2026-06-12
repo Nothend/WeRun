@@ -241,16 +241,21 @@ router.post('/admin/import', xlsUpload.single('excel'), (req, res) => {
     `INSERT OR IGNORE INTO import_pending (nickname, checkin_date, duration_minutes, week_key, created_at)
      VALUES (?, ?, ?, ?, ?)`
   );
-  // created_at 精化：首批导入的"打卡时间"是纯日期，created_at 落成北京零点
-  // （0:00:00.000，天然指纹，原生打卡与带时分秒的导入不可能撞上）。重导带
-  // 时分秒的 Excel 时把这些记录刷成精确提交时间，仅动 created_at
+  // created_at 精化：识别"打卡时间不真实"的历史导入记录，重导带时分秒的
+  // Excel 时刷成真实提交时间，仅动 created_at。两种特征（原生打卡均不满足）：
+  //   ① created_at 恰为北京零点 —— 新版导入遇到纯日期单元格的产物；
+  //   ② created_at 的北京日期 ≠ checkin_date —— 旧版导入把 created_at 写成了
+  //      导入操作时刻（与历史打卡日期相差数天/数月）。
+  //   注意特征②要求先跑完时区修正脚本（原生错位记录修正前也满足②）
+  const STALE_TIME_COND =
+    "((created_at + 28800000) % 86400000 = 0 OR date((created_at + 28800000)/1000, 'unixepoch') != checkin_date)";
   const refreshCheckinTime = db.prepare(
     `UPDATE checkins SET created_at = ?
-      WHERE openid = ? AND checkin_date = ? AND (created_at + 28800000) % 86400000 = 0`
+      WHERE openid = ? AND checkin_date = ? AND ${STALE_TIME_COND}`
   );
   const refreshPendingTime = db.prepare(
     `UPDATE import_pending SET created_at = ?
-      WHERE nickname = ? AND checkin_date = ? AND (created_at + 28800000) % 86400000 = 0`
+      WHERE nickname = ? AND checkin_date = ? AND ${STALE_TIME_COND}`
   );
   const hasTimeOfDay = (epochMs) => (epochMs + 28800000) % 86400000 !== 0;
 
@@ -349,12 +354,14 @@ router.post('/admin/import/match', (req, res) => {
      VALUES (?, ?, ?, ?, ?)`
   );
   const clearPending = db.prepare('DELETE FROM import_pending WHERE id = ?');
-  // 与导入接口同款的 created_at 精化：旧记录是首批导入的"北京零点"时间、
-  // 待匹配行带时分秒时，借匹配之机刷新（覆盖"v1.6.5 前手动匹配过、
-  // 重导后重新走匹配"的存量记录）
+  // 与导入接口同款的 created_at 精化：旧记录打卡时间不真实（北京零点、
+  // 或为旧版导入写入的导入操作时刻）且待匹配行带时分秒时，借匹配之机刷新
+  // （覆盖"v1.6.5 前手动匹配过、重导后重新走匹配"的存量记录）
   const refreshTime = db.prepare(
     `UPDATE checkins SET created_at = ?
-      WHERE openid = ? AND checkin_date = ? AND (created_at + 28800000) % 86400000 = 0`
+      WHERE openid = ? AND checkin_date = ?
+        AND ((created_at + 28800000) % 86400000 = 0
+          OR date((created_at + 28800000)/1000, 'unixepoch') != checkin_date)`
   );
   const hasTimeOfDay = (epochMs) => (epochMs + 28800000) % 86400000 !== 0;
 
