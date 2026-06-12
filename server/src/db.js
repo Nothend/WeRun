@@ -41,6 +41,14 @@ db.exec(`
     created_at       INTEGER NOT NULL,
     UNIQUE(nickname, checkin_date)
   );
+
+  -- Excel 昵称别名：管理员手动匹配/丢弃的结果持久记账，重复导入全量 Excel 时
+  -- 自动套用（openid 为 NULL 表示该昵称已被丢弃，导入时直接忽略）
+  CREATE TABLE IF NOT EXISTS import_alias (
+    nickname   TEXT PRIMARY KEY,
+    openid     TEXT DEFAULT NULL,
+    created_at INTEGER NOT NULL
+  );
 `);
 
 // 增量迁移：新增列（ALTER TABLE ADD COLUMN 不会破坏已有数据）
