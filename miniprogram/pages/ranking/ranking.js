@@ -1,4 +1,5 @@
 const api = require('../../utils/api');
+const config = require('../../config');
 const app = getApp();
 
 const PAGE_SIZE = 10;
@@ -31,13 +32,29 @@ Page({
     return {
       title: this.data.shareGroupText || 'WeRun 跑步群周榜，一起来运动！',
       path: '/pages/ranking/ranking',
+      imageUrl: config.baseUrl + '/shareground.png',
     };
+  },
+
+  // 朋友圈分享（封面图按 1:1 居中裁切）
+  onShareTimeline() {
+    return {
+      title: 'WeRun 跑步群周榜，一起来运动！',
+      imageUrl: config.baseUrl + '/shareground.png',
+    };
+  },
+
+  onPullDownRefresh() {
+    const done = () => wx.stopPullDownRefresh();
+    const user = app.globalData.user;
+    if (user && user.status !== 'pending') this.load().then(done, done);
+    else done();
   },
 
   onLoad() {
     // 计算 swiper 可用高度：屏幕高度 - 顶部标签栏(约 88rpx)
     try {
-      const info = wx.getSystemInfoSync();
+      const info = wx.getWindowInfo();
       const rpx2px = info.windowWidth / 750;
       const tabsPx = 96 * rpx2px; // 标签栏高度
       this.setData({ swiperHeight: info.windowHeight - tabsPx });

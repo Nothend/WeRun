@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "跑步打卡",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "light",
   "usingComponents": {}
 }

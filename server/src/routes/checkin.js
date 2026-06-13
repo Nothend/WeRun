@@ -61,6 +61,8 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
         already: true,
         reason: '今天已经打过卡啦',
         duration: existing.duration_minutes,
+        durationSeconds: existing.duration_seconds || 0,
+        hasSeconds: !!existing.has_seconds,
         weekCount: weekCountOf(openid, weekKey),
         target: config.weeklyTarget,
       });
@@ -97,6 +99,8 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
 
     // 调用千问识别时长与运动日期（不保存原图）
     const result = await recognizeDuration(req.file.buffer, req.file.mimetype || 'image/jpeg');
+    // 留痕：出现"同图不同时长"等识别漂移时可复盘
+    console.log(`[qwen] openid=${openid} 识别结果: ${JSON.stringify(result)}`);
 
     // AI 识别的日期——无论成功失败都返回给前端展示
     const recognizedDate = result.exercise_date || null;
@@ -126,6 +130,8 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       return res.json({
         success: false,
         duration,
+        durationSeconds,
+        hasSeconds,
         exercise_date: null,
         reason: '未能从截图中读取到运动日期，请截取包含日期（或"今天"字样）的完整运动记录页面',
       });
@@ -134,6 +140,8 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       return res.json({
         success: false,
         duration,
+        durationSeconds,
+        hasSeconds,
         exercise_date: recognizedDate,
         reason: `截图中的运动日期为 ${recognizedDate}，仅支持${config.screenshotMaxLagDays > 0 ? '今天或昨天' : '今天'}的运动记录`,
       });
@@ -143,16 +151,18 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       return res.json({
         success: false,
         duration,
+        durationSeconds,
+        hasSeconds,
         exercise_date: recognizedDate,
         reason: `截图中的运动时长约 ${duration} 分钟，未达到 ${config.minDurationMinutes} 分钟`,
       });
     }
 
-    // ── 防作弊②：秒级时长指纹去重（主力）/ 感知哈希视觉去重（兜底）──────
-    // 两人独立运动，"日期+总秒数"完全相同的概率极低，撞上基本可判定为盗用他人截图，
-    // 比 pHash 精确且无需调参，故作主力。仅当 AI 无法识别到秒级精度（如截图只
-    // 显示"32分钟"）时，秒数粒度太粗不能作指纹（分钟级冲突概率高、会误判），
-    // 改用 dHash 视觉相似度兜底拦截，阈值待积累真实距离分布后再微调。
+    // ── 防作弊②：秒级时长指纹去重 + 感知哈希视觉去重（两者都跑）──────
+    // "日期+总秒数"指纹防换设备重截：两人独立运动撞到同一秒的概率极低，撞上
+    // 基本可判定为盗用他人截图。但指纹依赖 AI 每次读出相同秒数，识别漂移
+    // （同图读出 2495/2555）或微信转发重压缩都可能绕过它，故 dHash 视觉相似度
+    // 无条件兜底拦截，不再只在无秒级精度时启用；阈值待积累真实距离分布后微调。
     let fingerprint = null;
     if (hasSeconds) {
       fingerprint = `${today}_${durationSeconds}`;
@@ -161,11 +171,14 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
         return res.json({
           success: false,
           duration,
+          durationSeconds,
+          hasSeconds,
           exercise_date: recognizedDate,
           reason: '疑似使用了他人的截图，请上传你本人的运动记录',
         });
       }
-    } else if (phash) {
+    }
+    if (phash) {
       for (const row of phashRows) {
         const dist = hammingDistance(phash, row.phash);
         const willBlock = dist <= config.imageSimilarityBlockThreshold;
@@ -178,6 +191,8 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
           return res.json({
             success: false,
             duration,
+            durationSeconds,
+            hasSeconds,
             exercise_date: recognizedDate,
             reason: '该截图与已有打卡记录过于相似，请上传你本人的运动记录截图',
           });
@@ -196,6 +211,8 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
           return res.json({
             success: false,
             duration,
+            durationSeconds,
+            hasSeconds,
             exercise_date: recognizedDate,
             reason: '疑似使用了他人的截图，请上传你本人的运动记录',
           });
@@ -213,6 +230,8 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
     res.json({
       success: true,
       duration,
+      durationSeconds,
+      hasSeconds,
       exercise_date: recognizedDate,
       weekCount,
       target: config.weeklyTarget,

@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "群周榜",
-  "enablePullDownRefresh": false,
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "light",
   "usingComponents": {}
 }

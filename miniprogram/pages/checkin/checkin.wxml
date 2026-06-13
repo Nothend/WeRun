@@ -38,7 +38,7 @@
       </view>
       <view class="result-row">
         <text class="result-label">运动时长</text>
-        <text class="result-val">约 {{result.duration}} 分钟</text>
+        <text class="result-val">{{result.durationText}}</text>
       </view>
       <view class="result-row">
         <text class="result-label">本周已打卡</text>
@@ -53,7 +53,7 @@
       <view class="result-title">今天已打过卡</view>
       <view wx:if="{{result.duration}}" class="result-row">
         <text class="result-label">已记录时长</text>
-        <text class="result-val">约 {{result.duration}} 分钟</text>
+        <text class="result-val">{{result.durationText}}</text>
       </view>
       <view class="result-row">
         <text class="result-label">本周已打卡</text>
@@ -75,7 +75,7 @@
         </view>
         <view wx:if="{{result.duration > 0}}" class="ai-detail-row">
           <text class="ai-detail-label">运动时长</text>
-          <text class="ai-detail-val">约 {{result.duration}} 分钟</text>
+          <text class="ai-detail-val">{{result.durationText}}</text>
         </view>
       </view>
     </view>

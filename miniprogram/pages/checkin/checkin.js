@@ -1,6 +1,22 @@
 const api = require('../../utils/api');
 const app = getApp();
 
+// 总秒数 → "00:41:35"
+function formatDuration(totalSeconds) {
+  const p = (n) => String(n).padStart(2, '0');
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  return `${p(h)}:${p(m)}:${p(totalSeconds % 60)}`;
+}
+
+// 识别到秒级精度时展示精确时长，分钟数仅作参考
+function durationText(data) {
+  if (!data.duration) return '';
+  return data.hasSeconds && data.durationSeconds
+    ? `${formatDuration(data.durationSeconds)}（约 ${data.duration} 分钟）`
+    : `约 ${data.duration} 分钟`;
+}
+
 Page({
   data: {
     imagePath: '',
@@ -102,11 +118,28 @@ Page({
     });
   },
 
-  async submit() {
+  submit() {
     if (!this.data.imagePath) {
       wx.showToast({ title: '请先选择截图', icon: 'none' });
       return;
     }
+    if (this.data.submitting) return;
+
+    // 攒一次「每周打卡周报」订阅额度：requestSubscribeMessage 必须在点击手势的
+    // 同步调用链里发起，经过 await 后手势上下文丢失会被微信直接拒绝
+    const weeklyTmpl = app.globalData.remoteConfig.weeklyTemplateId;
+    if (weeklyTmpl) {
+      wx.requestSubscribeMessage({
+        tmplIds: [weeklyTmpl],
+        // 用户拒绝或非点击路径（聊天素材自动打卡）下会 fail，complete 里照常继续上传
+        complete: () => this.doSubmit(),
+      });
+    } else {
+      this.doSubmit();
+    }
+  },
+
+  async doSubmit() {
     if (this.data.submitting) return;
 
     if (!app.globalData.user) {
@@ -118,17 +151,10 @@ Page({
     wx.showLoading({ title: '核验中...' });
     try {
       const data = await api.upload('/api/checkin', this.data.imagePath, { name: 'image' });
+      data.durationText = durationText(data);
       this.setData({ result: data });
       if (data.success) {
         wx.showToast({ title: '打卡成功！', icon: 'success' });
-        // 攒一次「每周打卡周报」订阅额度，用于周日自动推送
-        const weeklyTmpl = app.globalData.remoteConfig.weeklyTemplateId;
-        if (weeklyTmpl) {
-          wx.requestSubscribeMessage({
-            tmplIds: [weeklyTmpl],
-            fail: () => {}, // 用户拒绝或环境不支持时静默忽略
-          });
-        }
       }
     } catch (e) {
       wx.showToast({ title: e.message, icon: 'none' });

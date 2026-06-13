@@ -1,4 +1,5 @@
 const api = require('../../utils/api');
+const config = require('../../config');
 const app = getApp();
 
 Page({
@@ -16,7 +17,16 @@ Page({
     return {
       title: '我在 WeRun 坚持跑步打卡，快来一起运动！',
       path: '/pages/index/index',
+      imageUrl: config.baseUrl + '/shareground.png',
     };
+  },
+
+  onPullDownRefresh() {
+    const done = () => wx.stopPullDownRefresh();
+    const user = app.globalData.user;
+    if (!user) { done(); return; }
+    if (this.data.isPending) this.refreshMe().then(done, done);
+    else this.loadStats().then(done, done);
   },
 
   onShow() {

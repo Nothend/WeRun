@@ -4,6 +4,16 @@ function getApp_() {
   return getApp();
 }
 
+// 401 统一处理：清登录态；若不在首页则带回首页，避免页面停留在残留数据上
+function handleUnauthorized(app) {
+  app.clearAuth();
+  const pages = getCurrentPages();
+  const current = pages[pages.length - 1];
+  if (current && current.route !== 'pages/index/index') {
+    wx.reLaunch({ url: '/pages/index/index' });
+  }
+}
+
 // 统一 wx.request 封装：自动加 baseUrl + token，401 时清登录态
 function request(path, { method = 'GET', data } = {}) {
   const app = getApp_();
@@ -18,7 +28,7 @@ function request(path, { method = 'GET', data } = {}) {
       },
       success(res) {
         if (res.statusCode === 401) {
-          app.clearAuth();
+          handleUnauthorized(app);
           reject(new Error(res.data && res.data.error ? res.data.error : '登录已失效'));
           return;
         }
@@ -56,7 +66,7 @@ function upload(path, filePath, { name = 'file', formData = {} } = {}) {
           return;
         }
         if (res.statusCode === 401) {
-          app.clearAuth();
+          handleUnauthorized(app);
           reject(new Error(data.error || '登录已失效'));
           return;
         }
