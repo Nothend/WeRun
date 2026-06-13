@@ -95,7 +95,7 @@ your.domain.com {
 ```
 The container exposes port 9056 on `127.0.0.1` (mapped from internal port 3000). No nginx needed.
 
-Key env vars to set in ECS `.env`: `APPID`, `APPSECRET`, `DASHSCOPE_API_KEY`, `JWT_SECRET`, `PUBLIC_BASE_URL=https://your.domain.com`, `WERUN_IMAGE`. Optional tuning: `MIN_DURATION_MINUTES` (default 30), `WEEKLY_TARGET` (default 3), `SCREENSHOT_MAX_LAG_DAYS` (default 1 — screenshot exercise date may be at most this many days before today), `SHOW_SUPPORT` (default false — shows the about-page cost/donation section; keep false when submitting for platform review), `IMAGE_SIMILARITY_BLOCK_THRESHOLD` / `IMAGE_SIMILARITY_LOG_THRESHOLD`, `APPLY_TEMPLATE_ID` / `WEEKLY_TEMPLATE_ID` (subscribe messages), `QWEN_MODEL` / `QWEN_TEXT_MODEL`.
+Key env vars to set in ECS `.env`: `APPID`, `APPSECRET`, `DASHSCOPE_API_KEY`, `JWT_SECRET`, `PUBLIC_BASE_URL=https://your.domain.com`, `WERUN_IMAGE`. Optional tuning: `MIN_DURATION_MINUTES` (default 30), `WEEKLY_TARGET` (default 3), `SCREENSHOT_MAX_LAG_DAYS` (default 1 — screenshot exercise date may be at most this many days before today), `SHOW_SUPPORT` (default false — shows the about-page cost/donation section; keep false when submitting for platform review), `AUTO_APPROVE_MEMBERS` (default false — when true, a user's join application is auto-approved to `active` immediately on submit; admins are still notified, they just don't need to review), `IMAGE_SIMILARITY_BLOCK_THRESHOLD` / `IMAGE_SIMILARITY_LOG_THRESHOLD`, `APPLY_TEMPLATE_ID` / `WEEKLY_TEMPLATE_ID` (subscribe messages), `QWEN_MODEL` / `QWEN_TEXT_MODEL`.
 
 ## Coding Behavior Guidelines (Karpathy)
 

@@ -69,12 +69,19 @@ router.post('/apply', authRequired, upload.single('avatar'), async (req, res) =>
       openid
     );
 
-    // 异步通知管理员（fire-and-forget），失败不影响申请提交
+    // 审核开关打开：申请自动通过，立即成为正式成员（管理员仍会收到通知，只是无需审核）
+    if (config.autoApproveMembers) {
+      db.prepare("UPDATE users SET status = 'active' WHERE openid = ?").run(openid);
+    }
+
+    // 异步通知管理员（fire-and-forget），失败不影响申请提交。
+    // 不论是否自动审核都通知；自动审核时仅提示已通过、无需处理
     if (config.applyTemplateId) {
       const admins = db.prepare("SELECT openid FROM users WHERE is_admin = 1 AND status = 'active'").all();
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const timeStr = `${now.getFullYear()}年${pad(now.getMonth() + 1)}月${pad(now.getDate())}日 ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      const remark = config.autoApproveMembers ? '已自动通过审核，无需处理' : '请前往后台审核加入申请';
       for (const admin of admins) {
         sendSubscribeMessage(
           admin.openid,
@@ -82,7 +89,7 @@ router.post('/apply', authRequired, upload.single('avatar'), async (req, res) =>
           {
             thing1: { value: nickname.slice(0, 20) },
             time2: { value: timeStr },
-            thing3: { value: '请前往后台审核加入申请' },
+            thing3: { value: remark },
           },
           'pages/admin/admin'
         ).catch((e) => console.error('[apply-notify]', e.message));

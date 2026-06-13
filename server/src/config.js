@@ -28,11 +28,16 @@ const config = {
   // 感知哈希(dHash)相似度拦截阈值：仅在"识别不到秒级时长"（无法用秒级指纹去重）时生效，
   // 汉明距离 <= 此值时拒绝打卡。比日志阈值更严格，默认5，可据日志中的真实距离分布微调
   imageSimilarityBlockThreshold: parseInt(process.env.IMAGE_SIMILARITY_BLOCK_THRESHOLD || '5', 10),
+  // 会员审核开关：true=用户提交申请后自动通过、立即成为正式成员；
+  // false（默认）=申请进入待审核，需管理员在后台手动通过
+  autoApproveMembers: process.env.AUTO_APPROVE_MEMBERS === 'true',
   wechatNotifyTemplateId: process.env.WECHAT_NOTIFY_TEMPLATE_ID || '',
-  // 订阅消息模板A：有新用户申请时通知管理员
-  applyTemplateId: process.env.APPLY_TEMPLATE_ID || '',
-  // 订阅消息模板B：每周日统计推送给成员
-  weeklyTemplateId: process.env.WEEKLY_TEMPLATE_ID || '',
+  // 订阅消息模板A：有新用户申请时通知管理员。默认填本小程序在微信后台申请到的模板，
+  // 未显式配置环境变量时也能正常推送；换小程序/换模板时用 APPLY_TEMPLATE_ID 覆盖
+  applyTemplateId: process.env.APPLY_TEMPLATE_ID || 'fo2Y9PPFnbrq7s2jPXh3L-jPKYq5Pg0N7SUgjYbp20w',
+  // 订阅消息模板B：每周日统计推送给成员。同样内置本小程序的默认模板，
+  // 未显式配置环境变量时也能正常推送；换小程序/换模板时用 WEEKLY_TEMPLATE_ID 覆盖
+  weeklyTemplateId: process.env.WEEKLY_TEMPLATE_ID || '-7VQUbJgN8n-tnv8OPb7VKpfhdSFXMBAHVvkxCIaD-k',
 
   dataDir: DATA_DIR,
   dbPath: path.join(DATA_DIR, 'app.db'),
