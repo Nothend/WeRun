@@ -12,5 +12,12 @@
     "newFeature": true
   },
   "compileType": "miniprogram",
-  "libVersion": "latest"
+  "libVersion": "latest",
+  "packOptions": {
+    "ignore": [
+      { "type": "file", "value": "config.example.js" },
+      { "type": "file", "value": "project.config.example.json" }
+    ],
+    "include": []
+  }
 }
