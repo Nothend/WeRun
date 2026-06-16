@@ -1,0 +1,56 @@
+<view class="page">
+
+  <!-- 用户资料 -->
+  <view class="profile" wx:if="{{user}}">
+    <image class="profile-avatar" src="{{user.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+    <view class="profile-name">{{user.nickname}}</view>
+  </view>
+
+  <!-- 周期标签 -->
+  <view class="tabs" wx:if="{{periods.length}}">
+    <view wx:for="{{periods}}" wx:key="key"
+          class="tab {{current === index ? 'tab-active' : ''}}"
+          data-index="{{index}}" bindtap="onTapTab">
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 当前周期内容 -->
+  <block wx:for="{{periods}}" wx:key="key" wx:for-item="period" wx:for-index="pIdx">
+    <view wx:if="{{current === pIdx}}" class="container">
+
+      <!-- 汇总 -->
+      <view class="card summary-card">
+        <view class="summary-item">
+          <text class="summary-num">{{period.count}}</text>
+          <text class="summary-label">打卡次数</text>
+        </view>
+        <view class="summary-divider"></view>
+        <view class="summary-item">
+          <text class="summary-num">{{period.totalMinutes}}</text>
+          <text class="summary-label">累计分钟</text>
+        </view>
+      </view>
+
+      <!-- 周目标达标提示（仅周榜） -->
+      <view wx:if="{{period.weekly}}" class="goal-line {{period.achieved ? 'ok' : ''}}">
+        周目标 {{target}} 次 · {{period.achieved ? '已达标 ✅' : '未达标'}}
+      </view>
+
+      <!-- 明细 -->
+      <view wx:if="{{period.list.length === 0}}" class="empty-tip">该周期暂无打卡记录</view>
+      <view wx:else class="card list-card">
+        <view class="record-item" wx:for="{{period.list}}" wx:key="date" wx:for-item="item">
+          <view class="record-left">
+            <text class="record-date">{{item.timeText}}</text>
+            <text class="record-meta">{{item.weekday}} · {{item.weekKey}}</text>
+          </view>
+          <text class="record-duration">{{item.duration}} 分钟</text>
+        </view>
+      </view>
+
+    </view>
+  </block>
+
+  <view wx:if="{{loading}}" class="loading muted">加载中...</view>
+</view>

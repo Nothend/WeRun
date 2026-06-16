@@ -19,6 +19,9 @@ const config = {
   // 截图运动日期允许的最大滞后天数：0=只允许今天，1=允许今天或昨天（默认，
   // 照顾"晚上跑完次日早上打卡"）。识别不出日期或超出范围的截图会被拒绝
   screenshotMaxLagDays: parseInt(process.env.SCREENSHOT_MAX_LAG_DAYS || '1', 10),
+  // 是否对打卡截图调用微信内容安全检测(imgSecCheck)。true(默认)=送检，平台合规要求；
+  // false=跳过检测，打卡更快但有合规风险，自行权衡。仅作用于打卡截图，不影响头像/昵称检测
+  screenshotSecCheck: process.env.SCREENSHOT_SEC_CHECK !== 'false',
   // 「关于作者」页是否显示运营成本说明与赞赏码。默认隐藏——平台不允许个人
   // 主体小程序出现赞赏内容，提审时务必保持 false
   showSupport: process.env.SHOW_SUPPORT === 'true',
@@ -31,7 +34,6 @@ const config = {
   // 会员审核开关：true=用户提交申请后自动通过、立即成为正式成员；
   // false（默认）=申请进入待审核，需管理员在后台手动通过
   autoApproveMembers: process.env.AUTO_APPROVE_MEMBERS === 'true',
-  wechatNotifyTemplateId: process.env.WECHAT_NOTIFY_TEMPLATE_ID || '',
   // 订阅消息模板A：有新用户申请时通知管理员。默认填本小程序在微信后台申请到的模板，
   // 未显式配置环境变量时也能正常推送；换小程序/换模板时用 APPLY_TEMPLATE_ID 覆盖
   applyTemplateId: process.env.APPLY_TEMPLATE_ID || 'fo2Y9PPFnbrq7s2jPXh3L-jPKYq5Pg0N7SUgjYbp20w',

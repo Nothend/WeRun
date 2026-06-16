@@ -3,7 +3,7 @@
 ══════════════════════════════════════ */
 .auth-screen {
   min-height: 100vh;
-  background: #070d1b;
+  background: #f2f4f7;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -27,12 +27,12 @@
 .auth-hero-title {
   font-size: 52rpx;
   font-weight: 900;
-  color: #e2e8f0;
+  color: #1a1a1a;
   letter-spacing: 4rpx;
 }
 .auth-hero-sub {
   font-size: 26rpx;
-  color: #64748b;
+  color: #8a9099;
   letter-spacing: 1rpx;
   text-align: center;
   line-height: 1.6;
@@ -68,8 +68,8 @@
   width: 180rpx;
   height: 180rpx;
   border-radius: 50%;
-  border: 3rpx dashed rgba(34, 211, 238, 0.5);
-  box-shadow: 0 0 40rpx rgba(34, 211, 238, 0.15);
+  border: 3rpx dashed rgba(7, 193, 96, 0.5);
+  box-shadow: 0 0 40rpx rgba(7, 193, 96, 0.15);
 }
 .auth-avatar-overlay {
   position: absolute;
@@ -82,7 +82,7 @@
   transition: background 0.2s;
 }
 .auth-avatar-overlay.set {
-  background: rgba(34, 211, 238, 0.25);
+  background: rgba(7, 193, 96, 0.3);
 }
 .auth-avatar-camera {
   font-size: 56rpx;
@@ -91,11 +91,11 @@
 .auth-avatar-label {
   font-size: 28rpx;
   font-weight: 600;
-  color: #94a3b8;
+  color: #5a6270;
   letter-spacing: 1rpx;
 }
 .auth-avatar-label.done {
-  color: #22d3ee;
+  color: #07c160;
 }
 
 /* 昵称字段 */
@@ -104,7 +104,7 @@
 }
 .auth-field-label {
   font-size: 24rpx;
-  color: #64748b;
+  color: #8a9099;
   letter-spacing: 1rpx;
   margin-bottom: 16rpx;
   display: flex;
@@ -113,22 +113,22 @@
 }
 .auth-required {
   font-size: 20rpx;
-  color: #f59e0b;
-  background: rgba(245, 158, 11, 0.12);
+  color: #d48806;
+  background: rgba(245, 158, 11, 0.15);
   border-radius: 8rpx;
   padding: 2rpx 12rpx;
   letter-spacing: 0;
 }
 .auth-field-hint {
   font-size: 22rpx;
-  color: #eab308;
+  color: #d48806;
   margin-bottom: 12rpx;
   line-height: 1.5;
 }
 .auth-nickname-wrap {
   width: 100%;
-  background: rgba(255, 255, 255, 0.04);
-  border: 2rpx solid rgba(34, 211, 238, 0.2);
+  background: #f5f7fa;
+  border: 2rpx solid rgba(0, 0, 0, 0.08);
   border-radius: 20rpx;
   padding: 0 32rpx;
   height: 104rpx;
@@ -139,21 +139,21 @@
   transition: border-color 0.2s;
 }
 .auth-nickname-wrap.filled {
-  border-color: rgba(34, 211, 238, 0.6);
-  background: rgba(34, 211, 238, 0.04);
+  border-color: rgba(7, 193, 96, 0.6);
+  background: rgba(7, 193, 96, 0.06);
 }
 .auth-nickname-input {
   flex: 1;
   height: 104rpx;
   font-size: 34rpx;
-  color: #e2e8f0;
+  color: #1a1a1a;
 }
 .auth-nickname-placeholder {
-  color: #334155;
+  color: #aab0b8;
 }
 .auth-nickname-check {
   font-size: 32rpx;
-  color: #22d3ee;
+  color: #07c160;
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -168,10 +168,10 @@
 }
 .auth-social-tip {
   font-size: 24rpx;
-  color: #475569;
+  color: #8a9099;
   letter-spacing: 1rpx;
-  background: rgba(34, 211, 238, 0.06);
-  border: 1rpx solid rgba(34, 211, 238, 0.1);
+  background: #f5f7fa;
+  border: 1rpx solid rgba(0, 0, 0, 0.06);
   border-radius: 12rpx;
   padding: 14rpx 32rpx;
 }
@@ -182,35 +182,35 @@
   text-align: center;
   font-size: 34rpx;
   font-weight: 800;
-  color: #0a0f1a;
-  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+  color: #ffffff;
+  background: linear-gradient(135deg, #07c160, #06ad56);
   border-radius: 24rpx;
-  box-shadow: 0 8rpx 32rpx rgba(34, 211, 238, 0.45);
+  box-shadow: 0 8rpx 28rpx rgba(7, 193, 96, 0.3);
   letter-spacing: 2rpx;
 }
 .auth-allow-btn.saving {
   opacity: 0.6;
 }
 .auth-allow-btn.disabled {
-  background: #1e293b;
-  color: #475569;
+  background: #e8eaed;
+  color: #aab0b8;
   box-shadow: none;
   pointer-events: none;
 }
 .apply-hint {
   font-size: 22rpx;
-  color: #64748b;
+  color: #8a9099;
   text-align: center;
   letter-spacing: 0.5rpx;
   margin-top: -8rpx;
 }
 .auth-skip-btn {
   font-size: 24rpx;
-  color: #334155;
+  color: #aab0b8;
   letter-spacing: 0.5rpx;
   padding: 12rpx 32rpx;
   text-decoration: underline;
-  text-decoration-color: #1e293b;
+  text-decoration-color: #d0d4d9;
 }
 
 /* ══════════════════════════════════════
@@ -220,11 +220,11 @@
   min-height: 100vh;
   padding: 24rpx 24rpx 60rpx;
   box-sizing: border-box;
-  background: #070d1b;
+  background: #f2f4f7;
 }
 .card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1rpx solid rgba(34, 211, 238, 0.1);
+  background: #ffffff;
+  border: 1rpx solid rgba(0, 0, 0, 0.05);
   border-radius: 24rpx;
   margin-bottom: 24rpx;
 }
@@ -234,8 +234,8 @@
   display: flex;
   align-items: center;
   gap: 16rpx;
-  background: rgba(245, 158, 11, 0.08);
-  border: 1rpx solid rgba(245, 158, 11, 0.25);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1rpx solid rgba(245, 158, 11, 0.3);
   border-radius: 16rpx;
   padding: 24rpx 28rpx;
   margin-bottom: 24rpx;
@@ -246,7 +246,7 @@
 }
 .incomplete-text {
   font-size: 26rpx;
-  color: #f59e0b;
+  color: #d48806;
   line-height: 1.5;
   letter-spacing: 0.5rpx;
 }
@@ -273,8 +273,8 @@
   width: 180rpx;
   height: 180rpx;
   border-radius: 50%;
-  border: 3rpx solid rgba(34, 211, 238, 0.4);
-  box-shadow: 0 0 24rpx rgba(34, 211, 238, 0.15);
+  border: 3rpx solid rgba(7, 193, 96, 0.4);
+  box-shadow: 0 0 24rpx rgba(7, 193, 96, 0.15);
 }
 .avatar-camera-overlay {
   position: absolute;
@@ -293,7 +293,7 @@
 }
 .avatar-camera-text {
   font-size: 20rpx;
-  color: #e2e8f0;
+  color: #ffffff;
   letter-spacing: 1rpx;
 }
 
@@ -303,7 +303,7 @@
 }
 .input-label {
   font-size: 24rpx;
-  color: #475569;
+  color: #8a9099;
   padding-top: 28rpx;
   padding-bottom: 8rpx;
   letter-spacing: 1rpx;
@@ -312,12 +312,12 @@
   width: 100%;
   height: 88rpx;
   font-size: 30rpx;
-  color: #e2e8f0;
-  border-bottom: 1rpx solid rgba(34, 211, 238, 0.1);
+  color: #1a1a1a;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
   padding-bottom: 16rpx;
 }
-.input-placeholder { color: #334155; }
+.input-placeholder { color: #aab0b8; }
 
 /* 保存按钮 */
 .save-btn {
@@ -327,10 +327,10 @@
   text-align: center;
   font-size: 32rpx;
   font-weight: 600;
-  color: #0a0f1a;
-  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+  color: #ffffff;
+  background: linear-gradient(135deg, #07c160, #06ad56);
   border-radius: 24rpx;
-  box-shadow: 0 4rpx 24rpx rgba(34, 211, 238, 0.3);
+  box-shadow: 0 4rpx 20rpx rgba(7, 193, 96, 0.25);
   letter-spacing: 2rpx;
 }
 .save-btn.saving { opacity: 0.6; }

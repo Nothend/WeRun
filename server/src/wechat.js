@@ -98,47 +98,6 @@ async function imgSecCheck(imageBuffer) {
   }
 }
 
-// 向指定 openid 发送打卡订阅消息。调用方负责 try/catch，失败不影响主流程。
-// 模板字段约定（在微信公众平台创建模板时按此定义）：
-//   thing1  → 打卡成员
-//   number2 → 运动时长(分钟)
-//   phrase3 → 本周状态
-//   date4   → 打卡时间
-async function sendCheckinNotify(toOpenid, { nickname, durationMinutes, weekCount, weekTarget }) {
-  if (!config.wechatNotifyTemplateId) return;
-
-  const token = await getAccessToken();
-  if (!token) return;
-
-  const now = new Date();
-  const pad = (n) => String(n).padStart(2, '0');
-  const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const achieved = weekCount >= weekTarget;
-  const phaseStr = achieved ? '本周已达标' : `本周${weekCount}/${weekTarget}次`;
-
-  const body = {
-    touser: toOpenid,
-    template_id: config.wechatNotifyTemplateId,
-    page: 'pages/index/index',
-    miniprogram_state: 'formal',
-    data: {
-      thing1:  { value: nickname.slice(0, 20) },
-      number2: { value: String(durationMinutes) },
-      phrase3: { value: phaseStr },
-      date4:   { value: dateStr },
-    },
-  };
-
-  const sendResp = await fetch(
-    `https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=${token}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-  );
-  const sendData = await sendResp.json();
-  if (sendData.errcode && sendData.errcode !== 0) {
-    console.warn(`[notify] 发送打卡通知失败 openid=${toOpenid} errcode=${sendData.errcode}: ${sendData.errmsg}`);
-  }
-}
-
 // 通用订阅消息发送。调用方负责 catch，失败不影响主流程。
 // mock 模式时只打印日志，不发起真实请求。
 async function sendSubscribeMessage(toOpenid, templateId, data, page = 'pages/index/index') {
@@ -167,7 +126,6 @@ async function sendSubscribeMessage(toOpenid, templateId, data, page = 'pages/in
 module.exports = {
   code2session,
   getAccessToken,
-  sendCheckinNotify,
   sendSubscribeMessage,
   msgSecCheck,
   imgSecCheck,

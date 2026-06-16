@@ -1,6 +1,6 @@
 {
-  "navigationBarTitleText": "群周榜",
+  "navigationBarTitleText": "群排行榜",
   "enablePullDownRefresh": true,
-  "backgroundTextStyle": "light",
+  "backgroundTextStyle": "dark",
   "usingComponents": {}
 }

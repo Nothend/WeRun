@@ -152,6 +152,11 @@ Page({
     try {
       const data = await api.upload('/api/checkin', this.data.imagePath, { name: 'image' });
       data.durationText = durationText(data);
+      // 进行了内容安全验证时，展示安全验证与图片识别各自耗时
+      if (data.secCheckMs) {
+        data.secCheckText = (data.secCheckMs / 1000).toFixed(1) + ' 秒';
+        data.recognizeText = ((data.recognizeMs || 0) / 1000).toFixed(1) + ' 秒';
+      }
       this.setData({ result: data });
       if (data.success) {
         wx.showToast({ title: '打卡成功！', icon: 'success' });
@@ -169,7 +174,7 @@ Page({
       title: '撤销今日打卡',
       content: '确认删除今天的打卡记录？删除后可重新打卡。',
       confirmText: '确认',
-      confirmColor: '#ef4444',
+      confirmColor: '#fa5151',
       success: async (res) => {
         if (!res.confirm) return;
         try {

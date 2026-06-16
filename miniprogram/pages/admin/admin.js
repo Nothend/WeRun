@@ -1,5 +1,4 @@
 const api = require('../../utils/api');
-const config = require('../../config');
 const app = getApp();
 
 // epoch 毫秒 → "2026-03-03 18:03:19"（设备本地时区）
@@ -19,8 +18,6 @@ Page({
     list: [],
     loading: true,
     myOpenid: '',
-    myNotifyCheckin: false,
-    togglingNotify: false,
 
     // 改名弹窗
     renameModal: false,
@@ -129,11 +126,7 @@ Page({
     this.setData({ loading: true });
     try {
       const data = await api.request('/api/admin/users');
-      const me = data.list.find((u) => u.openid === this.data.myOpenid);
-      this.setData({
-        list: data.list,
-        myNotifyCheckin: me ? !!me.notifyCheckin : false,
-      });
+      this.setData({ list: data.list });
     } catch (e) {
       wx.showToast({ title: e.message, icon: 'none' });
     } finally {
@@ -182,29 +175,7 @@ Page({
     });
   },
 
-  // ── 打卡通知开关 ──────────────────────────────────────────
-  async toggleNotify() {
-    if (this.data.togglingNotify) return;
-    const newNotify = !this.data.myNotifyCheckin;
-
-    if (newNotify) {
-      // 开启时一并订阅：旧打卡通知模板 + 模板A（新成员申请通知）
-      const rc = app.globalData.remoteConfig;
-      const tmplIds = [];
-      if (config.notifyTemplateId)  tmplIds.push(config.notifyTemplateId);
-      if (rc.applyTemplateId)       tmplIds.push(rc.applyTemplateId);
-      if (tmplIds.length) {
-        wx.requestSubscribeMessage({
-          tmplIds,
-          complete: () => { this._saveNotifySetting(newNotify); },
-        });
-        return;
-      }
-    }
-    this._saveNotifySetting(newNotify);
-  },
-
-  // 独立订阅新成员申请通知（管理员可单独刷新额度）
+  // 订阅新成员申请通知（管理员每次点击刷新一次订阅额度）
   subscribeApplyNotify() {
     const tmplId = app.globalData.remoteConfig.applyTemplateId;
     if (!tmplId) {
@@ -224,28 +195,12 @@ Page({
     });
   },
 
-  async _saveNotifySetting(notify) {
-    this.setData({ togglingNotify: true });
-    try {
-      await api.request('/api/admin/notify-setting', {
-        method: 'POST',
-        data: { notify },
-      });
-      this.setData({ myNotifyCheckin: notify });
-      wx.showToast({ title: notify ? '已开启通知' : '已关闭通知', icon: 'success' });
-    } catch (err) {
-      wx.showToast({ title: err.message, icon: 'none' });
-    } finally {
-      this.setData({ togglingNotify: false });
-    }
-  },
-
   deleteAccount() {
     wx.showModal({
       title: '注销账号',
       content: '将永久删除当前账号及所有打卡记录，无法恢复。确认注销？',
       confirmText: '确认注销',
-      confirmColor: '#ef4444',
+      confirmColor: '#fa5151',
       cancelText: '取消',
       success: (res) => {
         if (!res.confirm) return;
@@ -254,7 +209,7 @@ Page({
           title: '再次确认',
           content: '注销后需重新登录，历史数据将全部清空。',
           confirmText: '注销',
-          confirmColor: '#ef4444',
+          confirmColor: '#fa5151',
           cancelText: '取消',
           success: async (res2) => {
             if (!res2.confirm) return;

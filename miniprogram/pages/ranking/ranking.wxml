@@ -19,7 +19,7 @@
         <view class="podium" wx:if="{{board.top3.length}}">
           <!-- 第二名 -->
           <view class="podium-slot slot-2" wx:if="{{board.top3[1]}}">
-            <image class="podium-avatar avatar-2" src="{{board.top3[1].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+            <image class="podium-avatar avatar-2" src="{{board.top3[1].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill" data-openid="{{board.top3[1].openid}}" catchtap="goUser"/>
             <text class="podium-medal">🥈</text>
             <view class="podium-name">{{board.top3[1].nickname}}</view>
             <view class="podium-count {{board.top3[1].achieved ? 'achieved' : ''}}">{{board.top3[1].count}} 次</view>
@@ -27,14 +27,14 @@
           <!-- 第一名 -->
           <view class="podium-slot slot-1" wx:if="{{board.top3[0]}}">
             <text class="crown">👑</text>
-            <image class="podium-avatar avatar-1" src="{{board.top3[0].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+            <image class="podium-avatar avatar-1" src="{{board.top3[0].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill" data-openid="{{board.top3[0].openid}}" catchtap="goUser"/>
             <text class="podium-medal">🥇</text>
             <view class="podium-name">{{board.top3[0].nickname}}</view>
             <view class="podium-count {{board.top3[0].achieved ? 'achieved' : ''}}">{{board.top3[0].count}} 次</view>
           </view>
           <!-- 第三名 -->
           <view class="podium-slot slot-3" wx:if="{{board.top3[2]}}">
-            <image class="podium-avatar avatar-3" src="{{board.top3[2].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+            <image class="podium-avatar avatar-3" src="{{board.top3[2].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill" data-openid="{{board.top3[2].openid}}" catchtap="goUser"/>
             <text class="podium-medal">🥉</text>
             <view class="podium-name">{{board.top3[2].nickname}}</view>
             <view class="podium-count {{board.top3[2].achieved ? 'achieved' : ''}}">{{board.top3[2].count}} 次</view>
@@ -45,7 +45,7 @@
         <view class="list-card" wx:if="{{board.rest.length}}">
           <view wx:for="{{board.visibleRest}}" wx:key="openid" wx:for-item="row" class="row">
             <view class="rank-num">{{row.rank}}</view>
-            <image class="avatar" src="{{row.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+            <image class="avatar" src="{{row.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill" data-openid="{{row.openid}}" catchtap="goUser"/>
             <view class="name">{{row.nickname}}</view>
             <view class="count-cell">
               <text class="count {{row.achieved ? 'achieved' : ''}}">{{row.count}}</text>

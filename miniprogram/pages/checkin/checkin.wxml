@@ -40,6 +40,16 @@
         <text class="result-label">运动时长</text>
         <text class="result-val">{{result.durationText}}</text>
       </view>
+      <block wx:if="{{result.secCheckMs}}">
+        <view class="result-row">
+          <text class="result-label">安全验证用时</text>
+          <text class="result-val">{{result.secCheckText}}</text>
+        </view>
+        <view class="result-row">
+          <text class="result-label">图片识别用时</text>
+          <text class="result-val">{{result.recognizeText}}</text>
+        </view>
+      </block>
       <view class="result-row">
         <text class="result-label">本周已打卡</text>
         <text class="result-val accent">{{result.weekCount}} / {{result.target}} 次</text>

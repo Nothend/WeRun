@@ -6,7 +6,7 @@ const config = require('../config');
 const { authRequired, activeRequired } = require('../auth');
 const { recognizeDuration } = require('../qwen');
 const { computeDHash, hammingDistance } = require('../phash');
-const { sendCheckinNotify, imgSecCheck } = require('../wechat');
+const { imgSecCheck } = require('../wechat');
 const { currentWeekKey, localDateStr } = require('../week');
 
 const router = express.Router();
@@ -16,30 +16,6 @@ function weekCountOf(openid, weekKey) {
   return db
     .prepare('SELECT COUNT(*) AS n FROM checkins WHERE openid = ? AND week_key = ?')
     .get(openid, weekKey).n;
-}
-
-// 通知所有开启了接收打卡消息的管理员（fire-and-forget，不影响响应）
-async function notifyAdmins(checkerOpenid, durationMinutes, weekCount) {
-  try {
-    const admins = db
-      .prepare('SELECT openid FROM users WHERE is_admin = 1 AND notify_checkin = 1')
-      .all();
-    if (!admins.length) return;
-
-    const checker = db.prepare('SELECT nickname FROM users WHERE openid = ?').get(checkerOpenid);
-    const nickname = checker?.nickname || '未设昵称';
-
-    for (const admin of admins) {
-      await sendCheckinNotify(admin.openid, {
-        nickname,
-        durationMinutes,
-        weekCount,
-        weekTarget: config.weeklyTarget,
-      });
-    }
-  } catch (e) {
-    console.error('[notify] notifyAdmins error:', e.message);
-  }
 }
 
 // POST /api/checkin  multipart: image(file)
@@ -79,8 +55,15 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
     }
 
     // ── 平台内容安全检测：违规图片直接拒绝（接口异常 fail-open 放行）──
-    if (!(await imgSecCheck(req.file.buffer))) {
-      return res.json({ success: false, reason: '图片含违规信息，请更换截图' });
+    // 由 SCREENSHOT_SEC_CHECK 开关控制是否送检；送检时记录耗时，成功后返回给前端展示
+    let secCheckMs = null;
+    if (config.screenshotSecCheck) {
+      const t0 = Date.now();
+      const passed = await imgSecCheck(req.file.buffer);
+      secCheckMs = Date.now() - t0;
+      if (!passed) {
+        return res.json({ success: false, reason: '图片含违规信息，请更换截图' });
+      }
     }
 
     // ── 感知哈希（dHash）计算 ──────────────────────────
@@ -98,7 +81,9 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
     }
 
     // 调用千问识别时长与运动日期（不保存原图）
+    const tRecognize = Date.now();
     const result = await recognizeDuration(req.file.buffer, req.file.mimetype || 'image/jpeg');
+    const recognizeMs = Date.now() - tRecognize;
     // 留痕：出现"同图不同时长"等识别漂移时可复盘
     console.log(`[qwen] openid=${openid} 识别结果: ${JSON.stringify(result)}`);
 
@@ -224,9 +209,6 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
 
     const weekCount = weekCountOf(openid, weekKey);
 
-    // 异步通知管理员（不等待，不影响响应时间）
-    notifyAdmins(openid, duration, weekCount);
-
     res.json({
       success: true,
       duration,
@@ -236,6 +218,8 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
       weekCount,
       target: config.weeklyTarget,
       achieved: weekCount >= config.weeklyTarget,
+      secCheckMs,
+      recognizeMs,
       mock: result.mock || false,
     });
   } catch (e) {

@@ -18,7 +18,7 @@ router.get('/admin/users', (req, res) => {
   const rows = db
     .prepare(
       `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, u.is_admin AS isAdmin,
-              u.notify_checkin AS notifyCheckin, u.created_at AS createdAt,
+              u.created_at AS createdAt,
               (SELECT COUNT(*) FROM checkins c WHERE c.openid = u.openid) AS totalCheckins
          FROM users u
         WHERE u.status = 'active'
@@ -31,7 +31,6 @@ router.get('/admin/users', (req, res) => {
       nickname: r.nickname || '未设置昵称',
       avatarUrl: r.avatarUrl || '',
       isAdmin: !!r.isAdmin,
-      notifyCheckin: !!r.notifyCheckin,
       totalCheckins: r.totalCheckins,
       createdAt: r.createdAt,
     })),
@@ -133,13 +132,6 @@ router.get('/admin/checkins', (req, res) => {
     page,
     pageSize,
   });
-});
-
-// POST /api/admin/notify-setting  { notify: true|false } 管理员设置自己是否接收打卡通知
-router.post('/admin/notify-setting', (req, res) => {
-  const notify = req.body && req.body.notify ? 1 : 0;
-  db.prepare('UPDATE users SET notify_checkin = ? WHERE openid = ?').run(notify, req.user.openid);
-  res.json({ ok: true, notify: !!notify });
 });
 
 // POST /api/admin/users/:openid/nickname  { nickname: "..." } 修改用户昵称

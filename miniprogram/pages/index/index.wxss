@@ -13,8 +13,8 @@
   height: 96rpx;
   border-radius: 50%;
   flex-shrink: 0;
-  border: 2rpx solid rgba(34, 211, 238, 0.3);
-  box-shadow: 0 0 16rpx rgba(34, 211, 238, 0.1);
+  border: 2rpx solid rgba(7, 193, 96, 0.3);
+  box-shadow: 0 0 16rpx rgba(7, 193, 96, 0.12);
 }
 .profile-info {
   display: flex;
@@ -24,28 +24,28 @@
 .profile-name {
   font-size: 32rpx;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #1a1a1a;
   letter-spacing: 0.5rpx;
 }
 .profile-sub {
   font-size: 22rpx;
-  color: #475569;
+  color: #8a9099;
   letter-spacing: 1rpx;
 }
 .profile-login-badge {
   flex-shrink: 0;
   font-size: 24rpx;
   font-weight: 600;
-  color: #22d3ee;
+  color: #07c160;
   padding: 12rpx 28rpx;
-  border: 1rpx solid rgba(34, 211, 238, 0.3);
+  border: 1rpx solid rgba(7, 193, 96, 0.3);
   border-radius: 100rpx;
 }
 .profile-stats {
   display: flex;
   align-items: center;
-  background: rgba(34, 211, 238, 0.04);
-  border: 1rpx solid rgba(34, 211, 238, 0.1);
+  background: rgba(7, 193, 96, 0.05);
+  border: 1rpx solid rgba(7, 193, 96, 0.12);
   border-radius: 16rpx;
   padding: 24rpx 0;
 }
@@ -59,19 +59,19 @@
 .pstat-num {
   font-size: 52rpx;
   font-weight: 800;
-  color: #22d3ee;
+  color: #07c160;
   line-height: 1;
   letter-spacing: -1rpx;
 }
 .pstat-label {
   font-size: 20rpx;
-  color: #475569;
+  color: #8a9099;
   letter-spacing: 2rpx;
 }
 .pstat-divider {
   width: 1rpx;
   height: 64rpx;
-  background: rgba(34, 211, 238, 0.12);
+  background: rgba(0, 0, 0, 0.08);
 }
 .pstat-hover {
   opacity: 0.6;
@@ -82,19 +82,19 @@
   align-items: center;
   margin-top: 20rpx;
   padding: 14rpx 24rpx;
-  background: rgba(74, 222, 128, 0.06);
-  border: 1rpx solid rgba(74, 222, 128, 0.15);
+  background: rgba(7, 193, 96, 0.08);
+  border: 1rpx solid rgba(7, 193, 96, 0.2);
   border-radius: 12rpx;
 }
 .today-label {
   font-size: 24rpx;
-  color: #4ade80;
+  color: #07c160;
 }
 .today-del {
   font-size: 22rpx;
-  color: #f87171;
+  color: #fa5151;
   padding: 6rpx 20rpx;
-  border: 1rpx solid rgba(248, 113, 113, 0.3);
+  border: 1rpx solid rgba(250, 81, 81, 0.3);
   border-radius: 8rpx;
 }
 
@@ -105,13 +105,13 @@
   padding: 36rpx 40rpx;
 }
 .card-hover {
-  background: rgba(34, 211, 238, 0.06);
+  background: rgba(7, 193, 96, 0.06);
 }
 .checkin-icon-wrap {
   width: 80rpx;
   height: 80rpx;
   border-radius: 20rpx;
-  background: rgba(34, 211, 238, 0.12);
+  background: rgba(7, 193, 96, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,11 +128,11 @@
 .checkin-title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #e2e8f0;
+  color: #1a1a1a;
 }
 .checkin-sub {
   font-size: 22rpx;
-  color: #475569;
+  color: #8a9099;
   letter-spacing: 0.5rpx;
 }
 
@@ -147,16 +147,16 @@
   padding: 36rpx 40rpx;
 }
 .action-item + .action-item {
-  border-top: 1rpx solid rgba(255, 255, 255, 0.04);
+  border-top: 1rpx solid rgba(0, 0, 0, 0.06);
 }
 .action-hover {
-  background: rgba(34, 211, 238, 0.04);
+  background: rgba(7, 193, 96, 0.05);
 }
 .action-icon-wrap {
   width: 72rpx;
   height: 72rpx;
   border-radius: 18rpx;
-  background: rgba(255, 255, 255, 0.04);
+  background: #f5f7fa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,23 +165,23 @@
   flex-shrink: 0;
 }
 .action-item.primary .action-icon-wrap {
-  background: rgba(34, 211, 238, 0.1);
+  background: rgba(7, 193, 96, 0.12);
 }
 .action-text {
   flex: 1;
   font-size: 30rpx;
   font-weight: 500;
-  color: #cbd5e1;
+  color: #3d4350;
 }
 .action-item.primary .action-text {
-  color: #e2e8f0;
+  color: #1a1a1a;
 }
 .logout-text {
-  color: #ef4444;
+  color: #fa5151;
 }
 .action-chevron {
   font-size: 48rpx;
-  color: #1e3050;
+  color: #c5cbd3;
   font-weight: 300;
   line-height: 1;
 }
@@ -189,8 +189,8 @@
 /* ── 待审核申请提示卡 ── */
 .pending-banner {
   padding: 32rpx 36rpx;
-  border-color: rgba(234, 179, 8, 0.3);
-  background: rgba(234, 179, 8, 0.04);
+  border-color: rgba(234, 179, 8, 0.4);
+  background: rgba(234, 179, 8, 0.08);
 }
 .pending-banner-top {
   display: flex;
@@ -204,7 +204,7 @@
 .pending-banner-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #eab308;
+  color: #d48806;
   letter-spacing: 0.5rpx;
 }
 .pending-banner-body {
@@ -214,24 +214,24 @@
 }
 .pending-banner-msg {
   font-size: 26rpx;
-  color: #94a3b8;
+  color: #5a6270;
   line-height: 1.6;
 }
 .pending-banner-btn {
   align-self: flex-start;
   font-size: 26rpx;
   font-weight: 600;
-  color: #eab308;
+  color: #d48806;
   padding: 14rpx 32rpx;
-  border: 1rpx solid rgba(234, 179, 8, 0.35);
+  border: 1rpx solid rgba(234, 179, 8, 0.5);
   border-radius: 100rpx;
 }
 .pending-banner-edit {
   align-self: flex-start;
   font-size: 24rpx;
-  color: #64748b;
+  color: #8a9099;
   padding: 10rpx 24rpx;
-  border: 1rpx solid rgba(100, 116, 139, 0.2);
+  border: 1rpx solid rgba(0, 0, 0, 0.12);
   border-radius: 100rpx;
 }
 .pending-banner-actions {

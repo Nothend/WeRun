@@ -109,6 +109,13 @@ Page({
     };
   },
 
+  // ── 点头像查看成员主页 ────────────────────────────────
+  goUser(e) {
+    const openid = e.currentTarget.dataset.openid;
+    if (!openid) return;
+    wx.navigateTo({ url: `/pages/user/user?openid=${encodeURIComponent(openid)}` });
+  },
+
   // ── 标签 / 滑动切换 ────────────────────────────────
   onSwiperChange(e) {
     this.setData({ current: e.detail.current });

@@ -13,13 +13,13 @@
 .about-title {
   font-size: 36rpx;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #1a1a1a;
   letter-spacing: 1rpx;
   margin-bottom: 16rpx;
 }
 .about-desc {
   font-size: 26rpx;
-  color: #94a3b8;
+  color: #5a6270;
   line-height: 1.7;
 }
 
@@ -30,7 +30,7 @@
 .cost-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #1a1a1a;
   margin-bottom: 28rpx;
   letter-spacing: 0.5rpx;
 }
@@ -48,7 +48,7 @@
 }
 .cost-text {
   font-size: 26rpx;
-  color: #94a3b8;
+  color: #5a6270;
   line-height: 1.6;
 }
 
@@ -59,18 +59,18 @@
   align-items: center;
   text-align: center;
   padding: 44rpx 40rpx;
-  border-color: rgba(34, 211, 238, 0.18);
+  border-color: rgba(7, 193, 96, 0.25);
 }
 .support-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #1a1a1a;
   margin-bottom: 16rpx;
   letter-spacing: 1rpx;
 }
 .support-sub {
   font-size: 24rpx;
-  color: #94a3b8;
+  color: #5a6270;
   line-height: 1.7;
   margin-bottom: 32rpx;
 }
@@ -84,6 +84,6 @@
 }
 .support-hint {
   font-size: 22rpx;
-  color: #475569;
+  color: #8a9099;
   letter-spacing: 1rpx;
 }

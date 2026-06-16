@@ -134,6 +134,56 @@ function buildBoard({ weekKey, datePrefix }) {
   }));
 }
 
+// GET /api/stats/user/:openid  指定成员各周期打卡情况（逐天明细）
+router.get('/stats/user/:openid', authRequired, activeRequired, (req, res) => {
+  const { openid } = req.params;
+  const user = db
+    .prepare("SELECT nickname, avatar_url AS avatarUrl FROM users WHERE openid = ? AND status = 'active'")
+    .get(openid);
+  if (!user) return res.status(404).json({ error: '成员不存在' });
+
+  const rows = db
+    .prepare(
+      `SELECT checkin_date AS date, duration_minutes AS duration, week_key AS weekKey,
+              created_at AS createdAt
+         FROM checkins WHERE openid = ? ORDER BY checkin_date DESC`
+    )
+    .all(openid);
+
+  const thisWeek = currentWeekKey();
+  const lastWeek = lastWeekKey();
+  const thisMonth = currentMonthStr();
+  const lastMonth = lastMonthStr();
+  const thisYear = currentYearStr();
+  const defs = [
+    { key: 'thisWeek', label: '本周', weekly: true, filter: (r) => r.weekKey === thisWeek },
+    { key: 'lastWeek', label: '上周', weekly: true, filter: (r) => r.weekKey === lastWeek },
+    { key: 'thisMonth', label: '本月', weekly: false, filter: (r) => r.date.startsWith(thisMonth) },
+    { key: 'lastMonth', label: '上月', weekly: false, filter: (r) => r.date.startsWith(lastMonth) },
+    { key: 'thisYear', label: '本年', weekly: false, filter: (r) => r.date.startsWith(thisYear) },
+    { key: 'allTime', label: '总览', weekly: false, filter: () => true },
+  ];
+
+  const periods = defs.map((d) => {
+    const list = rows.filter(d.filter).map((r) => ({ ...r, duration: Math.round(r.duration) }));
+    return {
+      key: d.key,
+      label: d.label,
+      weekly: d.weekly,
+      count: list.length,
+      totalMinutes: Math.round(list.reduce((s, r) => s + (r.duration || 0), 0)),
+      achieved: d.weekly ? list.length >= config.weeklyTarget : false,
+      list,
+    };
+  });
+
+  res.json({
+    user: { nickname: user.nickname || '未设置昵称', avatarUrl: user.avatarUrl || '' },
+    target: config.weeklyTarget,
+    periods,
+  });
+});
+
 // GET /api/stats/rankings  多榜单：本周/上周/本月/上月/本年/总榜
 router.get('/stats/rankings', authRequired, activeRequired, (req, res) => {
   const defs = [

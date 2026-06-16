@@ -137,7 +137,7 @@ Page({
       title: '撤销今日打卡',
       content: '确认删除今天的打卡记录？删除后可重新打卡。',
       confirmText: '确认',
-      confirmColor: '#ef4444',
+      confirmColor: '#fa5151',
       success: async (res) => {
         if (!res.confirm) return;
         try {
@@ -177,7 +177,7 @@ Page({
       title: '退出登录',
       content: '确认退出当前账号？',
       confirmText: '退出',
-      confirmColor: '#ef4444',
+      confirmColor: '#fa5151',
       success: (res) => {
         if (res.confirm) {
           app.clearAuth();
