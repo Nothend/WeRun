@@ -40,5 +40,5 @@ server/public/sample*.png
 # 临时下载到 public 下分析的生产库副本，严禁入库（public/ 会被静态服务）
 server/public/app.db*
 
-# 本地运维/提审备忘，不进仓库
-docs/审核整改说明.md
+# 本地运维/提审备忘、发版文案等，整个 docs 目录不进仓库
+docs/
