@@ -25,9 +25,17 @@ Thumbs.db
 # WeChat devtools
 miniprogram/node_modules/
 
+# 小程序本地真实配置（从 *.example 复制后填真实值；真实 baseUrl/appid 不进仓库）
+miniprogram/config.js
+miniprogram/project.config.json
+
+# server 本地专用目录（样例截图、草稿、真实配置备份等），不进仓库
+server/local/*
+!server/local/README.md
+
 # 本地测试用的真实数据表格/截图样例（含真实位置信息），不进仓库
 server/public/test.xlsx
-server/public/sample1.png
+server/public/sample*.png
 
 # 临时下载到 public 下分析的生产库副本，严禁入库（public/ 会被静态服务）
 server/public/app.db*
