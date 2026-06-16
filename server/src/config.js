@@ -20,7 +20,7 @@ const config = {
   // 照顾"晚上跑完次日早上打卡"）。识别不出日期或超出范围的截图会被拒绝
   screenshotMaxLagDays: parseInt(process.env.SCREENSHOT_MAX_LAG_DAYS || '1', 10),
   // 是否对打卡截图调用微信内容安全检测(imgSecCheck)。true(默认)=送检，平台合规要求；
-  // false=跳过检测，打卡更快但有合规风险，自行权衡。仅作用于打卡截图，不影响头像/昵称检测
+  // false=跳过检测，打卡更快但有合规风险。改这个值后必须重建容器(docker compose up -d)才生效。
   screenshotSecCheck: process.env.SCREENSHOT_SEC_CHECK !== 'false',
   // 「关于作者」页是否显示运营成本说明与赞赏码。默认隐藏——平台不允许个人
   // 主体小程序出现赞赏内容，提审时务必保持 false

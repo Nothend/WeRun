@@ -148,7 +148,7 @@ Page({
     }
 
     this.setData({ submitting: true, result: null });
-    wx.showLoading({ title: '核验中...' });
+    wx.showLoading({ title: '核验中，约需几秒…' });
     try {
       const data = await api.upload('/api/checkin', this.data.imagePath, { name: 'image' });
       data.durationText = durationText(data);

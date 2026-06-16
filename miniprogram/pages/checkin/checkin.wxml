@@ -42,8 +42,8 @@
       </view>
       <block wx:if="{{result.secCheckMs}}">
         <view class="result-row">
-          <text class="result-label">安全验证用时</text>
-          <text class="result-val">{{result.secCheckText}}</text>
+          <text class="result-label">内容安全检测</text>
+          <text class="result-val">✓ 已通过（{{result.secCheckText}}）</text>
         </view>
         <view class="result-row">
           <text class="result-label">图片识别用时</text>
@@ -76,6 +76,7 @@
       <view class="result-icon">❌</view>
       <view class="result-title fail">打卡未成功</view>
       <view class="result-reason">{{result.reason}}</view>
+      <view class="result-hint">按上方提示调整后，重新选择一张清晰完整的运动记录截图再试～</view>
       <!-- 核验详情：让用户直观看到系统从截图中读取了什么 -->
       <view wx:if="{{result.exercise_date || result.duration > 0}}" class="ai-detail">
         <view class="ai-detail-title">截图核验结果</view>
@@ -88,6 +89,7 @@
           <text class="ai-detail-val">{{result.durationText}}</text>
         </view>
       </view>
+      <button class="retry-btn" bindtap="chooseImage">重新选择截图</button>
     </view>
   </view>
 </view>
