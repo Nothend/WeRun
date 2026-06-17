@@ -10,6 +10,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 需要完整历史与全部标签，供生成更新日志
+
+      - name: Generate changelog from git tags
+        run: node server/scripts/gen-changelog.js
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

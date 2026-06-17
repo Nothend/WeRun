@@ -11,6 +11,7 @@ Page({
     stats: null,
     isPending: false,
     hasApplied: false,
+    noticeText: '',
   },
 
   onShareAppMessage() {
@@ -39,6 +40,7 @@ Page({
       nickname: user ? user.nickname : '',
       isPending,
       hasApplied,
+      noticeText: app.globalData.remoteConfig.noticeText || '',
     });
     if (user && !isPending) this.loadStats();
     if (user && isPending) this.refreshMe();

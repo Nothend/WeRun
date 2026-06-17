@@ -25,6 +25,10 @@ const config = {
   // 「关于作者」页是否显示运营成本说明与赞赏码。默认隐藏——平台不允许个人
   // 主体小程序出现赞赏内容，提审时务必保持 false
   showSupport: process.env.SHOW_SUPPORT === 'true',
+  // 后台「成员管理」是否显示 Excel 历史数据导入功能（导入按钮+格式说明+待匹配记录）。
+  // 默认隐藏——导入仅用于一次性历史数据迁移，迁移完成后用不上，平时隐藏保持后台简洁；
+  // 需要导入时把 SHOW_IMPORT=true 重启即可
+  showImport: process.env.SHOW_IMPORT === 'true',
   // 感知哈希(dHash, 256bit)相似度日志阈值：汉明距离 <= 此值时记录"疑似相似截图"日志（不拦截）
   // 用于积累真实样本，评估是否启用拦截及合适阈值
   imageSimilarityLogThreshold: parseInt(process.env.IMAGE_SIMILARITY_LOG_THRESHOLD || '20', 10),

@@ -25,10 +25,15 @@ Page({
     newNickname: '',
     renaming: false,
 
-    // Excel 导入
+    // Excel 导入（整套导入功能由服务端 SHOW_IMPORT 开关控制，默认隐藏）
+    showImport: false,
     importLoading: false,
     showImportResult: false,
     importResult: null,
+
+    // 滚动公告
+    noticeText: '',
+    savingNotice: false,
 
     // 待审核申请
     applications: [],
@@ -55,10 +60,15 @@ Page({
       setTimeout(() => wx.navigateBack(), 800);
       return;
     }
-    this.setData({ myOpenid: user.openid });
+    const showImport = !!app.globalData.remoteConfig.showImport;
+    this.setData({
+      myOpenid: user.openid,
+      showImport,
+      noticeText: app.globalData.remoteConfig.noticeText || '',
+    });
     this.load();
     this.loadApplications();
-    this.loadPendingImports();
+    if (showImport) this.loadPendingImports();
   },
 
   switchTab(e) {
@@ -67,6 +77,28 @@ Page({
     this.setData({ activeTab: tab });
     if (tab === 'logs' && this.data.logs.length === 0) {
       this.loadLogs(1);
+    }
+  },
+
+  // ── 滚动公告 ──────────────────────────────────────────────
+  onNoticeInput(e) {
+    this.setData({ noticeText: e.detail.value });
+  },
+
+  async saveNotice() {
+    if (this.data.savingNotice) return;
+    const text = (this.data.noticeText || '').trim();
+    this.setData({ savingNotice: true });
+    try {
+      const data = await api.request('/api/admin/notice', { method: 'POST', data: { text } });
+      // 同步全局配置，首页 onShow 即读到最新公告
+      app.globalData.remoteConfig.noticeText = data.text;
+      this.setData({ noticeText: data.text });
+      wx.showToast({ title: text ? '公告已更新' : '公告已撤下', icon: 'success' });
+    } catch (e) {
+      wx.showToast({ title: e.message || '保存失败', icon: 'none' });
+    } finally {
+      this.setData({ savingNotice: false });
     }
   },
 

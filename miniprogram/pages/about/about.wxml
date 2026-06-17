@@ -6,6 +6,25 @@
     <view class="about-desc">用爱发电开发的小程序，希望能帮大家把跑步坚持下去。</view>
   </view>
 
+  <!-- 更新日志：服务端从 git 标签自动生成，每次发版自动追加 -->
+  <view wx:if="{{changelog.length > 0}}" class="card changelog-card">
+    <view class="changelog-head">
+      <text class="changelog-title">更新日志</text>
+      <text class="changelog-summary">持续迭代 · 已发布 {{versionCount}} 个版本</text>
+    </view>
+    <view class="changelog-list">
+      <view wx:for="{{changelog}}" wx:key="version" class="changelog-item">
+        <view class="changelog-item-top">
+          <text class="changelog-ver">{{item.version}}</text>
+          <text wx:if="{{item.area}}" class="changelog-badge badge-{{item.areaClass}}">{{item.area}}</text>
+          <text class="changelog-date">{{item.date}}</text>
+        </view>
+        <view class="changelog-text">{{item.text}}</view>
+      </view>
+    </view>
+    <view wx:if="{{firstDate}}" class="changelog-foot">首个版本发布于 {{firstDate}}</view>
+  </view>
+
   <!-- 支持区块：由服务器开关控制（remoteConfig.showSupport），默认隐藏 -->
   <block wx:if="{{showSupport}}">
     <view class="card cost-card">

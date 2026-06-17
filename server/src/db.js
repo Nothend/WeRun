@@ -49,6 +49,13 @@ db.exec(`
     openid     TEXT DEFAULT NULL,
     created_at INTEGER NOT NULL
   );
+
+  -- 全局键值配置：管理员可在后台修改、小程序经 /api/config 读取（如首页滚动公告 notice）
+  CREATE TABLE IF NOT EXISTS settings (
+    key        TEXT PRIMARY KEY,
+    value      TEXT NOT NULL DEFAULT '',
+    updated_at INTEGER NOT NULL
+  );
 `);
 
 // 增量迁移：新增列（ALTER TABLE ADD COLUMN 不会破坏已有数据）

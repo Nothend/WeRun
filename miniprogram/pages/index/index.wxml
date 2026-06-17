@@ -1,5 +1,13 @@
 <view class="container">
 
+  <!-- 滚动公告（管理员后台设置，空则不显示） -->
+  <view wx:if="{{noticeText}}" class="notice-bar">
+    <text class="notice-icon">📢</text>
+    <view class="notice-viewport">
+      <view class="notice-track">{{noticeText}}</view>
+    </view>
+  </view>
+
   <!-- 已登录未申请：邀请加入卡 -->
   <view wx:if="{{isPending && !hasApplied}}" class="card pending-banner">
     <view class="pending-banner-top">

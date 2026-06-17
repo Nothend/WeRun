@@ -15,6 +15,9 @@ data/
 *.log
 npm-debug.log*
 
+# 更新日志：由 CI 从 git 标签自动生成并打入镜像，不手动维护、不入库
+server/src/changelog.json
+
 # OS / editor
 .DS_Store
 Thumbs.db

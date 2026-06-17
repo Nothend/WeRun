@@ -17,7 +17,7 @@
         <view class="header-title">成员管理</view>
         <view class="header-count">{{list.length}} 位成员</view>
       </view>
-      <button class="import-btn" loading="{{importLoading}}" bindtap="importExcel">导入数据</button>
+      <button wx:if="{{showImport}}" class="import-btn" loading="{{importLoading}}" bindtap="importExcel">导入数据</button>
     </view>
 
     <!-- 待审核申请 -->
@@ -60,6 +60,16 @@
       </view>
     </view>
 
+    <!-- 滚动公告设置 -->
+    <view class="card notice-setting-card">
+      <view class="notice-title">首页滚动公告</view>
+      <view class="notice-desc muted">显示在首页顶部，所有成员可见；留空并保存即撤下公告</view>
+      <textarea class="notice-input" value="{{noticeText}}" bindinput="onNoticeInput"
+                placeholder="输入公告内容（100 字以内）" maxlength="100" auto-height/>
+      <button class="notice-save-btn {{savingNotice ? 'btn-disabled' : ''}}"
+              loading="{{savingNotice}}" bindtap="saveNotice">保存公告</button>
+    </view>
+
     <!-- 成员列表 -->
     <view class="card list-card">
       <view wx:for="{{list}}" wx:key="openid" class="row">
@@ -100,7 +110,7 @@
     </view>
 
     <!-- 导入说明 -->
-    <view class="card hint-card">
+    <view wx:if="{{showImport}}" class="card hint-card">
       <view class="hint-title">Excel 导入格式说明</view>
       <view class="hint-row">列名：<text class="hint-code">用户昵称</text> 和 <text class="hint-code">打卡时间</text></view>
       <view class="hint-row">日期格式：<text class="hint-code">2026-06-05</text> 或 <text class="hint-code">2026/06/05</text></view>
@@ -108,7 +118,7 @@
     </view>
 
     <!-- 待匹配导入记录：导入时尚未加入小程序的成员 -->
-    <view wx:if="{{pendingImports.length > 0}}" class="card pending-card">
+    <view wx:if="{{showImport && pendingImports.length > 0}}" class="card pending-card">
       <view class="header-title">待匹配导入记录</view>
       <view class="hint-row muted" style="margin-top:8rpx">这些昵称导入时尚未加入小程序，待其登录后可关联到对应成员</view>
       <view wx:for="{{pendingImports}}" wx:key="nickname" class="pending-row">

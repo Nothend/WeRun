@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const cron = require('node-cron');
 const config = require('./config');
 const db = require('./db'); // 初始化数据库与目录
@@ -15,9 +16,13 @@ app.use('/avatars', express.static(config.avatarDir, { maxAge: '7d' }));
 // 静态公共资源：GET /public/<file>
 app.use('/public', express.static(path.join(__dirname, '..', 'public'), { maxAge: '30d' }));
 // 小程序分享封面：单文件托管（data/ 下还有 app.db，严禁整目录 static），
-// 宿主机直接替换 data/shareground.png 即可生效，无需重新发版
+// 宿主机直接替换 data/shareground.{png,jpg,jpeg} 即可生效，无需重新发版。
+// URL 固定 /shareground.png，实际按 png→jpg→jpeg 顺序取存在的文件并以对应类型返回。
 app.get('/shareground.png', (req, res) => {
-  res.sendFile(path.join(config.dataDir, 'shareground.png'), (err) => {
+  const candidates = ['shareground.png', 'shareground.jpg', 'shareground.jpeg'];
+  const file = candidates.find((name) => fs.existsSync(path.join(config.dataDir, name)));
+  if (!file) return res.status(404).json({ error: 'not found' });
+  res.sendFile(path.join(config.dataDir, file), (err) => {
     if (err && !res.headersSent) res.status(404).json({ error: 'not found' });
   });
 });
@@ -34,6 +39,7 @@ app.get('/health', (req, res) => {
 
 // 业务路由
 app.use('/api', require('./routes/config'));
+app.use('/api', require('./routes/changelog'));
 app.use('/api', require('./routes/login'));
 app.use('/api', require('./routes/apply'));
 app.use('/api', require('./routes/profile'));

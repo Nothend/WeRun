@@ -151,6 +151,23 @@ router.post('/admin/users/:openid/nickname', async (req, res) => {
   res.json({ ok: true, nickname });
 });
 
+// POST /api/admin/notice  { text: "..." } 设置首页滚动公告（空字符串=撤下公告）
+router.post('/admin/notice', async (req, res) => {
+  const text = ((req.body && req.body.text) || '').trim();
+  if (text.length > 100) return res.status(400).json({ error: '公告不能超过 100 字' });
+
+  // 公告对全体成员可见，先过平台内容安全检测（非空时）
+  if (text && !(await msgSecCheck(req.user.openid, text))) {
+    return res.status(400).json({ error: '内容含违规信息，请修改后重试' });
+  }
+
+  db.prepare(
+    `INSERT INTO settings (key, value, updated_at) VALUES ('notice', ?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
+  ).run(text, Date.now());
+  res.json({ ok: true, text });
+});
+
 // Excel 序列号 / Date 对象不带时区信息，统一按北京时间(+08:00)理解墙上时间
 const CN_TZ_OFFSET_MS = 8 * 3600 * 1000;
 
