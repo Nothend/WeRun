@@ -5,6 +5,7 @@ App({
     token: '',
     user: null, // { openid, nickname, avatarUrl, isAdmin }
     remoteConfig: { minDurationMinutes: 30, weeklyTarget: 3, applyTemplateId: '', weeklyTemplateId: '' }, // 默认值，拉取成功后覆盖
+    configLoaded: false, // /api/config 是否已成功返回（首屏公告等需等它就绪）
     pendingMaterial: null, // 从微信聊天素材打开时待识别的图片 { path, name }
   },
   onLaunch(options) {
@@ -29,14 +30,18 @@ App({
   },
 
   fetchConfig() {
-    wx.request({
-      url: config.baseUrl + '/api/config',
-      method: 'GET',
-      success: (res) => {
-        if (res.statusCode === 200 && res.data) {
-          this.globalData.remoteConfig = res.data;
-        }
-      },
+    return new Promise((resolve) => {
+      wx.request({
+        url: config.baseUrl + '/api/config',
+        method: 'GET',
+        complete: (res) => {
+          if (res && res.statusCode === 200 && res.data) {
+            this.globalData.remoteConfig = res.data;
+            this.globalData.configLoaded = true;
+          }
+          resolve(this.globalData.remoteConfig);
+        },
+      });
     });
   },
   setAuth(token, user) {
