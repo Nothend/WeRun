@@ -41,6 +41,8 @@ npm start                # 监听 http://localhost:3000
 ```
 小程序端：用微信开发者工具导入 `miniprogram/`，详情→本地设置勾选「不校验合法域名」，`config.js` 的 `baseUrl` 改为 `http://localhost:3000`。
 
+> 运维小工具见 [`server/tools/README.md`](server/tools/README.md)，含运动截图识别的多模型测速 / 测准脚本（换模型、调提示词前做选型）。
+
 ## 首个管理员
 - 默认：**第一个登录的用户**自动成为管理员。
 - 或在 `.env` 设 `BOOTSTRAP_ADMIN_OPENID=<你的openid>` 指定。

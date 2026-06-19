@@ -38,9 +38,8 @@ miniprogram/project.private.config.json
 server/local/*
 !server/local/README.md
 
-# 本地测试用的真实数据表格/截图样例（含真实位置信息），不进仓库
-server/public/test.xlsx
-server/public/sample*.png
+# 本地运维小工具（多模型识别测速/测准网页），不进仓库
+server/tools/
 
 # 临时下载到 public 下分析的生产库副本，严禁入库（public/ 会被静态服务）
 server/public/app.db*
