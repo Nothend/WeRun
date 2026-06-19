@@ -89,6 +89,32 @@ router.get('/stats/group', authRequired, activeRequired, (req, res) => {
   });
 });
 
+// GET /api/stats/feed  今日打卡动态（按提交时间倒序，仅当天）
+router.get('/stats/feed', authRequired, activeRequired, (req, res) => {
+  const today = localDateStr();
+  const rows = db
+    .prepare(
+      `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl,
+              c.duration_minutes AS duration, c.created_at AS createdAt
+         FROM checkins c JOIN users u ON u.openid = c.openid
+        WHERE c.checkin_date = ? AND u.status = 'active'
+        ORDER BY c.created_at DESC`
+    )
+    .all(today);
+
+  res.json({
+    date: today,
+    count: rows.length,
+    list: rows.map((r) => ({
+      openid: r.openid,
+      nickname: r.nickname || '未设置昵称',
+      avatarUrl: r.avatarUrl || '',
+      duration: Math.round(r.duration),
+      createdAt: r.createdAt,
+    })),
+  });
+});
+
 // 构建单个排行榜：weekKey 按周筛选，datePrefix 按 checkin_date 前缀筛选，二者都无则为总榜
 function buildBoard({ weekKey, datePrefix }) {
   let rows;

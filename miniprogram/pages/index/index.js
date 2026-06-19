@@ -2,6 +2,16 @@ const api = require('../../utils/api');
 const config = require('../../config');
 const app = getApp();
 
+// epoch 毫秒 → 相对时间（动态均为当天，故只到「小时前」，异常兜底为「今日」）
+function relTime(ms) {
+  if (!ms) return '今日';
+  const diff = Date.now() - ms;
+  if (diff < 60000) return '刚刚';
+  if (diff < 3600000) return Math.floor(diff / 60000) + ' 分钟前';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + ' 小时前';
+  return '今日';
+}
+
 Page({
   data: {
     user: null,
@@ -12,6 +22,8 @@ Page({
     isPending: false,
     hasApplied: false,
     noticeText: '',
+    feed: [],
+    feedLoaded: false,
   },
 
   onShareAppMessage() {
@@ -27,7 +39,7 @@ Page({
     const user = app.globalData.user;
     if (!user) { done(); return; }
     if (this.data.isPending) this.refreshMe().then(done, done);
-    else this.loadStats().then(done, done);
+    else { this.loadFeed(); this.loadStats().then(done, done); }
   },
 
   onShow() {
@@ -42,7 +54,7 @@ Page({
       hasApplied,
       noticeText: app.globalData.remoteConfig.noticeText || '',
     });
-    if (user && !isPending) this.loadStats();
+    if (user && !isPending) { this.loadStats(); this.loadFeed(); }
     if (user && isPending) this.refreshMe();
     // 首次启动时 onShow 可能早于 /api/config 返回，公告会读到空值；
     // 配置就绪后补刷一次，避免要切到其他页再回来才显示公告
@@ -66,6 +78,7 @@ Page({
       this.setData({ user, avatarUrl: user.avatarUrl, nickname: user.nickname, isPending, hasApplied });
       if (!isPending) {
         this.loadStats();
+        this.loadFeed();
         if (showFeedback) wx.showToast({ title: '审核已通过', icon: 'success' });
       } else if (showFeedback) {
         wx.showToast({ title: '仍在审核中，请耐心等待', icon: 'none' });
@@ -95,7 +108,7 @@ Page({
       const isPending = user.status === 'pending';
       const hasApplied = !!user.hasApplied;
       this.setData({ user, avatarUrl: user.avatarUrl, nickname: user.nickname, isPending, hasApplied });
-      if (!isPending) this.loadStats();
+      if (!isPending) { this.loadStats(); this.loadFeed(); }
       if (isPending && !hasApplied) {
         wx.navigateTo({ url: '/pages/profile/profile?mode=apply' });
       } else if (isNewUser) {
@@ -141,6 +154,17 @@ Page({
     }
   },
 
+  // 今日打卡动态（仅当天，按提交时间倒序）
+  async loadFeed() {
+    try {
+      const { list } = await api.request('/api/stats/feed');
+      const feed = list.map((r) => ({ ...r, timeText: relTime(r.createdAt) }));
+      this.setData({ feed, feedLoaded: true });
+    } catch (e) {
+      this.setData({ feedLoaded: true });
+    }
+  },
+
   deleteCheckinToday() {
     wx.showModal({
       title: '撤销今日打卡',
@@ -153,6 +177,7 @@ Page({
           await api.request('/api/checkin/today', { method: 'DELETE' });
           wx.showToast({ title: '已撤销', icon: 'success' });
           this.loadStats();
+          this.loadFeed();
         } catch (e) {
           wx.showToast({ title: e.message || '撤销失败', icon: 'none' });
         }
@@ -165,6 +190,13 @@ Page({
     if (!this.data.stats) return;
     const scope = e.currentTarget.dataset.scope;
     wx.navigateTo({ url: `/pages/records/records?scope=${scope}` });
+  },
+
+  // 点击动态项查看该成员打卡明细
+  goUser(e) {
+    const openid = e.currentTarget.dataset.openid;
+    if (!openid) return;
+    wx.navigateTo({ url: `/pages/user/user?openid=${encodeURIComponent(openid)}` });
   },
 
   // ── 个人资料 ───────────────────────────────────────────

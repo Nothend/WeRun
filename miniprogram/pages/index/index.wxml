@@ -72,6 +72,28 @@
     <text class="action-chevron">›</text>
   </view>
 
+  <!-- 今日打卡动态 -->
+  <view wx:if="{{user && !isPending}}" class="card feed-card">
+    <view class="feed-head">
+      <text class="feed-title">🏃 今日动态</text>
+      <text wx:if="{{feed.length}}" class="feed-count">{{feed.length}} 人在动 🔥</text>
+    </view>
+    <view wx:if="{{feed.length}}" class="feed-list">
+      <view wx:for="{{feed}}" wx:key="openid" class="feed-item" hover-class="feed-item-hover" hover-stay-time="150" data-openid="{{item.openid}}" bindtap="goUser">
+        <image class="feed-avatar" src="{{item.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+        <view class="feed-main">
+          <text class="feed-name">{{item.nickname}}</text>
+          <text class="feed-desc">打卡 {{item.duration}} 分钟</text>
+        </view>
+        <text class="feed-time">{{item.timeText}}</text>
+      </view>
+    </view>
+    <view wx:elif="{{feedLoaded}}" class="feed-empty">
+      <text class="feed-empty-icon">🌱</text>
+      <text class="feed-empty-text">今天还没有人打卡，来做第一个动起来的人</text>
+    </view>
+  </view>
+
   <!-- 快速入口 -->
   <view class="card actions-card">
     <view class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goRanking">
