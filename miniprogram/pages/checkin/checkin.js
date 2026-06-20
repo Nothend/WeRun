@@ -148,7 +148,6 @@ Page({
     }
 
     this.setData({ submitting: true, result: null });
-    wx.showLoading({ title: '核验中，约需几秒…' });
     try {
       const data = await api.upload('/api/checkin', this.data.imagePath, { name: 'image' });
       data.durationText = durationText(data);
@@ -164,7 +163,6 @@ Page({
     } catch (e) {
       wx.showToast({ title: e.message, icon: 'none' });
     } finally {
-      wx.hideLoading();
       this.setData({ submitting: false });
     }
   },

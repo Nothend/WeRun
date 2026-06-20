@@ -2,5 +2,7 @@
   "navigationBarTitleText": "群排行榜",
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "dark",
-  "usingComponents": {}
+  "usingComponents": {
+    "notice-bar": "../../components/notice-bar/notice-bar"
+  }
 }

@@ -193,3 +193,43 @@
 .retry-btn::after {
   border: none;
 }
+
+/* ── 核验等待遮罩 ── */
+.checkin-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+.checkin-loading-box {
+  width: 520rpx;
+  padding: 48rpx 40rpx 28rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.checkin-spinner {
+  width: 64rpx;
+  height: 64rpx;
+  border: 6rpx solid rgba(7, 193, 96, 0.15);
+  border-top-color: #07c160;
+  border-radius: 50%;
+  animation: checkin-spin 0.8s linear infinite;
+}
+@keyframes checkin-spin {
+  100% { transform: rotate(360deg); }
+}
+.checkin-loading-text {
+  margin: 24rpx 0;
+  font-size: 28rpx;
+  color: #333;
+}
+/* 遮罩内的公告占满弹窗宽度（组件根节点 class）；公告为空时组件不渲染，仅留转圈与文案 */
+.loading-notice {
+  width: 100%;
+}

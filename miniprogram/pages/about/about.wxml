@@ -1,5 +1,7 @@
 <view class="container">
 
+  <notice-bar/>
+
   <view class="card about-card">
     <view class="about-icon">🏃</view>
     <view class="about-title">WeRun 跑团打卡</view>

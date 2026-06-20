@@ -1,5 +1,7 @@
 <view class="page">
 
+  <notice-bar/>
+
   <!-- 用户资料 -->
   <view class="profile" wx:if="{{user}}">
     <image class="profile-avatar" src="{{user.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>

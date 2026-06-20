@@ -1,0 +1,37 @@
+/* 组件根节点占满父级宽度，确保跑马灯有完整可用宽度（弹窗内由父级 class 再控宽） */
+:host {
+  display: block;
+}
+
+/* ── 滚动公告 ── */
+.notice-bar {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 24rpx;
+  margin-bottom: 20rpx;
+  background: rgba(7, 193, 96, 0.08);
+  border: 2rpx solid rgba(7, 193, 96, 0.18);
+  border-radius: 16rpx;
+}
+.notice-icon {
+  flex-shrink: 0;
+  font-size: 26rpx;
+}
+.notice-viewport {
+  flex: 1;
+  overflow: hidden;
+}
+.notice-track {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 24rpx;
+  color: #1a8d4e;
+  letter-spacing: 0.5rpx;
+  padding-left: 100%;
+  animation: notice-marquee 6s linear infinite;
+}
+@keyframes notice-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}

@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "成员主页",
-  "usingComponents": {}
+  "usingComponents": {
+    "notice-bar": "../../components/notice-bar/notice-bar"
+  }
 }

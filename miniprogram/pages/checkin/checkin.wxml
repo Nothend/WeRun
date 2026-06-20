@@ -1,4 +1,7 @@
 <view class="container">
+
+  <notice-bar/>
+
   <view class="card">
     <!-- 上传区 -->
     <view class="upload-zone" bindtap="chooseImage">
@@ -90,6 +93,15 @@
         </view>
       </view>
       <button class="retry-btn" bindtap="chooseImage">重新选择截图</button>
+    </view>
+  </view>
+
+  <!-- 核验等待遮罩：转圈 + 复用滚动公告，让等待几秒时有内容可看 -->
+  <view wx:if="{{submitting}}" class="checkin-loading">
+    <view class="checkin-loading-box">
+      <view class="checkin-spinner"></view>
+      <text class="checkin-loading-text">核验中，约需几秒…</text>
+      <notice-bar class="loading-notice"/>
     </view>
   </view>
 </view>

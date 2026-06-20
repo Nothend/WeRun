@@ -21,7 +21,6 @@ Page({
     stats: null,
     isPending: false,
     hasApplied: false,
-    noticeText: '',
     feed: [],
     feedLoaded: false,
   },
@@ -52,17 +51,9 @@ Page({
       nickname: user ? user.nickname : '',
       isPending,
       hasApplied,
-      noticeText: app.globalData.remoteConfig.noticeText || '',
     });
     if (user && !isPending) { this.loadStats(); this.loadFeed(); }
     if (user && isPending) this.refreshMe();
-    // 首次启动时 onShow 可能早于 /api/config 返回，公告会读到空值；
-    // 配置就绪后补刷一次，避免要切到其他页再回来才显示公告
-    if (!app.globalData.configLoaded) {
-      app.fetchConfig().then((cfg) => {
-        this.setData({ noticeText: (cfg && cfg.noticeText) || '' });
-      });
-    }
   },
 
   // 从服务端拉取最新用户状态。审核结果不会推送到客户端，

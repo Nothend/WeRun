@@ -1,0 +1,6 @@
+<view wx:if="{{text}}" class="notice-bar">
+  <text class="notice-icon">📢</text>
+  <view class="notice-viewport">
+    <view class="notice-track">{{text}}</view>
+  </view>
+</view>

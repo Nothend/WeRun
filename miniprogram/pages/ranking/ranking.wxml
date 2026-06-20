@@ -1,5 +1,7 @@
 <view class="page">
 
+  <notice-bar/>
+
   <!-- 顶部标签栏 -->
   <view class="tabs">
     <view wx:for="{{boards}}" wx:key="key"

@@ -1,5 +1,7 @@
 <view class="container">
 
+  <notice-bar/>
+
   <!-- 汇总 -->
   <view class="card summary-card">
     <view class="summary-item">

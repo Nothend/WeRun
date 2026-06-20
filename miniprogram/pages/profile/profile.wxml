@@ -53,6 +53,8 @@
 <!-- 普通编辑模式 -->
 <view wx:else class="container">
 
+  <notice-bar/>
+
   <!-- 资料不完整警示 -->
   <view wx:if="{{!previewUrl || !nickname}}" class="incomplete-banner">
     <text class="incomplete-icon">⚠️</text>
