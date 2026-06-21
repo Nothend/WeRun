@@ -59,7 +59,7 @@ page {
   color: transparent;
   font-weight: 700;
 }
-/* 💎赞助 钻石尊贵徽标（与排行榜第一名的 👑 区分）*/
+/* 💎 钻石尊贵徽标（文案由 remoteConfig.sponsorBadge 控制，与排行榜第一名的 👑 区分）*/
 .sponsor-badge {
   display: inline-flex;
   align-items: center;

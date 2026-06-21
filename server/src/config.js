@@ -60,6 +60,11 @@ const config = {
   // 模板中用 {{TODAY}} 占位今天的北京日期；文件不存在时使用代码内置的默认提示词
   qwenPromptPath: path.join(DATA_DIR, 'qwen-prompt.txt'),
 
+  // 赞助用户徽标文案：跟在「尊贵」展示里的小钻石标记。默认 💎（仅钻石，不带文字），
+  // 可改成其它 emoji/文案；设为空串则不展示徽标（头像金环+昵称渐变仍保留）。
+  // 改完重启容器即可，无需重新提审小程序——值经 /api/config 下发给前端
+  sponsorBadge: process.env.SPONSOR_BADGE != null ? process.env.SPONSOR_BADGE : '💎',
+
   // 赞助用户判定：openid 是否在 SPONSOR_OPENIDS 名单内（享受「尊贵」展示）
   isSponsor(openid) {
     return !!openid && sponsorSet.has(openid);

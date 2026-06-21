@@ -1,4 +1,5 @@
 const api = require('../../utils/api');
+const app = getApp();
 
 const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
@@ -18,6 +19,7 @@ Page({
     target: 3,
     periods: [],
     current: 0,
+    sponsorBadge: '💎', // 赞助徽标文案，取自 remoteConfig
   },
 
   onLoad(options) {
@@ -27,7 +29,7 @@ Page({
       this.setData({ loading: false });
       return;
     }
-    this.setData({ openid });
+    this.setData({ openid, sponsorBadge: app.globalData.remoteConfig.sponsorBadge });
     this.load();
   },
 

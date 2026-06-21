@@ -24,7 +24,7 @@
             <image class="podium-avatar avatar-2 {{board.top3[1].isSponsor ? 'sponsor-avatar' : ''}}" src="{{board.top3[1].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill" data-openid="{{board.top3[1].openid}}" catchtap="goUser"/>
             <text class="podium-medal">🥈</text>
             <view class="podium-name {{board.top3[1].isSponsor ? 'sponsor-name' : ''}}">{{board.top3[1].nickname}}</view>
-            <view wx:if="{{board.top3[1].isSponsor}}" class="sponsor-badge podium-badge">💎赞助</view>
+            <view wx:if="{{board.top3[1].isSponsor && sponsorBadge}}" class="sponsor-badge podium-badge">{{sponsorBadge}}</view>
             <view class="podium-count {{board.top3[1].achieved ? 'achieved' : ''}}">{{board.top3[1].count}} 次</view>
           </view>
           <!-- 第一名 -->
@@ -33,7 +33,7 @@
             <image class="podium-avatar avatar-1 {{board.top3[0].isSponsor ? 'sponsor-avatar' : ''}}" src="{{board.top3[0].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill" data-openid="{{board.top3[0].openid}}" catchtap="goUser"/>
             <text class="podium-medal">🥇</text>
             <view class="podium-name {{board.top3[0].isSponsor ? 'sponsor-name' : ''}}">{{board.top3[0].nickname}}</view>
-            <view wx:if="{{board.top3[0].isSponsor}}" class="sponsor-badge podium-badge">💎赞助</view>
+            <view wx:if="{{board.top3[0].isSponsor && sponsorBadge}}" class="sponsor-badge podium-badge">{{sponsorBadge}}</view>
             <view class="podium-count {{board.top3[0].achieved ? 'achieved' : ''}}">{{board.top3[0].count}} 次</view>
           </view>
           <!-- 第三名 -->
@@ -41,7 +41,7 @@
             <image class="podium-avatar avatar-3 {{board.top3[2].isSponsor ? 'sponsor-avatar' : ''}}" src="{{board.top3[2].avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill" data-openid="{{board.top3[2].openid}}" catchtap="goUser"/>
             <text class="podium-medal">🥉</text>
             <view class="podium-name {{board.top3[2].isSponsor ? 'sponsor-name' : ''}}">{{board.top3[2].nickname}}</view>
-            <view wx:if="{{board.top3[2].isSponsor}}" class="sponsor-badge podium-badge">💎赞助</view>
+            <view wx:if="{{board.top3[2].isSponsor && sponsorBadge}}" class="sponsor-badge podium-badge">{{sponsorBadge}}</view>
             <view class="podium-count {{board.top3[2].achieved ? 'achieved' : ''}}">{{board.top3[2].count}} 次</view>
           </view>
         </view>
@@ -52,7 +52,7 @@
             <view class="rank-num">{{row.rank}}</view>
             <image class="avatar {{row.isSponsor ? 'sponsor-avatar' : ''}}" src="{{row.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill" data-openid="{{row.openid}}" catchtap="goUser"/>
             <view class="name {{row.isSponsor ? 'sponsor-name' : ''}}">{{row.nickname}}</view>
-            <view wx:if="{{row.isSponsor}}" class="sponsor-badge">💎赞助</view>
+            <view wx:if="{{row.isSponsor && sponsorBadge}}" class="sponsor-badge">{{sponsorBadge}}</view>
             <view class="count-cell">
               <text class="count {{row.achieved ? 'achieved' : ''}}">{{row.count}}</text>
               <text class="count-unit muted">次</text>

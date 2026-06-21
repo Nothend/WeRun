@@ -37,7 +37,7 @@
       <view class="profile-info">
         <view class="sponsor-nameline">
           <text class="profile-name {{user.isSponsor ? 'sponsor-name' : ''}}">{{user ? (nickname || '未设置昵称') : '未登录'}}</text>
-          <text wx:if="{{user.isSponsor}}" class="sponsor-badge">💎赞助</text>
+          <text wx:if="{{user.isSponsor && sponsorBadge}}" class="sponsor-badge">{{sponsorBadge}}</text>
         </view>
         <text class="profile-sub">{{isPending ? (hasApplied ? '申请审核中 · 点击编辑资料' : '尚未加入跑团 · 点击提交申请') : (user ? '跑团成员 · 点击编辑资料' : '点击微信登录，解锁打卡与个人数据')}}</text>
       </view>
@@ -82,7 +82,7 @@
         <view class="feed-main">
           <view class="sponsor-nameline">
             <text class="feed-name {{item.isSponsor ? 'sponsor-name' : ''}}">{{item.nickname}}</text>
-            <text wx:if="{{item.isSponsor}}" class="sponsor-badge">💎赞助</text>
+            <text wx:if="{{item.isSponsor && sponsorBadge}}" class="sponsor-badge">{{sponsorBadge}}</text>
           </view>
           <text class="feed-desc">打卡 {{item.duration}} 分钟</text>
         </view>

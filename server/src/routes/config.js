@@ -19,6 +19,8 @@ router.get('/config', (req, res) => {
     showSupport: config.showSupport,
     // 后台 Excel 导入功能开关（默认隐藏，仅历史数据迁移时开启）
     showImport: config.showImport,
+    // 赞助用户徽标文案（默认 💎，空串表示不展示徽标）
+    sponsorBadge: config.sponsorBadge,
     // 首页滚动公告文本（管理员后台可改，空字符串表示不展示公告栏）
     noticeText: (noticeRow && noticeRow.value) || '',
   });
