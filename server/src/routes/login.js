@@ -43,6 +43,7 @@ router.post('/login', async (req, res) => {
         isAdmin: !!user.is_admin,
         status: user.status || 'active',
         hasApplied: !!user.applied_at,
+        isSponsor: config.isSponsor(user.openid),
       },
     });
   } catch (e) {

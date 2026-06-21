@@ -116,6 +116,10 @@
   white-space: nowrap;
   text-align: center;
 }
+.podium-badge {
+  margin-left: 0;
+  margin-top: 8rpx;
+}
 .podium-count {
   font-size: 24rpx;
   font-weight: 700;

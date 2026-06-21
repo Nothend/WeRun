@@ -4,6 +4,14 @@ require('dotenv').config();
 // 数据目录：容器内固定为 /app/data（compose 挂载卷），本地默认 server/data
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
 
+// 赞助用户 openid 列表（逗号分隔）。这些用户在排行榜/今日动态/个人主页享有「尊贵」展示样式。
+const sponsorSet = new Set(
+  (process.env.SPONSOR_OPENIDS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+);
+
 const config = {
   port: parseInt(process.env.PORT || '3000', 10),
   appid: process.env.APPID || '',
@@ -51,6 +59,11 @@ const config = {
   // 自定义千问识别提示词模板（可选）：放在 data 卷里，改完即生效，无需发版/重启。
   // 模板中用 {{TODAY}} 占位今天的北京日期；文件不存在时使用代码内置的默认提示词
   qwenPromptPath: path.join(DATA_DIR, 'qwen-prompt.txt'),
+
+  // 赞助用户判定：openid 是否在 SPONSOR_OPENIDS 名单内（享受「尊贵」展示）
+  isSponsor(openid) {
+    return !!openid && sponsorSet.has(openid);
+  },
 
   // 没有真实 APPID 时进入 mock 模式：跳过真实 code2session，便于本地/未配置时联调
   get useMockWechat() {

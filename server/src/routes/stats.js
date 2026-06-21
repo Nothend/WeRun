@@ -78,6 +78,7 @@ router.get('/stats/group', authRequired, activeRequired, (req, res) => {
     avatarUrl: r.avatarUrl || '',
     weekCount: r.weekCount,
     achieved: r.weekCount >= config.weeklyTarget,
+    isSponsor: config.isSponsor(r.openid),
   }));
 
   res.json({
@@ -111,6 +112,7 @@ router.get('/stats/feed', authRequired, activeRequired, (req, res) => {
       avatarUrl: r.avatarUrl || '',
       duration: Math.round(r.duration),
       createdAt: r.createdAt,
+      isSponsor: config.isSponsor(r.openid),
     })),
   });
 });
@@ -157,6 +159,7 @@ function buildBoard({ weekKey, datePrefix }) {
     nickname: r.nickname || '未设置昵称',
     avatarUrl: r.avatarUrl || '',
     count: r.count,
+    isSponsor: config.isSponsor(r.openid),
   }));
 }
 
@@ -204,7 +207,11 @@ router.get('/stats/user/:openid', authRequired, activeRequired, (req, res) => {
   });
 
   res.json({
-    user: { nickname: user.nickname || '未设置昵称', avatarUrl: user.avatarUrl || '' },
+    user: {
+      nickname: user.nickname || '未设置昵称',
+      avatarUrl: user.avatarUrl || '',
+      isSponsor: config.isSponsor(openid),
+    },
     target: config.weeklyTarget,
     periods,
   });

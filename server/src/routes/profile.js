@@ -21,6 +21,7 @@ router.get('/me', authRequired, (req, res) => {
       isAdmin: !!user.is_admin,
       status: user.status || 'active',
       hasApplied: !!user.applied_at,
+      isSponsor: config.isSponsor(user.openid),
     },
   });
 });
@@ -67,6 +68,7 @@ router.post('/profile', authRequired, upload.single('avatar'), async (req, res) 
         isAdmin: !!user.is_admin,
         status: user.status || 'active',
         hasApplied: !!user.applied_at,
+        isSponsor: config.isSponsor(user.openid),
       },
     });
   } catch (e) {

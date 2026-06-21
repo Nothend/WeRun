@@ -39,3 +39,53 @@ page {
   color: #8a9099;
   font-size: 24rpx;
 }
+
+/* ── 赞助用户「尊贵」展示（全局，跨页面复用）── */
+/* 头像金色光环（呼吸动效） */
+.sponsor-avatar {
+  border-color: #f5c542 !important;
+  box-shadow: 0 0 0 2rpx #f5c542, 0 0 18rpx rgba(245, 197, 66, 0.6) !important;
+  animation: sponsor-glow 2.2s ease-in-out infinite;
+}
+@keyframes sponsor-glow {
+  0%, 100% { box-shadow: 0 0 0 2rpx #f5c542, 0 0 12rpx rgba(245, 197, 66, 0.45); }
+  50% { box-shadow: 0 0 0 2rpx #ffd95e, 0 0 28rpx rgba(245, 197, 66, 0.95); }
+}
+/* 昵称金色渐变（双类提高优先级，覆盖各页面 .name/.feed-name 的纯色） */
+.sponsor-name.sponsor-name {
+  background: linear-gradient(90deg, #b8860b, #f7c948, #b8860b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+/* 💎赞助 钻石尊贵徽标（与排行榜第一名的 👑 区分）*/
+.sponsor-badge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 10rpx;
+  padding: 2rpx 14rpx;
+  font-size: 18rpx;
+  font-weight: 700;
+  color: #8a5a00;
+  background: linear-gradient(135deg, #fff3cf, #ffe08a);
+  border: 1rpx solid rgba(184, 134, 11, 0.45);
+  border-radius: 100rpx;
+  box-shadow: 0 1rpx 4rpx rgba(184, 134, 11, 0.25);
+  line-height: 1.5;
+}
+/* 名字 + 徽标 同行容器（名字可省略号，徽标不挤压） */
+.sponsor-nameline {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.sponsor-nameline .sponsor-name,
+.sponsor-nameline .name,
+.sponsor-nameline .feed-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
