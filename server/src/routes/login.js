@@ -44,6 +44,7 @@ router.post('/login', async (req, res) => {
         status: user.status || 'active',
         hasApplied: !!user.applied_at,
         isSponsor: config.isSponsor(user.openid),
+        sponsorBadge: config.sponsorBadgeFor(user.openid),
       },
     });
   } catch (e) {

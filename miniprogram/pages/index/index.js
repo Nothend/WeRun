@@ -23,7 +23,6 @@ Page({
     hasApplied: false,
     feed: [],
     feedLoaded: false,
-    sponsorBadge: '💎', // 赞助徽标文案，onShow 时取最新 remoteConfig 覆盖
   },
 
   onShareAppMessage() {
@@ -52,7 +51,6 @@ Page({
       nickname: user ? user.nickname : '',
       isPending,
       hasApplied,
-      sponsorBadge: app.globalData.remoteConfig.sponsorBadge,
     });
     if (user && !isPending) { this.loadStats(); this.loadFeed(); }
     if (user && isPending) this.refreshMe();

@@ -27,7 +27,6 @@ Page({
     shareGroupText: '',
     shareGroupLoading: false,
     showShareGroupModal: false,
-    sponsorBadge: '💎', // 赞助徽标文案，onShow 时取最新 remoteConfig 覆盖
   },
 
   onShareAppMessage() {
@@ -68,7 +67,7 @@ Page({
   onShow() {
     const user = app.globalData.user;
     const isPending = !!(user && user.status === 'pending');
-    this.setData({ isAdmin: !!(user && user.isAdmin), sponsorBadge: app.globalData.remoteConfig.sponsorBadge });
+    this.setData({ isAdmin: !!(user && user.isAdmin) });
     if (user && !isPending) {
       this.load();
     } else {

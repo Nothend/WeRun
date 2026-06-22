@@ -41,15 +41,12 @@ page {
 }
 
 /* ── 赞助用户「尊贵」展示（全局，跨页面复用）── */
-/* 头像金色光环（呼吸动效） */
+/* 头像金色光环：加粗实心金环（静态，无动画） */
 .sponsor-avatar {
-  border-color: #f5c542 !important;
-  box-shadow: 0 0 0 2rpx #f5c542, 0 0 18rpx rgba(245, 197, 66, 0.6) !important;
-  animation: sponsor-glow 2.2s ease-in-out infinite;
-}
-@keyframes sponsor-glow {
-  0%, 100% { box-shadow: 0 0 0 2rpx #f5c542, 0 0 12rpx rgba(245, 197, 66, 0.45); }
-  50% { box-shadow: 0 0 0 2rpx #ffd95e, 0 0 28rpx rgba(245, 197, 66, 0.95); }
+  border-color: #ffd95e !important;
+  box-shadow:
+    0 0 0 6rpx #ffd95e,
+    0 0 16rpx rgba(245, 197, 66, 0.6) !important;
 }
 /* 昵称金色渐变（双类提高优先级，覆盖各页面 .name/.feed-name 的纯色） */
 .sponsor-name.sponsor-name {

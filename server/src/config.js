@@ -4,13 +4,20 @@ require('dotenv').config();
 // 数据目录：容器内固定为 /app/data（compose 挂载卷），本地默认 server/data
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
 
-// 赞助用户 openid 列表（逗号分隔）。这些用户在排行榜/今日动态/个人主页享有「尊贵」展示样式。
-const sponsorSet = new Set(
-  (process.env.SPONSOR_OPENIDS || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
-);
+// 赞助用户名单（逗号分隔）。这些用户在排行榜/今日动态/个人主页享有「尊贵」展示样式。
+// 每项可选地用「:徽标」给该用户自定义徽标，例：oAAA,oBBB:🍒,oCCC:🎀
+// ——未写徽标的沿用 SPONSOR_BADGE 默认值（仅 oAAA 这种）。openid 不含冒号，故取第一个冒号分隔。
+const defaultSponsorBadge = process.env.SPONSOR_BADGE != null ? process.env.SPONSOR_BADGE : '💎';
+const sponsorBadges = new Map(); // openid -> 该用户徽标文案（空串=不展示徽标但仍享金环+渐变）
+(process.env.SPONSOR_OPENIDS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+  .forEach((entry) => {
+    const idx = entry.indexOf(':');
+    if (idx === -1) sponsorBadges.set(entry, defaultSponsorBadge);
+    else sponsorBadges.set(entry.slice(0, idx).trim(), entry.slice(idx + 1).trim());
+  });
 
 const config = {
   port: parseInt(process.env.PORT || '3000', 10),
@@ -60,14 +67,15 @@ const config = {
   // 模板中用 {{TODAY}} 占位今天的北京日期；文件不存在时使用代码内置的默认提示词
   qwenPromptPath: path.join(DATA_DIR, 'qwen-prompt.txt'),
 
-  // 赞助用户徽标文案：跟在「尊贵」展示里的小钻石标记。默认 💎（仅钻石，不带文字），
-  // 可改成其它 emoji/文案；设为空串则不展示徽标（头像金环+昵称渐变仍保留）。
-  // 改完重启容器即可，无需重新提审小程序——值经 /api/config 下发给前端
-  sponsorBadge: process.env.SPONSOR_BADGE != null ? process.env.SPONSOR_BADGE : '💎',
-
   // 赞助用户判定：openid 是否在 SPONSOR_OPENIDS 名单内（享受「尊贵」展示）
   isSponsor(openid) {
-    return !!openid && sponsorSet.has(openid);
+    return !!openid && sponsorBadges.has(openid);
+  },
+  // 该用户专属徽标文案：自定义了就用自定义的，否则用 SPONSOR_BADGE 默认值；
+  // 非赞助用户或徽标设为空串时返回空串（前端据此隐藏徽标，金环+渐变仍保留）。
+  // 随每个用户对象下发到前端，改完重启容器即生效，无需重新提审小程序。
+  sponsorBadgeFor(openid) {
+    return (openid && sponsorBadges.get(openid)) || '';
   },
 
   // 没有真实 APPID 时进入 mock 模式：跳过真实 code2session，便于本地/未配置时联调

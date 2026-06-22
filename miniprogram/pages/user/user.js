@@ -19,7 +19,6 @@ Page({
     target: 3,
     periods: [],
     current: 0,
-    sponsorBadge: '💎', // 赞助徽标文案，取自 remoteConfig
   },
 
   onLoad(options) {
@@ -29,7 +28,7 @@ Page({
       this.setData({ loading: false });
       return;
     }
-    this.setData({ openid, sponsorBadge: app.globalData.remoteConfig.sponsorBadge });
+    this.setData({ openid });
     this.load();
   },
 

@@ -6,7 +6,7 @@
   <view class="profile" wx:if="{{user}}">
     <image class="profile-avatar {{user.isSponsor ? 'sponsor-avatar' : ''}}" src="{{user.avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
     <view class="profile-name {{user.isSponsor ? 'sponsor-name' : ''}}">{{user.nickname}}</view>
-    <view wx:if="{{user.isSponsor && sponsorBadge}}" class="sponsor-badge">{{sponsorBadge}}</view>
+    <view wx:if="{{user.isSponsor && user.sponsorBadge}}" class="sponsor-badge">{{user.sponsorBadge}}</view>
   </view>
 
   <!-- 周期标签 -->

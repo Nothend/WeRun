@@ -22,6 +22,7 @@ router.get('/me', authRequired, (req, res) => {
       status: user.status || 'active',
       hasApplied: !!user.applied_at,
       isSponsor: config.isSponsor(user.openid),
+      sponsorBadge: config.sponsorBadgeFor(user.openid),
     },
   });
 });
@@ -69,6 +70,7 @@ router.post('/profile', authRequired, upload.single('avatar'), async (req, res) 
         status: user.status || 'active',
         hasApplied: !!user.applied_at,
         isSponsor: config.isSponsor(user.openid),
+        sponsorBadge: config.sponsorBadgeFor(user.openid),
       },
     });
   } catch (e) {

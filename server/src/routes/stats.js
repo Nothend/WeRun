@@ -79,6 +79,7 @@ router.get('/stats/group', authRequired, activeRequired, (req, res) => {
     weekCount: r.weekCount,
     achieved: r.weekCount >= config.weeklyTarget,
     isSponsor: config.isSponsor(r.openid),
+    sponsorBadge: config.sponsorBadgeFor(r.openid),
   }));
 
   res.json({
@@ -113,6 +114,7 @@ router.get('/stats/feed', authRequired, activeRequired, (req, res) => {
       duration: Math.round(r.duration),
       createdAt: r.createdAt,
       isSponsor: config.isSponsor(r.openid),
+      sponsorBadge: config.sponsorBadgeFor(r.openid),
     })),
   });
 });
@@ -160,6 +162,7 @@ function buildBoard({ weekKey, datePrefix }) {
     avatarUrl: r.avatarUrl || '',
     count: r.count,
     isSponsor: config.isSponsor(r.openid),
+    sponsorBadge: config.sponsorBadgeFor(r.openid),
   }));
 }
 
@@ -211,6 +214,7 @@ router.get('/stats/user/:openid', authRequired, activeRequired, (req, res) => {
       nickname: user.nickname || '未设置昵称',
       avatarUrl: user.avatarUrl || '',
       isSponsor: config.isSponsor(openid),
+      sponsorBadge: config.sponsorBadgeFor(openid),
     },
     target: config.weeklyTarget,
     periods,
