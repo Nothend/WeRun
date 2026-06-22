@@ -34,6 +34,21 @@ function fmtDate(dt) {
   ).padStart(2, '0')}`;
 }
 
+// 某 ISO 周（"YYYY-Www"）的周一日期字符串（纯日历运算）
+function isoWeekMondayStr(weekKey) {
+  const [y, w] = weekKey.split('-W').map(Number);
+  const jan4 = new Date(Date.UTC(y, 0, 4)); // 1月4日一定在第1周
+  const dow = jan4.getUTCDay() || 7;
+  const mon = new Date(jan4);
+  mon.setUTCDate(jan4.getUTCDate() - (dow - 1) + (w - 1) * 7);
+  return fmtDate(mon);
+}
+
+// 用户「加入小程序」的北京日期（首次登录时写入的 created_at）
+function joinDateStr(member) {
+  return localDateStr(new Date(member.createdAt || 0));
+}
+
 // 枚举「周一落在 [year,month] 且整周已结束」的各 ISO 周 week_key。
 // month 为空则枚举整年。todayStr 之后（含进行中的当前周）一律不计入。
 function completedWeekKeys({ year, month, todayStr }) {
@@ -87,10 +102,21 @@ function aggregateActivity(datePrefix) {
   return map;
 }
 
+// node-canvas（cairo）用 CJK 字体无法渲染彩色 emoji，会变成豆腐块/空白，
+// 故海报昵称里的 emoji 一律剔除（变体选择符/ZWJ/keycap/区域指示符一并清掉），
+// 不影响中文/英文/数字。清空后回退默认名。
+function stripEmoji(s = '') {
+  return s
+    .replace(/\p{Extended_Pictographic}/gu, '')
+    .replace(/[\u{1F1E6}-\u{1F1FF}\u{FE00}-\u{FE0F}\u{20E3}\u{200D}]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function decorate(member, extra) {
   return {
     openid: member.openid,
-    nickname: member.nickname || '神秘跑者',
+    nickname: stripEmoji(member.nickname) || '神秘跑者',
     avatarUrl: member.avatarUrl || '',
     isSponsor: config.isSponsor(member.openid),
     ...extra,
@@ -117,13 +143,19 @@ function buildWeekReport(now = new Date(), { weekKey = currentWeekKey(now), peri
   );
 
   const target = config.weeklyTarget;
+  const weekMonStr = isoWeekMondayStr(weekKey);
   const sponsors = []; // 金主：未达标（次数 < target），可多人，顶部金冠展示
   const achieved = []; // 达标者：列在分隔线下方，带绿色「达标」
   members.forEach((m) => {
     const n = counts.get(m.openid) || 0;
     const a = weekActivity.get(m.openid) || { count: 0, minutes: 0 };
     const row = decorate(m, { count: n, minutes: Math.round(a.minutes), achieved: n >= target });
-    (n >= target ? achieved : sponsors).push(row);
+    if (n >= target) {
+      achieved.push(row);
+    } else if (weekMonStr >= joinDateStr(m)) {
+      // 仅「该周一前已加入」者未达标才算金主；本周中途加入的不评判、不展示
+      sponsors.push(row);
+    }
   });
 
   // 金主：次数升序（垫底的排前）→ 时长升序；达标：次数降序 → 时长降序
@@ -165,10 +197,16 @@ function buildAggregateReport(period, now = new Date()) {
   const members = activeMembers();
   const weekKeys = completedWeekKeys({ year, month, todayStr });
 
-  // 各周每人次数 → 金主次数累计
+  // 各周每人次数 → 金主次数累计；只统计「该周一前已加入」的周（加入前的周不计入达标判定）
+  const joinStr = new Map(members.map((m) => [m.openid, joinDateStr(m)]));
   const missCount = new Map(); // openid -> 当金主周数
-  members.forEach((m) => missCount.set(m.openid, 0));
+  const countableWeeks = new Map(); // openid -> 计入达标判定的周数（加入后的完整周）
+  members.forEach((m) => {
+    missCount.set(m.openid, 0);
+    countableWeeks.set(m.openid, 0);
+  });
   weekKeys.forEach((wk) => {
+    const wkMon = isoWeekMondayStr(wk);
     const counts = new Map(
       db
         .prepare('SELECT openid, COUNT(*) AS n FROM checkins WHERE week_key = ? GROUP BY openid')
@@ -176,12 +214,14 @@ function buildAggregateReport(period, now = new Date()) {
         .map((r) => [r.openid, r.n])
     );
     members.forEach((m) => {
+      if (wkMon < joinStr.get(m.openid)) return; // 加入前/中途加入的那一周不计
+      countableWeeks.set(m.openid, countableWeeks.get(m.openid) + 1);
       const n = counts.get(m.openid) || 0;
       if (n < target) missCount.set(m.openid, missCount.get(m.openid) + 1);
     });
   });
 
-  // 月/年榜：先按次数、再按运动时长排序的排行榜；每周都达标(missCount===0)算「达标」，否则「不达标」
+  // 月/年榜：先按次数、再按运动时长排序；加入后的每个完整周都达标才算「达标」，否则「不达标」
   const activity = aggregateActivity(datePrefix);
   const rows = members
     .map((m) => {
@@ -189,7 +229,7 @@ function buildAggregateReport(period, now = new Date()) {
       return decorate(m, {
         count: a.count,
         minutes: Math.round(a.minutes),
-        achieved: weekKeys.length > 0 && missCount.get(m.openid) === 0,
+        achieved: countableWeeks.get(m.openid) > 0 && missCount.get(m.openid) === 0,
       });
     })
     .sort((x, y) => y.count - x.count || y.minutes - x.minutes);

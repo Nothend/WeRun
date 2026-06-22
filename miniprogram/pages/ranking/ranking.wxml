@@ -75,7 +75,7 @@
 
         <!-- 管理员：生成金主报告海报（本周/本月/本年榜显示对应周期） -->
         <view wx:if="{{isAdmin && board.reportPeriod}}"
-              class="share-group-btn report-btn {{reportLoading === board.reportPeriod ? 'btn-loading' : ''}}"
+              class="report-btn {{reportLoading === board.reportPeriod ? 'btn-loading' : ''}}"
               data-period="{{board.reportPeriod}}"
               bindtap="genReport">
           {{reportLoading === board.reportPeriod ? '生成中…' : '🏆 生成金主报告'}}

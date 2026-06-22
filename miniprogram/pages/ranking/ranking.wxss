@@ -243,113 +243,20 @@
   height: 48rpx;
 }
 
-/* ── 分享群总览按钮 ── */
-.share-group-btn {
-  margin: 32rpx 24rpx 0;
+/* ── 生成金主报告按钮（金色调）── */
+.report-btn {
+  margin: 16rpx 24rpx 0;
   height: 64rpx;
   line-height: 64rpx;
   text-align: center;
   font-size: 26rpx;
-  color: #07c160;
-  background: rgba(7, 193, 96, 0.08);
-  border: 1rpx solid rgba(7, 193, 96, 0.25);
+  color: #c8902a;
+  background: rgba(245, 197, 66, 0.1);
+  border: 1rpx solid rgba(245, 197, 66, 0.3);
   border-radius: 14rpx;
   letter-spacing: 1rpx;
 }
-.share-group-btn.btn-loading {
-  color: #aab0b8;
-}
-/* 金主报告：金色调，区别于绿色的群总览分享 */
-.share-group-btn.report-btn {
-  margin-top: 16rpx;
-  color: #c8902a;
-  background: rgba(245, 197, 66, 0.1);
-  border-color: rgba(245, 197, 66, 0.3);
-}
-.share-group-btn.report-btn.btn-loading {
+.report-btn.btn-loading {
   color: #aab0b8;
 }
 
-/* ── 分享弹窗 ── */
-.share-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-.share-modal {
-  background: #ffffff;
-  border: 1rpx solid rgba(0, 0, 0, 0.06);
-  border-radius: 28rpx;
-  padding: 48rpx 44rpx 40rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 600rpx;
-}
-.share-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 32rpx;
-  letter-spacing: 1rpx;
-}
-.share-text-box {
-  width: 100%;
-  background: #f5f7fa;
-  border: 1rpx solid rgba(0, 0, 0, 0.06);
-  border-radius: 16rpx;
-  padding: 28rpx 24rpx;
-  margin-bottom: 32rpx;
-  min-height: 120rpx;
-}
-.share-text {
-  font-size: 28rpx;
-  color: #3d4350;
-  line-height: 1.7;
-}
-.share-actions {
-  display: flex;
-  gap: 20rpx;
-  width: 100%;
-  margin-bottom: 28rpx;
-}
-.share-copy-btn {
-  flex: 1;
-  height: 72rpx;
-  line-height: 72rpx;
-  text-align: center;
-  font-size: 26rpx;
-  color: #07c160;
-  background: rgba(7, 193, 96, 0.08);
-  border: 1rpx solid rgba(7, 193, 96, 0.3);
-  border-radius: 16rpx;
-}
-.share-forward-btn {
-  flex: 1;
-  height: 72rpx;
-  line-height: 72rpx;
-  text-align: center;
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, #07c160, #06ad56);
-  border-radius: 16rpx;
-  border: none;
-  padding: 0;
-  margin: 0;
-  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.25);
-}
-.share-forward-btn::after {
-  border: none;
-}
-.share-close {
-  font-size: 26rpx;
-  color: #8a9099;
-  padding: 12rpx 48rpx;
-  border: 1rpx solid rgba(0, 0, 0, 0.12);
-  border-radius: 12rpx;
-}
