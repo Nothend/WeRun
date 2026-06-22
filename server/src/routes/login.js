@@ -9,10 +9,18 @@ const router = express.Router();
 // POST /api/login  { code }
 router.post('/login', async (req, res) => {
   try {
-    const { code } = req.body || {};
-    if (!code) return res.status(400).json({ error: '缺少 code' });
+    const { code, devOpenid } = req.body || {};
+    if (!code && !devOpenid) return res.status(400).json({ error: '缺少 code' });
 
-    const { openid } = await code2session(code);
+    // 仅 mock 模式（未配置真实 APPID）下：允许小程序用固定 devOpenid 指定身份，
+    // 这样每次重启/重新登录都映射到同一个用户（wx.login 的 code 每次都变，否则
+    // 每次登录都会派生出新用户，永远回不到原管理员）。生产模式忽略此字段。
+    let openid;
+    if (config.useMockWechat && devOpenid) {
+      openid = String(devOpenid);
+    } else {
+      ({ openid } = await code2session(code));
+    }
 
     let user = db.prepare('SELECT * FROM users WHERE openid = ?').get(openid);
     let isNewUser = false;

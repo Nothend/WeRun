@@ -259,6 +259,16 @@
 .share-group-btn.btn-loading {
   color: #aab0b8;
 }
+/* 金主报告：金色调，区别于绿色的群总览分享 */
+.share-group-btn.report-btn {
+  margin-top: 16rpx;
+  color: #c8902a;
+  background: rgba(245, 197, 66, 0.1);
+  border-color: rgba(245, 197, 66, 0.3);
+}
+.share-group-btn.report-btn.btn-loading {
+  color: #aab0b8;
+}
 
 /* ── 分享弹窗 ── */
 .share-overlay {

@@ -125,34 +125,37 @@ function buildBoard({ weekKey, datePrefix }) {
   if (weekKey) {
     rows = db
       .prepare(
-        `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, COUNT(c.id) AS count
+        `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, COUNT(c.id) AS count,
+                COALESCE(SUM(c.duration_minutes),0) AS minutes
            FROM users u
            LEFT JOIN checkins c ON c.openid = u.openid AND c.week_key = ?
           WHERE u.status = 'active'
           GROUP BY u.openid
-          ORDER BY count DESC, u.created_at ASC`
+          ORDER BY count DESC, minutes DESC, u.created_at ASC`
       )
       .all(weekKey);
   } else if (datePrefix) {
     rows = db
       .prepare(
-        `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, COUNT(c.id) AS count
+        `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, COUNT(c.id) AS count,
+                COALESCE(SUM(c.duration_minutes),0) AS minutes
            FROM users u
            LEFT JOIN checkins c ON c.openid = u.openid AND c.checkin_date LIKE ?
           WHERE u.status = 'active'
           GROUP BY u.openid
-          ORDER BY count DESC, u.created_at ASC`
+          ORDER BY count DESC, minutes DESC, u.created_at ASC`
       )
       .all(datePrefix + '%');
   } else {
     rows = db
       .prepare(
-        `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, COUNT(c.id) AS count
+        `SELECT u.openid, u.nickname, u.avatar_url AS avatarUrl, COUNT(c.id) AS count,
+                COALESCE(SUM(c.duration_minutes),0) AS minutes
            FROM users u
            LEFT JOIN checkins c ON c.openid = u.openid
           WHERE u.status = 'active'
           GROUP BY u.openid
-          ORDER BY count DESC, u.created_at ASC`
+          ORDER BY count DESC, minutes DESC, u.created_at ASC`
       )
       .all();
   }

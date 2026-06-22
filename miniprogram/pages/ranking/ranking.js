@@ -4,6 +4,9 @@ const app = getApp();
 
 const PAGE_SIZE = 10;
 
+// 哪些榜单可生成对应的金主报告海报（本周需周五22:00后，由后端把关）
+const REPORT_PERIOD = { thisWeek: 'week', lastWeek: 'lastweek', thisMonth: 'month', thisYear: 'year' };
+
 // 未登录/待审核时展示的空壳榜单结构，与后端 /api/stats/rankings 的标签保持一致
 const PLACEHOLDER_BOARDS = [
   { key: 'today', label: '今日', weekly: false, list: [] },
@@ -23,15 +26,12 @@ Page({
     current: 0, // 当前 swiper 下标
     swiperHeight: 0, // swiper 高度（px），按屏幕动态计算
     isAdmin: false,
-    // 群总览分享（管理员）
-    shareGroupText: '',
-    shareGroupLoading: false,
-    showShareGroupModal: false,
+    reportLoading: '', // 正在生成的报告周期（week/month/year），用于按钮 loading 态
   },
 
   onShareAppMessage() {
     return {
-      title: this.data.shareGroupText || 'WeRun 跑步群周榜，一起来运动！',
+      title: 'WeRun 跑步群周榜，一起来运动！',
       path: '/pages/ranking/ranking',
       imageUrl: config.baseUrl + '/shareground.png',
     };
@@ -101,6 +101,7 @@ Page({
       key: b.key,
       label: b.label,
       weekly: b.weekly,
+      reportPeriod: REPORT_PERIOD[b.key] || '',
       total: b.list.length,
       top3,
       rest,
@@ -147,28 +148,24 @@ Page({
     this.setData({ [`boards[${idx}]`]: rebuilt });
   },
 
-  // ── 群总览分享（管理员）────────────────────────────────
-  async openGroupShareModal() {
-    if (this.data.shareGroupLoading) return;
-    this.setData({ shareGroupLoading: true });
+  // ── 生成金主报告海报（管理员）────────────────────────
+  // 请求后端渲染好的 PNG URL，用 previewImage 打开；长按可转发到群/朋友圈或保存相册
+  async genReport(e) {
+    const period = e.currentTarget.dataset.period;
+    if (!period || this.data.reportLoading) return;
+    this.setData({ reportLoading: period });
     try {
-      const data = await api.request('/api/share/group');
-      this.setData({ shareGroupText: data.text, showShareGroupModal: true });
-    } catch (e) {
-      wx.showToast({ title: e.message || '生成文案失败', icon: 'none' });
+      const data = await api.request(`/api/report/${period}`);
+      if (data.notice) {
+        await new Promise((resolve) =>
+          wx.showModal({ title: '提示', content: data.notice, showCancel: false, success: resolve })
+        );
+      }
+      wx.previewImage({ urls: [data.url], current: data.url });
+    } catch (err) {
+      wx.showToast({ title: err.message || '生成失败', icon: 'none' });
     } finally {
-      this.setData({ shareGroupLoading: false });
+      this.setData({ reportLoading: '' });
     }
-  },
-
-  closeGroupShareModal() {
-    this.setData({ showShareGroupModal: false });
-  },
-
-  copyGroupShareText() {
-    wx.setClipboardData({
-      data: this.data.shareGroupText,
-      success: () => wx.showToast({ title: '已复制', icon: 'success' }),
-    });
   },
 });

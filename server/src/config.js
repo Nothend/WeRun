@@ -63,6 +63,7 @@ const config = {
   dataDir: DATA_DIR,
   dbPath: path.join(DATA_DIR, 'app.db'),
   avatarDir: path.join(DATA_DIR, 'avatars'),
+  reportDir: path.join(DATA_DIR, 'reports'),
   // 自定义千问识别提示词模板（可选）：放在 data 卷里，改完即生效，无需发版/重启。
   // 模板中用 {{TODAY}} 占位今天的北京日期；文件不存在时使用代码内置的默认提示词
   qwenPromptPath: path.join(DATA_DIR, 'qwen-prompt.txt'),

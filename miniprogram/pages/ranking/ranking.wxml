@@ -73,11 +73,12 @@
         <!-- 空态 -->
         <view wx:if="{{board.total === 0}}" class="empty">本榜暂无数据，快去打卡吧～</view>
 
-        <!-- 管理员：分享群总览（仅本周榜显示） -->
-        <view wx:if="{{isAdmin && board.key === 'thisWeek'}}"
-              class="share-group-btn {{shareGroupLoading ? 'btn-loading' : ''}}"
-              bindtap="openGroupShareModal">
-          {{shareGroupLoading ? '生成中…' : '📤 分享群总览'}}
+        <!-- 管理员：生成金主报告海报（本周/本月/本年榜显示对应周期） -->
+        <view wx:if="{{isAdmin && board.reportPeriod}}"
+              class="share-group-btn report-btn {{reportLoading === board.reportPeriod ? 'btn-loading' : ''}}"
+              data-period="{{board.reportPeriod}}"
+              bindtap="genReport">
+          {{reportLoading === board.reportPeriod ? '生成中…' : '🏆 生成金主报告'}}
         </view>
 
         <view class="scroll-bottom"></view>
@@ -86,19 +87,4 @@
   </swiper>
 
   <view wx:if="{{loading}}" class="loading muted">加载中...</view>
-</view>
-
-<!-- 群总览分享弹窗 -->
-<view wx:if="{{showShareGroupModal}}" class="share-overlay" bindtap="closeGroupShareModal">
-  <view class="share-modal" catchtap="">
-    <view class="share-title">分享群总览 📤</view>
-    <view class="share-text-box">
-      <text class="share-text">{{shareGroupText}}</text>
-    </view>
-    <view class="share-actions">
-      <view class="share-copy-btn" bindtap="copyGroupShareText">复制文案</view>
-      <button class="share-forward-btn" open-type="share">分享给好友</button>
-    </view>
-    <view class="share-close" bindtap="closeGroupShareModal">关闭</view>
-  </view>
 </view>

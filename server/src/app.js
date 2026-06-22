@@ -15,6 +15,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/avatars', express.static(config.avatarDir, { maxAge: '7d' }));
 // 静态公共资源：GET /public/<file>
 app.use('/public', express.static(path.join(__dirname, '..', 'public'), { maxAge: '30d' }));
+// 金主报告海报：GET /reports/<period>.png（管理员生成后写入 data/reports）
+app.use('/reports', express.static(config.reportDir, { maxAge: 0 }));
 // 小程序分享封面：单文件托管（data/ 下还有 app.db，严禁整目录 static），
 // 宿主机直接替换 data/shareground.{png,jpg,jpeg} 即可生效，无需重新发版。
 // URL 固定 /shareground.png，实际按 png→jpg→jpeg 顺序取存在的文件并以对应类型返回。
@@ -48,6 +50,7 @@ app.use('/api', require('./routes/stats'));
 app.use('/api', require('./routes/admin'));
 app.use('/api', require('./routes/account'));
 app.use('/api', require('./routes/share'));
+app.use('/api', require('./routes/report'));
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'not found' }));

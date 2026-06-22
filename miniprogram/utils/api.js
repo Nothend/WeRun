@@ -92,7 +92,9 @@ function login() {
           reject(new Error('微信登录失败：未拿到 code'));
           return;
         }
-        request('/api/login', { method: 'POST', data: { code: res.code } })
+        const loginData = { code: res.code };
+        if (config.devLoginAs) loginData.devOpenid = config.devLoginAs; // 本地联调固定身份，正式发布置空
+        request('/api/login', { method: 'POST', data: loginData })
           .then((data) => {
             getApp_().setAuth(data.token, data.user);
             resolve(data);
