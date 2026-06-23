@@ -6,6 +6,7 @@ const config = require('./config');
 const db = require('./db'); // 初始化数据库与目录
 const { sendSubscribeMessage } = require('./wechat');
 const { currentWeekKey } = require('./week');
+const { generateDueReports } = require('./reportmsg');
 
 const app = express();
 app.use(express.json({ limit: '2mb' }));
@@ -51,6 +52,7 @@ app.use('/api', require('./routes/admin'));
 app.use('/api', require('./routes/account'));
 app.use('/api', require('./routes/share'));
 app.use('/api', require('./routes/report'));
+app.use('/api', require('./routes/reports'));
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'not found' }));
@@ -121,6 +123,11 @@ async function sendWeeklyReport() {
 
 // 每周日 22:00（中国时区）发送周报
 cron.schedule('0 22 * * 0', sendWeeklyReport, { timezone: 'Asia/Shanghai' });
+
+// 每天 23:45（中国时区）：周/月/年最后一天生成对应战报消息（首页报告卡据此下发未读）
+cron.schedule('45 23 * * *', () => {
+  try { generateDueReports(); } catch (e) { console.warn(`[report-msg] ${e.message}`); }
+}, { timezone: 'Asia/Shanghai' });
 
 app.listen(config.port, () => {
   console.log(`[WeRun] server listening on :${config.port}`);

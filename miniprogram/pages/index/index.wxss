@@ -61,45 +61,145 @@
   border-radius: var(--r-pill);
 }
 
-/* ── 本周进度速览 ── */
-.progress-card {
-  display: flex;
-  align-items: center;
+/* ── 打卡卡：打卡行 + 进度细条合并为一张卡 ── */
+.hero-card {
   background: var(--surface);
   border-radius: var(--r-lg);
-  padding: 40rpx 0;
   margin-bottom: 24rpx;
   box-shadow: var(--shadow);
+  overflow: hidden;
 }
-.progress-item {
+/* 卡内的打卡行去掉自身卡片外观，由 .hero-card 统一承载 */
+.hero-flush {
+  background: transparent;
+  box-shadow: none;
+  margin-bottom: 0;
+  border-radius: 0;
+  padding: 36rpx;
+}
+.hero-flush.hero-hover {
+  background: #fafbfc;
+}
+.hero-strip {
+  display: flex;
+  align-items: center;
+  border-top: 1rpx solid var(--hairline);
+}
+.hero-strip-item {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14rpx;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10rpx;
+  padding: 22rpx 0;
 }
-.progress-hover {
+.hero-strip-hover {
   opacity: 0.55;
 }
-.progress-num {
-  font-size: var(--fs-hero);
+.hero-strip-num {
+  font-size: 34rpx;
   font-weight: 800;
   color: var(--text-1);
   line-height: 1;
-  letter-spacing: -1rpx;
 }
-.progress-num.achieved {
+.hero-strip-num.achieved {
   color: var(--brand);
 }
-.progress-label {
+.hero-strip-label {
   font-size: var(--fs-cap);
   color: var(--text-3);
   letter-spacing: 0.5rpx;
 }
-.progress-divider {
+.hero-strip-divider {
   width: 1rpx;
-  height: 72rpx;
+  height: 32rpx;
   background: var(--hairline);
+}
+
+/* ── 未读战报卡：小红点 + 角标，勾起点击 ── */
+.report-card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  margin-bottom: 24rpx;
+  padding: 22rpx 28rpx 6rpx;
+  box-shadow: var(--shadow);
+  border: 1rpx solid rgba(250, 81, 81, 0.18);
+}
+.report-head {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.report-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: var(--danger);
+  animation: report-pulse 1.6s ease-out infinite;
+}
+@keyframes report-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(250, 81, 81, 0.45); }
+  70%  { box-shadow: 0 0 0 12rpx rgba(250, 81, 81, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(250, 81, 81, 0); }
+}
+.report-title {
+  font-size: var(--fs-meta);
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: 0.5rpx;
+}
+.report-badge {
+  min-width: 30rpx;
+  height: 30rpx;
+  padding: 0 8rpx;
+  border-radius: 15rpx;
+  background: var(--danger);
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 700;
+  line-height: 30rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+.report-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 18rpx 0;
+}
+.report-item + .report-item {
+  border-top: 1rpx solid var(--hairline);
+}
+.report-item-hover {
+  opacity: 0.6;
+}
+.report-item-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  min-width: 0;
+}
+.report-item-label {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--text-1);
+}
+.report-item-text {
+  font-size: var(--fs-cap);
+  color: var(--text-2);
+}
+.report-item-cta {
+  flex-shrink: 0;
+  font-size: var(--fs-cap);
+  font-weight: 600;
+  color: var(--brand);
+}
+.report-item-chevron {
+  flex-shrink: 0;
+  font-size: 32rpx;
+  color: var(--text-3);
+  margin-left: -6rpx;
 }
 
 /* ── 今日动态 ── */

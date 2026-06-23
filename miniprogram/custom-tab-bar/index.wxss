@@ -23,6 +23,19 @@
 .tab.active {
   color: #07c160;
 }
+.tab-icon-wrap {
+  position: relative;
+}
+.tab-dot {
+  position: absolute;
+  top: -2rpx;
+  right: -8rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #fa5151;
+  border: 2rpx solid #ffffff;
+}
 .tab-icon {
   width: 46rpx;
   height: 46rpx;

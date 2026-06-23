@@ -23,6 +23,7 @@
     <view wx:if="{{user.isAdmin}}" class="menu-item" hover-class="menu-hover" hover-stay-time="120" bindtap="goAdmin">
       <text class="icon icon-settings menu-icon"></text>
       <text class="menu-text">后台管理</text>
+      <text wx:if="{{pendingCount}}" class="menu-badge">{{pendingCount}}</text>
       <text class="icon icon-chevron menu-chevron"></text>
     </view>
     <view class="menu-item" hover-class="menu-hover" hover-stay-time="120" bindtap="goAbout">

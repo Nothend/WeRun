@@ -39,36 +39,56 @@
     <text class="icon icon-chevron hero-chevron"></text>
   </view>
 
-  <!-- 已登录且通过：今日已打卡 -->
-  <view wx:elif="{{!isPending && stats && stats.todayCheckin}}" class="hero hero-done">
-    <view class="hero-icon done"><text class="icon icon-check"></text></view>
-    <view class="hero-main">
-      <text class="hero-title">今日已打卡</text>
-      <text class="hero-sub">已记录约 {{stats.todayCheckin.duration}} 分钟，继续保持</text>
+  <!-- 已登录且通过：打卡卡（打卡行 + 本周/累计进度细条，合并为一张卡省空间） -->
+  <view wx:elif="{{!isPending}}" class="hero-card">
+    <!-- 今日已打卡 -->
+    <view wx:if="{{stats && stats.todayCheckin}}" class="hero hero-flush hero-done">
+      <view class="hero-icon done"><text class="icon icon-check"></text></view>
+      <view class="hero-main">
+        <text class="hero-title">今日已打卡</text>
+        <text class="hero-sub">已记录约 {{stats.todayCheckin.duration}} 分钟，继续保持</text>
+      </view>
+      <text class="hero-undo" catchtap="deleteCheckinToday">撤销</text>
     </view>
-    <text class="hero-undo" catchtap="deleteCheckinToday">撤销</text>
+    <!-- 去打卡 -->
+    <view wx:else class="hero hero-flush hero-cta" hover-class="hero-hover" hover-stay-time="120" bindtap="goCheckin">
+      <view class="hero-icon"><text class="icon icon-camera"></text></view>
+      <view class="hero-main">
+        <text class="hero-title">上传截图打卡</text>
+        <text class="hero-sub">上传运动截图，自动核验时长 · ≥{{minDurationMinutes}} 分钟计一次</text>
+      </view>
+      <text class="icon icon-chevron hero-chevron"></text>
+    </view>
+
+    <!-- 进度细条：本周 / 累计，点击进打卡明细 -->
+    <view class="hero-strip">
+      <view class="hero-strip-item" hover-class="{{stats ? 'hero-strip-hover' : ''}}" hover-stay-time="150" data-scope="week" catchtap="openRecords">
+        <text class="hero-strip-num {{stats && stats.weekCount >= weeklyTarget ? 'achieved' : ''}}">{{stats ? stats.weekCount : '-'}}</text>
+        <text class="hero-strip-label">本周 · 目标 {{weeklyTarget}}</text>
+      </view>
+      <view class="hero-strip-divider"></view>
+      <view class="hero-strip-item" hover-class="{{stats ? 'hero-strip-hover' : ''}}" hover-stay-time="150" data-scope="all" catchtap="openRecords">
+        <text class="hero-strip-num">{{stats ? stats.totalCount : '-'}}</text>
+        <text class="hero-strip-label">累计</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 已登录且通过：去打卡 -->
-  <view wx:elif="{{!isPending}}" class="hero hero-cta" hover-class="hero-hover" hover-stay-time="120" bindtap="goCheckin">
-    <view class="hero-icon"><text class="icon icon-camera"></text></view>
-    <view class="hero-main">
-      <text class="hero-title">上传截图打卡</text>
-      <text class="hero-sub">上传运动截图，自动核验时长 · ≥{{minDurationMinutes}} 分钟计一次</text>
+  <!-- ── 未读战报（周/月/年报，读后消失）── -->
+  <view wx:if="{{user && !isPending && reports.length}}" class="report-card">
+    <view class="report-head">
+      <view class="report-dot"></view>
+      <text class="report-title">新战报</text>
+      <text class="report-badge">{{reports.length}}</text>
     </view>
-    <text class="icon icon-chevron hero-chevron"></text>
-  </view>
-
-  <!-- ── 本周进度速览 ── -->
-  <view wx:if="{{user && !isPending}}" class="progress-card">
-    <view class="progress-item" hover-class="{{stats ? 'progress-hover' : ''}}" hover-stay-time="150" data-scope="week" bindtap="openRecords">
-      <text class="progress-num {{stats && stats.weekCount >= weeklyTarget ? 'achieved' : ''}}">{{stats ? stats.weekCount : '-'}}</text>
-      <text class="progress-label">本周打卡{{stats ? ' ·' : ''}} 目标 {{weeklyTarget}}</text>
-    </view>
-    <view class="progress-divider"></view>
-    <view class="progress-item" hover-class="{{stats ? 'progress-hover' : ''}}" hover-stay-time="150" data-scope="all" bindtap="openRecords">
-      <text class="progress-num">{{stats ? stats.totalCount : '-'}}</text>
-      <text class="progress-label">累计打卡次数</text>
+    <view wx:for="{{reports}}" wx:key="key" class="report-item" hover-class="report-item-hover" hover-stay-time="120"
+          data-key="{{item.key}}" data-board="{{item.board}}" bindtap="openReport">
+      <view class="report-item-main">
+        <text class="report-item-label">{{item.label}}</text>
+        <text class="report-item-text">{{item.text}}</text>
+      </view>
+      <text class="report-item-cta">看榜单</text>
+      <text class="icon icon-chevron report-item-chevron"></text>
     </view>
   </view>
 

@@ -23,6 +23,7 @@ Page({
     hasApplied: false,
     feed: [],
     feedLoaded: false,
+    reports: [], // 未读战报消息（周/月/年），点开即标已读并跳榜
     minDurationMinutes: 30,
     weeklyTarget: 3,
   },
@@ -40,7 +41,7 @@ Page({
     const user = app.globalData.user;
     if (!user) { done(); return; }
     if (this.data.isPending) this.refreshMe().then(done, done);
-    else { this.loadFeed(); this.loadStats().then(done, done); }
+    else { this.loadFeed(); this.loadReports(); this.loadStats().then(done, done); }
   },
 
   onShow() {
@@ -60,7 +61,7 @@ Page({
       minDurationMinutes: rc.minDurationMinutes || 30,
       weeklyTarget: rc.weeklyTarget || 3,
     });
-    if (user && !isPending) { this.loadStats(); this.loadFeed(); }
+    if (user && !isPending) { this.loadStats(); this.loadFeed(); this.loadReports(); }
     if (user && isPending) this.refreshMe();
   },
 
@@ -78,6 +79,7 @@ Page({
       if (!isPending) {
         this.loadStats();
         this.loadFeed();
+        this.loadReports();
         if (showFeedback) wx.showToast({ title: '审核已通过', icon: 'success' });
       } else if (showFeedback) {
         wx.showToast({ title: '仍在审核中，请耐心等待', icon: 'none' });
@@ -107,7 +109,7 @@ Page({
       const isPending = user.status === 'pending';
       const hasApplied = !!user.hasApplied;
       this.setData({ user, avatarUrl: user.avatarUrl, nickname: user.nickname, isPending, hasApplied });
-      if (!isPending) { this.loadStats(); this.loadFeed(); }
+      if (!isPending) { this.loadStats(); this.loadFeed(); this.loadReports(); }
       if (isPending && !hasApplied) {
         wx.navigateTo({ url: '/pages/profile/profile?mode=apply' });
       } else if (isNewUser) {
@@ -162,6 +164,25 @@ Page({
     } catch (e) {
       this.setData({ feedLoaded: true });
     }
+  },
+
+  // 未读战报消息（周/月/年报）
+  async loadReports() {
+    try {
+      const { items } = await api.request('/api/reports');
+      this.setData({ reports: items || [] });
+    } catch (e) {
+      // 静默
+    }
+  },
+
+  // 点开战报：标已读 + 跳排行榜对应板（switchTab 不能带参，用 globalData 暂存）
+  openReport(e) {
+    const { key, board } = e.currentTarget.dataset;
+    api.request('/api/reports/read', { method: 'POST', data: { key } }).catch(() => {});
+    this.setData({ reports: this.data.reports.filter((r) => r.key !== key) });
+    app.globalData.pendingRankingBoard = board;
+    wx.switchTab({ url: '/pages/ranking/ranking' });
   },
 
   deleteCheckinToday() {

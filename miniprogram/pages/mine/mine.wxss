@@ -72,6 +72,20 @@
   font-size: var(--fs-body);
   color: var(--text-1);
 }
+.menu-badge {
+  min-width: 32rpx;
+  height: 32rpx;
+  padding: 0 9rpx;
+  margin-right: 12rpx;
+  border-radius: 16rpx;
+  background: var(--danger);
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 32rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
 .menu-chevron {
   font-size: 32rpx;
   color: var(--text-3);

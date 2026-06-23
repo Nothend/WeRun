@@ -85,12 +85,23 @@ Page({
     const user = app.globalData.user;
     const isPending = !!(user && user.status === 'pending');
     this.setData({ isAdmin: !!(user && user.isAdmin) });
+    // 首页战报卡跳转过来时，跳到指定榜单板（switchTab 无法带参，经 globalData 传递）
+    this._pendingBoard = app.globalData.pendingRankingBoard || '';
+    app.globalData.pendingRankingBoard = '';
     if (user && !isPending) {
       this.load();
     } else {
       const boards = PLACEHOLDER_BOARDS.map((b) => this.buildBoardView(b));
-      this.setData({ loading: false, boards }, () => this.measureSwiper());
+      this.setData({ loading: false, boards }, () => { this.applyPendingBoard(); this.measureSwiper(); });
     }
+  },
+
+  // 切到 _pendingBoard 指定的榜单板（按 key 找下标）
+  applyPendingBoard() {
+    if (!this._pendingBoard) return;
+    const idx = this.data.boards.findIndex((b) => b.key === this._pendingBoard);
+    this._pendingBoard = '';
+    if (idx >= 0) this.setData({ current: idx });
   },
 
   async load() {
@@ -98,7 +109,7 @@ Page({
     try {
       const data = await api.request('/api/stats/rankings');
       const boards = (data.boards || []).map((b) => this.buildBoardView(b));
-      this.setData({ target: data.target, boards }, () => this.measureSwiper());
+      this.setData({ target: data.target, boards }, () => { this.applyPendingBoard(); this.measureSwiper(); });
     } catch (e) {
       wx.showToast({ title: e.message, icon: 'none' });
     } finally {

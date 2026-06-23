@@ -56,6 +56,20 @@ db.exec(`
     value      TEXT NOT NULL DEFAULT '',
     updated_at INTEGER NOT NULL
   );
+
+  -- 周期战报消息：cron 在每周/月/年最后一天 23:45 生成一行，首页报告卡据此向用户下发
+  CREATE TABLE IF NOT EXISTS report_messages (
+    report_key TEXT PRIMARY KEY,   -- 'week:2026-W23' / 'month:2026-06' / 'year:2026'
+    created_at INTEGER NOT NULL
+  );
+
+  -- 每人每条战报的已读状态：有行即已读，首页报告卡只展示未读
+  CREATE TABLE IF NOT EXISTS report_reads (
+    openid     TEXT NOT NULL,
+    report_key TEXT NOT NULL,
+    read_at    INTEGER NOT NULL,
+    PRIMARY KEY (openid, report_key)
+  );
 `);
 
 // 增量迁移：新增列（ALTER TABLE ADD COLUMN 不会破坏已有数据）

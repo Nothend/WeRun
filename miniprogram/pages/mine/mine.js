@@ -9,6 +9,7 @@ Page({
     isPending: false,
     hasApplied: false,
     loggingIn: false,
+    pendingCount: 0, // 待审核加入申请数（管理员），>0 时后台管理入口显红点
   },
 
   onShow() {
@@ -23,6 +24,22 @@ Page({
       isPending: !!(user && user.status === 'pending'),
       hasApplied: !!(user && user.hasApplied),
     });
+    this.loadPendingCount();
+  },
+
+  // 仅管理员：拉取待审核申请数
+  async loadPendingCount() {
+    const user = app.globalData.user;
+    if (!user || !user.isAdmin) {
+      if (this.data.pendingCount) this.setData({ pendingCount: 0 });
+      return;
+    }
+    try {
+      const { list } = await api.request('/api/admin/applications');
+      this.setData({ pendingCount: (list || []).length });
+    } catch (e) {
+      // 静默
+    }
   },
 
   async handleLogin() {
