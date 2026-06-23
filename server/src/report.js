@@ -44,9 +44,14 @@ function isoWeekMondayStr(weekKey) {
   return fmtDate(mon);
 }
 
-// 用户「加入小程序」的北京日期（首次登录时写入的 created_at）
+// 用户「加入跑团」的北京日期：取「注册小程序日」与「最早一条打卡日（含导入历史）」中较早者。
+// 老成员的历史打卡常由 Excel 导入、最近才注册小程序，若只看 created_at 会把他们误判为新人。
 function joinDateStr(member) {
-  return localDateStr(new Date(member.createdAt || 0));
+  const reg = localDateStr(new Date(member.createdAt || 0));
+  const firstCk = db
+    .prepare('SELECT MIN(checkin_date) AS d FROM checkins WHERE openid = ?')
+    .get(member.openid).d;
+  return firstCk && firstCk < reg ? firstCk : reg;
 }
 
 // 枚举「周一落在 [year,month] 且整周已结束」的各 ISO 周 week_key。

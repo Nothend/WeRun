@@ -346,7 +346,8 @@ function drawContent(ctx, report, copy, avatars) {
   if (report.period === 'week' || report.period === 'lastweek') {
     // 周榜：金主（金冠头像，可多人）在上；横线分隔；达标者（绿色「达标」）在下、弹性多列
     if (report.noSponsor) {
-      y += 64;
+      // 皇冠以 y 为底向上绘制（高约 116*0.7≈81），留足间距避免顶到上方的副标题
+      y += 112;
       crown(ctx, W / 2, y, 116);
       y += 46;
       ctx.textAlign = 'center';
