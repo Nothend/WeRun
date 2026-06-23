@@ -1,7 +1,11 @@
 /* ── 页面 ── */
+/* 整页固定为一屏高度、禁止整页滚动：只保留榜单内 scroll-view 这一层纵向滚动，
+   避免「外层页面 + 内层榜单」两层滚动相互误判（外层会把滚动公告顶出屏幕） */
 .page {
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* ── 顶部标签栏 ── */

@@ -53,16 +53,29 @@ Page({
   },
 
   onLoad() {
-    // 计算 swiper 可用高度：窗口高度 - 顶部周期标签栏(约 96rpx)。
-    // 底部 tabBar 的让位由 scroll-view 内的 .scroll-bottom 占位撑出（含安全区），见 wxss。
+    // 先给一个估算高度（窗口高 - 顶部标签栏约 96rpx）避免首帧塌缩，
+    // 真正的高度由 measureSwiper() 按 swiper 实际 top 精确测得（自动扣除滚动公告）。
     try {
       const info = wx.getWindowInfo();
-      const rpx2px = info.windowWidth / 750;
-      const tabsPx = 96 * rpx2px; // 顶部周期标签栏
+      const tabsPx = (96 * info.windowWidth) / 750;
       this.setData({ swiperHeight: info.windowHeight - tabsPx });
     } catch (e) {
       // ignore，保留默认
     }
+  },
+
+  // 让 swiper 精确填满「其上沿到屏幕底」的剩余空间：高度 = 窗口高 - swiper 实际 top。
+  // 这样滚动公告无论有无、高度多少都自动扣除，整页正好一屏、不产生外层滚动。
+  // 底部 tabBar 的让位仍由 scroll-view 内的 .scroll-bottom 占位撑出（含安全区），见 wxss。
+  measureSwiper() {
+    wx.createSelectorQuery()
+      .select('.boards')
+      .boundingClientRect((rect) => {
+        if (!rect) return;
+        const h = Math.round(wx.getWindowInfo().windowHeight - rect.top);
+        if (h > 0 && h !== this.data.swiperHeight) this.setData({ swiperHeight: h });
+      })
+      .exec();
   },
 
   onShow() {
@@ -76,7 +89,7 @@ Page({
       this.load();
     } else {
       const boards = PLACEHOLDER_BOARDS.map((b) => this.buildBoardView(b));
-      this.setData({ loading: false, boards });
+      this.setData({ loading: false, boards }, () => this.measureSwiper());
     }
   },
 
@@ -85,7 +98,7 @@ Page({
     try {
       const data = await api.request('/api/stats/rankings');
       const boards = (data.boards || []).map((b) => this.buildBoardView(b));
-      this.setData({ target: data.target, boards });
+      this.setData({ target: data.target, boards }, () => this.measureSwiper());
     } catch (e) {
       wx.showToast({ title: e.message, icon: 'none' });
     } finally {
