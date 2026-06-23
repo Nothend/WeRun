@@ -1,0 +1,48 @@
+<view class="container">
+
+  <!-- 资料头部 -->
+  <view class="profile" hover-class="profile-hover" hover-stay-time="120" bindtap="onProfileTap">
+    <image class="profile-avatar {{user.isSponsor ? 'sponsor-avatar' : ''}}" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
+    <view class="profile-info">
+      <view class="sponsor-nameline">
+        <text class="profile-name {{user.isSponsor ? 'sponsor-name' : ''}}">{{user ? (nickname || '未设置昵称') : '未登录'}}</text>
+        <text wx:if="{{user.isSponsor && user.sponsorBadge}}" class="sponsor-badge">{{user.sponsorBadge}}</text>
+      </view>
+      <text class="profile-sub">{{user ? (isPending ? (hasApplied ? '申请审核中 · 点击编辑资料' : '尚未加入跑团 · 点击提交申请') : '跑团成员 · 点击编辑资料') : '点击微信登录，解锁打卡与个人数据'}}</text>
+    </view>
+    <text class="icon icon-chevron profile-chevron"></text>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu">
+    <view wx:if="{{user && !isPending}}" class="menu-item" hover-class="menu-hover" hover-stay-time="120" bindtap="goRecords">
+      <text class="icon icon-records menu-icon"></text>
+      <text class="menu-text">打卡记录</text>
+      <text class="icon icon-chevron menu-chevron"></text>
+    </view>
+    <view wx:if="{{user.isAdmin}}" class="menu-item" hover-class="menu-hover" hover-stay-time="120" bindtap="goAdmin">
+      <text class="icon icon-settings menu-icon"></text>
+      <text class="menu-text">后台管理</text>
+      <text class="icon icon-chevron menu-chevron"></text>
+    </view>
+    <view class="menu-item" hover-class="menu-hover" hover-stay-time="120" bindtap="goAbout">
+      <text class="icon icon-heart menu-icon"></text>
+      <text class="menu-text">关于作者</text>
+      <text class="icon icon-chevron menu-chevron"></text>
+    </view>
+  </view>
+
+  <!-- 账号操作 -->
+  <view class="menu">
+    <view wx:if="{{user}}" class="menu-item" hover-class="menu-hover" hover-stay-time="120" bindtap="handleLogout">
+      <text class="icon icon-logout menu-icon danger"></text>
+      <text class="menu-text danger">退出登录</text>
+    </view>
+    <view wx:else class="menu-item" hover-class="menu-hover" hover-stay-time="120" bindtap="handleLogin">
+      <text class="icon icon-user menu-icon"></text>
+      <text class="menu-text">{{loggingIn ? '登录中…' : '微信登录'}}</text>
+      <text class="icon icon-chevron menu-chevron"></text>
+    </view>
+  </view>
+
+</view>

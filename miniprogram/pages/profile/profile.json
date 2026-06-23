@@ -2,7 +2,7 @@
   "navigationBarTitleText": "编辑资料",
   "navigationBarBackgroundColor": "#ffffff",
   "navigationBarTextStyle": "black",
-  "backgroundColor": "#f2f4f7",
+  "backgroundColor": "#f5f6f8",
   "usingComponents": {
     "notice-bar": "../../components/notice-bar/notice-bar"
   }

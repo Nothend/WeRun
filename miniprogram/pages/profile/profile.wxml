@@ -12,7 +12,7 @@
       <view class="auth-avatar-wrap">
         <image class="auth-avatar" src="{{previewUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
         <view class="auth-avatar-overlay {{previewUrl ? 'set' : ''}}">
-          <text class="auth-avatar-camera">{{previewUrl ? '✓' : '📷'}}</text>
+          <text class="icon {{previewUrl ? 'icon-check' : 'icon-camera'}} auth-avatar-camera"></text>
         </view>
       </view>
       <view class="auth-avatar-label {{previewUrl ? 'done' : ''}}">
@@ -66,7 +66,7 @@
       <view class="avatar-wrap">
         <image class="avatar-preview" src="{{previewUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
         <view class="avatar-camera-overlay">
-          <text class="avatar-camera-icon">📷</text>
+          <text class="icon icon-camera avatar-camera-icon"></text>
           <text class="avatar-camera-text">更换头像</text>
         </view>
       </view>

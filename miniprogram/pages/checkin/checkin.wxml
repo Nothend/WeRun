@@ -7,7 +7,7 @@
     <view class="upload-zone" bindtap="chooseImage">
       <image wx:if="{{imagePath}}" src="{{imagePath}}" mode="aspectFit" class="preview-img"/>
       <view wx:else class="upload-empty">
-        <view class="upload-icon">📷</view>
+        <text class="icon icon-camera upload-icon"></text>
         <view class="upload-label">点击选择 / 拍摄</view>
         <view class="muted upload-sub">支持相册或实时拍摄</view>
       </view>

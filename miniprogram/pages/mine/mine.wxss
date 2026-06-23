@@ -1,0 +1,81 @@
+/* ── 资料头部 ── */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 28rpx;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 44rpx 36rpx;
+  margin-bottom: 24rpx;
+  box-shadow: var(--shadow);
+}
+.profile-hover {
+  background: #fafbfc;
+}
+.profile-avatar {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #eef1f5;
+  border: 2rpx solid rgba(0, 0, 0, 0.04);
+}
+.profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  min-width: 0;
+}
+.profile-name {
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: 0.5rpx;
+}
+.profile-sub {
+  font-size: var(--fs-cap);
+  color: var(--text-3);
+  line-height: 1.4;
+}
+.profile-chevron {
+  font-size: 36rpx;
+  color: var(--text-3);
+}
+
+/* ── 菜单 ── */
+.menu {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  margin-bottom: 24rpx;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 32rpx 36rpx;
+}
+.menu-item + .menu-item {
+  border-top: 1rpx solid var(--hairline);
+}
+.menu-hover {
+  background: #fafbfc;
+}
+.menu-icon {
+  font-size: 40rpx;
+  color: var(--text-2);
+  margin-right: 24rpx;
+}
+.menu-text {
+  flex: 1;
+  font-size: var(--fs-body);
+  color: var(--text-1);
+}
+.menu-chevron {
+  font-size: 32rpx;
+  color: var(--text-3);
+}
+.danger {
+  color: var(--danger);
+}

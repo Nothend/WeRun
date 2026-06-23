@@ -23,6 +23,8 @@ Page({
     hasApplied: false,
     feed: [],
     feedLoaded: false,
+    minDurationMinutes: 30,
+    weeklyTarget: 3,
   },
 
   onShareAppMessage() {
@@ -42,6 +44,10 @@ Page({
   },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 0 });
+    }
+    const rc = app.globalData.remoteConfig || {};
     const user = app.globalData.user;
     const isPending = !!(user && user.status === 'pending');
     const hasApplied = !!(user && user.hasApplied);
@@ -51,6 +57,8 @@ Page({
       nickname: user ? user.nickname : '',
       isPending,
       hasApplied,
+      minDurationMinutes: rc.minDurationMinutes || 30,
+      weeklyTarget: rc.weeklyTarget || 3,
     });
     if (user && !isPending) { this.loadStats(); this.loadFeed(); }
     if (user && isPending) this.refreshMe();
@@ -190,49 +198,12 @@ Page({
     wx.navigateTo({ url: `/pages/user/user?openid=${encodeURIComponent(openid)}` });
   },
 
-  // ── 个人资料 ───────────────────────────────────────────
-  onProfileTap() {
-    if (!this.data.user) {
-      this.handleLogin();
-      return;
-    }
-    if (this.data.isPending && !this.data.hasApplied) {
-      this.goApply();
-      return;
-    }
-    wx.navigateTo({ url: '/pages/profile/profile' });
-  },
-
   // ── 导航 ──────────────────────────────────────────────
-  handleLogout() {
-    wx.showModal({
-      title: '退出登录',
-      content: '确认退出当前账号？',
-      confirmText: '退出',
-      confirmColor: '#fa5151',
-      success: (res) => {
-        if (res.confirm) {
-          app.clearAuth();
-          this.setData({ user: null, avatarUrl: '', nickname: '', stats: null });
-        }
-      },
-    });
-  },
-
   goCheckin() {
     wx.navigateTo({ url: '/pages/checkin/checkin' });
   },
 
   goApply() {
     wx.navigateTo({ url: '/pages/profile/profile?mode=apply' });
-  },
-  goRanking() {
-    wx.navigateTo({ url: '/pages/ranking/ranking' });
-  },
-  goAbout() {
-    wx.navigateTo({ url: '/pages/about/about' });
-  },
-  goAdmin() {
-    wx.navigateTo({ url: '/pages/admin/admin' });
   },
 });

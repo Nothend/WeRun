@@ -6,19 +6,17 @@
   <!-- 已登录未申请：邀请加入卡 -->
   <view wx:if="{{isPending && !hasApplied}}" class="card pending-banner">
     <view class="pending-banner-top">
-      <text class="pending-banner-icon">🏃</text>
       <text class="pending-banner-title">加入跑团</text>
     </view>
     <view class="pending-banner-body">
       <view class="pending-banner-msg">填写昵称和头像提交加入申请，管理员通过后即可参与打卡和查看排行榜</view>
-      <view class="pending-banner-btn" bindtap="goApply">提交加入申请 →</view>
+      <view class="pending-banner-btn" bindtap="goApply">提交加入申请</view>
     </view>
   </view>
 
   <!-- 已申请：待审核提示卡 -->
   <view wx:elif="{{isPending && hasApplied}}" class="card pending-banner">
     <view class="pending-banner-top">
-      <text class="pending-banner-icon">⏳</text>
       <text class="pending-banner-title">申请审核中</text>
     </view>
     <view class="pending-banner-body">
@@ -30,51 +28,58 @@
     </view>
   </view>
 
-  <!-- 个人资料 -->
-  <view class="card profile-card">
-    <view class="profile-row" bindtap="onProfileTap">
-      <image class="avatar {{user.isSponsor ? 'sponsor-avatar' : ''}}" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill"/>
-      <view class="profile-info">
-        <view class="sponsor-nameline">
-          <text class="profile-name {{user.isSponsor ? 'sponsor-name' : ''}}">{{user ? (nickname || '未设置昵称') : '未登录'}}</text>
-          <text wx:if="{{user.isSponsor && user.sponsorBadge}}" class="sponsor-badge">{{user.sponsorBadge}}</text>
-        </view>
-        <text class="profile-sub">{{isPending ? (hasApplied ? '申请审核中 · 点击编辑资料' : '尚未加入跑团 · 点击提交申请') : (user ? '跑团成员 · 点击编辑资料' : '点击微信登录，解锁打卡与个人数据')}}</text>
-      </view>
-      <text wx:if="{{!user}}" class="profile-login-badge" hover-class="action-hover">{{loggingIn ? '登录中…' : '去登录'}}</text>
+  <!-- ── 主角：打卡 ── -->
+  <!-- 未登录 -->
+  <view wx:if="{{!user}}" class="hero hero-cta" hover-class="hero-hover" hover-stay-time="120" bindtap="handleLogin">
+    <view class="hero-icon"><text class="icon icon-camera"></text></view>
+    <view class="hero-main">
+      <text class="hero-title">{{loggingIn ? '登录中…' : '上传截图打卡'}}</text>
+      <text class="hero-sub">微信登录后，上传运动截图自动核验时长</text>
     </view>
-    <view class="profile-stats">
-      <view class="pstat-item" hover-class="{{stats ? 'pstat-hover' : ''}}" hover-stay-time="150" data-scope="week" bindtap="openRecords">
-        <text class="pstat-num">{{stats ? stats.weekCount : '-'}}</text>
-        <text class="pstat-label">本周打卡{{stats ? ' ›' : ''}}</text>
-      </view>
-      <view class="pstat-divider"></view>
-      <view class="pstat-item" hover-class="{{stats ? 'pstat-hover' : ''}}" hover-stay-time="150" data-scope="all" bindtap="openRecords">
-        <text class="pstat-num">{{stats ? stats.totalCount : '-'}}</text>
-        <text class="pstat-label">总打卡次数{{stats ? ' ›' : ''}}</text>
-      </view>
+    <text class="icon icon-chevron hero-chevron"></text>
+  </view>
+
+  <!-- 已登录且通过：今日已打卡 -->
+  <view wx:elif="{{!isPending && stats && stats.todayCheckin}}" class="hero hero-done">
+    <view class="hero-icon done"><text class="icon icon-check"></text></view>
+    <view class="hero-main">
+      <text class="hero-title">今日已打卡</text>
+      <text class="hero-sub">已记录约 {{stats.todayCheckin.duration}} 分钟，继续保持</text>
     </view>
-    <view wx:if="{{stats && stats.todayCheckin}}" class="today-row">
-      <text class="today-label">今日已打卡 · 约 {{stats.todayCheckin.duration}} 分钟</text>
-      <text class="today-del" bindtap="deleteCheckinToday">撤销</text>
+    <text class="hero-undo" catchtap="deleteCheckinToday">撤销</text>
+  </view>
+
+  <!-- 已登录且通过：去打卡 -->
+  <view wx:elif="{{!isPending}}" class="hero hero-cta" hover-class="hero-hover" hover-stay-time="120" bindtap="goCheckin">
+    <view class="hero-icon"><text class="icon icon-camera"></text></view>
+    <view class="hero-main">
+      <text class="hero-title">上传截图打卡</text>
+      <text class="hero-sub">上传运动截图，自动核验时长 · ≥{{minDurationMinutes}} 分钟计一次</text>
+    </view>
+    <text class="icon icon-chevron hero-chevron"></text>
+  </view>
+
+  <!-- ── 本周进度速览 ── -->
+  <view wx:if="{{user && !isPending}}" class="progress-card">
+    <view class="progress-item" hover-class="{{stats ? 'progress-hover' : ''}}" hover-stay-time="150" data-scope="week" bindtap="openRecords">
+      <text class="progress-num {{stats && stats.weekCount >= weeklyTarget ? 'achieved' : ''}}">{{stats ? stats.weekCount : '-'}}</text>
+      <text class="progress-label">本周打卡{{stats ? ' ·' : ''}} 目标 {{weeklyTarget}}</text>
+    </view>
+    <view class="progress-divider"></view>
+    <view class="progress-item" hover-class="{{stats ? 'progress-hover' : ''}}" hover-stay-time="150" data-scope="all" bindtap="openRecords">
+      <text class="progress-num">{{stats ? stats.totalCount : '-'}}</text>
+      <text class="progress-label">累计打卡次数</text>
     </view>
   </view>
 
-  <!-- 上传截图打卡 -->
-  <view class="card checkin-card" hover-class="card-hover" hover-stay-time="150" bindtap="goCheckin">
-    <view class="checkin-icon-wrap">📷</view>
-    <view class="checkin-content">
-      <text class="checkin-title">上传截图打卡</text>
-      <text class="checkin-sub">上传运动截图，自动核验时长</text>
-    </view>
-    <text class="action-chevron">›</text>
-  </view>
-
-  <!-- 今日打卡动态 -->
+  <!-- ── 今日动态 ── -->
   <view wx:if="{{user && !isPending}}" class="card feed-card">
     <view class="feed-head">
-      <text class="feed-title">🏃 今日动态</text>
-      <text wx:if="{{feed.length}}" class="feed-count">{{feed.length}} 人在动 🔥</text>
+      <text class="section-title">今日动态</text>
+      <view wx:if="{{feed.length}}" class="feed-count">
+        <text class="icon icon-flame feed-count-icon"></text>
+        <text>{{feed.length}} 人在动</text>
+      </view>
     </view>
     <view wx:if="{{feed.length}}" class="feed-list">
       <view wx:for="{{feed}}" wx:key="openid" class="feed-item" hover-class="feed-item-hover" hover-stay-time="150" data-openid="{{item.openid}}" bindtap="goUser">
@@ -90,37 +95,7 @@
       </view>
     </view>
     <view wx:elif="{{feedLoaded}}" class="feed-empty">
-      <text class="feed-empty-icon">🌱</text>
       <text class="feed-empty-text">今天还没有人打卡，来做第一个动起来的人</text>
-    </view>
-  </view>
-
-  <!-- 快速入口 -->
-  <view class="card actions-card">
-    <view class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goRanking">
-      <view class="action-icon-wrap">🏆</view>
-      <text class="action-text">查看排行榜</text>
-      <text class="action-chevron">›</text>
-    </view>
-    <view class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goAbout">
-      <view class="action-icon-wrap">💗</view>
-      <text class="action-text">关于作者</text>
-      <text class="action-chevron">›</text>
-    </view>
-    <view wx:if="{{user.isAdmin}}" class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="goAdmin">
-      <view class="action-icon-wrap">⚙️</view>
-      <text class="action-text">后台管理</text>
-      <text class="action-chevron">›</text>
-    </view>
-    <view wx:if="{{user}}" class="action-item" hover-class="action-hover" hover-stay-time="150" bindtap="handleLogout">
-      <view class="action-icon-wrap">🚪</view>
-      <text class="action-text logout-text">退出登录</text>
-      <text class="action-chevron">›</text>
-    </view>
-    <view wx:if="{{!user}}" class="action-item" hover-class="action-hover" hover-stay-time="150" loading="{{loggingIn}}" bindtap="handleLogin">
-      <view class="action-icon-wrap">👤</view>
-      <text class="action-text">微信登录</text>
-      <text class="action-chevron">›</text>
     </view>
   </view>
 

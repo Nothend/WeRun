@@ -239,8 +239,10 @@
   text-align: center;
   padding: 48rpx 0;
 }
+/* 底部占位：撑出整条自定义 tabBar 的高度（含安全区）再加 24rpx 自然空隙，
+   保证滚到底时「生成金主报告」按钮完整露在 tabBar 上方 */
 .scroll-bottom {
-  height: 48rpx;
+  height: calc(var(--tabbar-h) + 24rpx);
 }
 
 /* ── 生成金主报告按钮（金色调）── */

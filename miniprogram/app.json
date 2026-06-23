@@ -1,21 +1,33 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/checkin/checkin",
     "pages/ranking/ranking",
+    "pages/mine/mine",
+    "pages/checkin/checkin",
     "pages/admin/admin",
     "pages/profile/profile",
     "pages/about/about",
     "pages/records/records",
     "pages/user/user"
   ],
+  "tabBar": {
+    "custom": true,
+    "color": "#a0a6b0",
+    "selectedColor": "#07c160",
+    "backgroundColor": "#ffffff",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/ranking/ranking", "text": "排行榜" },
+      { "pagePath": "pages/mine/mine", "text": "我的" }
+    ]
+  },
   "window": {
     "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "WeRun",
-    "backgroundColor": "#f2f4f7",
-    "backgroundColorTop": "#f2f4f7",
-    "backgroundColorBottom": "#f2f4f7"
+    "backgroundColor": "#f5f6f8",
+    "backgroundColorTop": "#f5f6f8",
+    "backgroundColorBottom": "#f5f6f8"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",

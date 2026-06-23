@@ -2,9 +2,9 @@
 .upload-zone {
   width: 100%;
   height: 460rpx;
-  border-radius: 16rpx;
-  border: 2rpx dashed rgba(7, 193, 96, 0.3);
-  background: rgba(7, 193, 96, 0.04);
+  border-radius: var(--r-md);
+  border: 2rpx dashed rgba(0, 0, 0, 0.12);
+  background: #fafbfc;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,12 +22,13 @@
   gap: 14rpx;
 }
 .upload-icon {
-  font-size: 80rpx;
-  opacity: 0.35;
+  font-size: 76rpx;
+  color: var(--brand);
+  opacity: 0.55;
 }
 .upload-label {
   font-size: 28rpx;
-  color: #8a9099;
+  color: var(--text-2);
   letter-spacing: 1rpx;
 }
 .upload-sub {
@@ -48,7 +49,7 @@
 /* 已打卡完成态：绿色实底，区别于"不可用"的半透明置灰 */
 .submit-btn-done[disabled] {
   opacity: 1;
-  background: linear-gradient(135deg, #07c160, #06ad56);
+  background: var(--brand);
   box-shadow: none;
 }
 

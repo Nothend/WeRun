@@ -53,11 +53,12 @@ Page({
   },
 
   onLoad() {
-    // 计算 swiper 可用高度：屏幕高度 - 顶部标签栏(约 88rpx)
+    // 计算 swiper 可用高度：窗口高度 - 顶部周期标签栏(约 96rpx)。
+    // 底部 tabBar 的让位由 scroll-view 内的 .scroll-bottom 占位撑出（含安全区），见 wxss。
     try {
       const info = wx.getWindowInfo();
       const rpx2px = info.windowWidth / 750;
-      const tabsPx = 96 * rpx2px; // 标签栏高度
+      const tabsPx = 96 * rpx2px; // 顶部周期标签栏
       this.setData({ swiperHeight: info.windowHeight - tabsPx });
     } catch (e) {
       // ignore，保留默认
@@ -65,6 +66,9 @@ Page({
   },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 1 });
+    }
     const user = app.globalData.user;
     const isPending = !!(user && user.status === 'pending');
     this.setData({ isAdmin: !!(user && user.isAdmin) });
