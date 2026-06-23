@@ -11,11 +11,6 @@ Component({
       { pagePath: 'pages/mine/mine', text: '我的', icon: 'user' },
     ],
   },
-  pageLifetimes: {
-    show() {
-      this.refreshAdminDot();
-    },
-  },
   methods: {
     switchTab(e) {
       const idx = e.currentTarget.dataset.index;

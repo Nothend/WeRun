@@ -79,9 +79,8 @@ Page({
   },
 
   onShow() {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({ selected: 1 });
-    }
+    const tb = typeof this.getTabBar === 'function' && this.getTabBar();
+    if (tb) { tb.setData({ selected: 1 }); tb.refreshAdminDot(); }
     const user = app.globalData.user;
     const isPending = !!(user && user.status === 'pending');
     this.setData({ isAdmin: !!(user && user.isAdmin) });

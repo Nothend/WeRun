@@ -45,9 +45,8 @@ Page({
   },
 
   onShow() {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({ selected: 0 });
-    }
+    const tb = typeof this.getTabBar === 'function' && this.getTabBar();
+    if (tb) { tb.setData({ selected: 0 }); tb.refreshAdminDot(); }
     const rc = app.globalData.remoteConfig || {};
     const user = app.globalData.user;
     const isPending = !!(user && user.status === 'pending');

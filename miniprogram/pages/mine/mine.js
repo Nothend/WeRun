@@ -13,9 +13,8 @@ Page({
   },
 
   onShow() {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({ selected: 2 });
-    }
+    const tb = typeof this.getTabBar === 'function' && this.getTabBar();
+    if (tb) { tb.setData({ selected: 2 }); tb.refreshAdminDot(); }
     const user = app.globalData.user;
     this.setData({
       user,
