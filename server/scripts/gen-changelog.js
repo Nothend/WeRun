@@ -6,6 +6,10 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+// 统一按北京时间展示版本时间：git 的 format-local 会读取 TZ 环境变量，
+// 无论各提交存的是什么时区偏移（CI/容器多为 UTC），都换算成北京墙钟时间。
+process.env.TZ = 'Asia/Shanghai';
+
 const sh = (cmd) => execSync(cmd, { encoding: 'utf8' }).trim();
 
 // 去掉 feat:/fix:/chore(scope): 之类前缀，让文案对普通用户更友好
@@ -42,8 +46,8 @@ function detectArea(tag, prevRef) {
 
 const list = tags.map((tag, i) => {
   const subject = sh(`git log -1 --format=%s ${tag}`);
-  // 提交时间戳存的是 UTC，按记录值展示（不做时区换算，日期不偏移），精确到分
-  const date = sh(`git log -1 --format=%ad --date=format:'%Y-%m-%d %H:%M' ${tag}`);
+  // 按北京时间展示（format-local 读取上面设的 TZ=Asia/Shanghai），精确到分
+  const date = sh(`git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' ${tag}`);
   // tags 按版本号降序：下一个元素(i+1)即更早的上一版
   const { area, areaClass } = detectArea(tag, tags[i + 1] || EMPTY_TREE);
   return { version: tag, date, area, areaClass, text: subject.replace(PREFIX_RE, '').trim() };
