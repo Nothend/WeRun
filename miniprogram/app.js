@@ -7,6 +7,7 @@ App({
     remoteConfig: { minDurationMinutes: 30, weeklyTarget: 3, applyTemplateId: '', weeklyTemplateId: '' }, // 默认值，拉取成功后覆盖
     configLoaded: false, // /api/config 是否已成功返回（首屏公告等需等它就绪）
     pendingMaterial: null, // 从微信聊天素材打开时待识别的图片 { path, name }
+    adminDot: false, // 管理员有待审核申请时「我的」tab 红点，custom-tab-bar 的唯一来源
   },
   onLaunch(options) {
     const token = wx.getStorageSync('token');
