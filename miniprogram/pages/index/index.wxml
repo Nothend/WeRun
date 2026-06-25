@@ -97,7 +97,7 @@
     <view class="feed-head">
       <text class="section-title">今日动态</text>
       <view wx:if="{{feed.length}}" class="feed-count">
-        <text class="icon icon-flame feed-count-icon"></text>
+        <text class="feed-count-icon">🔥</text>
         <text>{{feed.length}} 人在动</text>
       </view>
     </view>

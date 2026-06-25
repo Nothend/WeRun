@@ -148,7 +148,10 @@
   background: #07c160;
   border-radius: 16rpx;
   height: 72rpx;
-  line-height: 72rpx;
+  /* flex 居中，避免依赖 line-height 在真机上文字垂直不居中 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .notice-save-btn::after { border: none; }
 
@@ -306,12 +309,16 @@
   margin: 0;
   font-size: 22rpx;
   height: 52rpx;
-  line-height: 52rpx;
   padding: 0 16rpx;
   color: #5a6270;
   background: #f5f7fa;
   border: 1rpx solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 8rpx;
+  /* flex 居中；!important 顶掉原生 button[size="mini"]（属性选择器优先级高于 .op-btn）的默认 display/行高 */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 .op-btn::after {
   border: none;

@@ -4,7 +4,7 @@
 
   <view class="card">
     <!-- 上传区 -->
-    <view class="upload-zone" bindtap="chooseImage">
+    <view class="upload-zone {{result ? 'collapsed' : ''}}" bindtap="chooseImage">
       <image wx:if="{{imagePath}}" src="{{imagePath}}" mode="aspectFit" class="preview-img"/>
       <view wx:else class="upload-empty">
         <text class="icon icon-camera upload-icon"></text>

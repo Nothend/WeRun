@@ -62,6 +62,10 @@ page {
   border-radius: var(--r-md);
   font-weight: 600;
   letter-spacing: 1rpx;
+  /* flex 居中，避免依赖 line-height 在真机上文字垂直不居中 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .btn-primary[disabled] {
   opacity: 0.35;
