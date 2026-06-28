@@ -227,7 +227,6 @@ router.get('/stats/user/:openid', authRequired, activeRequired, (req, res) => {
 // GET /api/stats/rankings  多榜单：本周/上周/本月/上月/本年/总榜
 router.get('/stats/rankings', authRequired, activeRequired, (req, res) => {
   const defs = [
-    { key: 'today', label: '今日', datePrefix: localDateStr() },
     { key: 'thisWeek', label: '本周', weekly: true, weekKey: currentWeekKey() },
     { key: 'lastWeek', label: '上周', weekly: true, weekKey: lastWeekKey() },
     { key: 'thisMonth', label: '本月', datePrefix: currentMonthStr() },

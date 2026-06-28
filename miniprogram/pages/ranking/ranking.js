@@ -9,7 +9,6 @@ const REPORT_PERIOD = { thisWeek: 'week', lastWeek: 'lastweek', thisMonth: 'mont
 
 // 未登录/待审核时展示的空壳榜单结构，与后端 /api/stats/rankings 的标签保持一致
 const PLACEHOLDER_BOARDS = [
-  { key: 'today', label: '今日', weekly: false, list: [] },
   { key: 'thisWeek', label: '本周', weekly: true, list: [] },
   { key: 'lastWeek', label: '上周', weekly: true, list: [] },
   { key: 'thisMonth', label: '本月', weekly: false, list: [] },
