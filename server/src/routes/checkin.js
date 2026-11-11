@@ -18,6 +18,17 @@ function weekCountOf(openid, weekKey) {
     .get(openid, weekKey).n;
 }
 
+// 同一张图被转发/重压缩后，AI 读出的秒数可能轻微漂移（如 2495/2555），容差 90 秒
+const SAME_DURATION_TOLERANCE_SECONDS = 90;
+
+// 已有记录与本次识别的时长是否"相近"：双方都有秒级精度时比总秒数，否则比分钟数
+function sameDuration(row, durationSeconds, hasSeconds, duration) {
+  if (hasSeconds && row.has_seconds) {
+    return Math.abs((row.duration_seconds || 0) - durationSeconds) <= SAME_DURATION_TOLERANCE_SECONDS;
+  }
+  return row.duration_minutes === duration;
+}
+
 // POST /api/checkin  multipart: image(file)
 router.post('/checkin', authRequired, activeRequired, upload.single('image'), async (req, res) => {
   try {
@@ -72,9 +83,13 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
     let phashRows = [];
     try {
       phash = await computeDHash(req.file.buffer);
+      // 只比对近几天的记录：截图日期必须是今天/昨天，更早的记录不可能是被盗用的同一张图
+      const phashSince = localDateStr(new Date(Date.now() - (config.screenshotMaxLagDays + 1) * 86400000));
       phashRows = db
-        .prepare('SELECT id, openid, phash FROM checkins WHERE phash IS NOT NULL')
-        .all();
+        .prepare(
+          'SELECT id, openid, phash, duration_minutes, duration_seconds, has_seconds FROM checkins WHERE phash IS NOT NULL AND checkin_date >= ?'
+        )
+        .all(phashSince);
     } catch (e) {
       console.error('[phash] compute error:', e.message);
       // 感知哈希计算失败不影响主流程
@@ -166,10 +181,13 @@ router.post('/checkin', authRequired, activeRequired, upload.single('image'), as
     if (phash) {
       for (const row of phashRows) {
         const dist = hammingDistance(phash, row.phash);
-        const willBlock = dist <= config.imageSimilarityBlockThreshold;
-        if (willBlock || dist <= config.imageSimilarityLogThreshold) {
+        // 背景图相同（如华为运动健康分享图）时 dHash 会很接近，所以还要求识别出的时长也相近
+        const similar = dist <= config.imageSimilarityBlockThreshold;
+        const sameData = similar && sameDuration(row, durationSeconds, hasSeconds, duration);
+        const willBlock = config.imageSimilarityBlockEnabled && sameData;
+        if (similar || dist <= config.imageSimilarityLogThreshold) {
           console.warn(
-            `[phash] 疑似相似截图: openid=${openid} 与 checkin#${row.id}(openid=${row.openid}) 汉明距离=${dist}/256${willBlock ? ' → 已拦截' : ''}`
+            `[phash] 疑似相似截图: openid=${openid} 与 checkin#${row.id}(openid=${row.openid}) 汉明距离=${dist}/256 时长${sameData ? '相近' : '不同'}${willBlock ? ' → 已拦截' : ''}`
           );
         }
         if (willBlock) {

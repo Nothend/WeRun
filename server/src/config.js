@@ -50,6 +50,9 @@ const config = {
   // 感知哈希(dHash)相似度拦截阈值：仅在"识别不到秒级时长"（无法用秒级指纹去重）时生效，
   // 汉明距离 <= 此值时拒绝打卡。比日志阈值更严格，默认5，可据日志中的真实距离分布微调
   imageSimilarityBlockThreshold: parseInt(process.env.IMAGE_SIMILARITY_BLOCK_THRESHOLD || '5', 10),
+  // 感知哈希拦截总开关。true(默认)=启用；false=不再因"图片相似"拦截（仍计算并入库 phash、
+  // 仍写疑似相似日志）。华为运动健康等分享图背景固定，误判多时可关。改后需重建容器生效
+  imageSimilarityBlockEnabled: process.env.IMAGE_SIMILARITY_BLOCK_ENABLED !== 'false',
   // 会员审核开关：true=用户提交申请后自动通过、立即成为正式成员；
   // false（默认）=申请进入待审核，需管理员在后台手动通过
   autoApproveMembers: process.env.AUTO_APPROVE_MEMBERS === 'true',
